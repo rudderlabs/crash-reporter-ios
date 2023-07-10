@@ -1,53 +1,49 @@
 ---
 name: Bug report
-about: Create a report to help us improve the library
-title: ''
-labels: ''
-assignees: ''
-
+about: Create a report to help us improve
+title: "BUG : <Title>"
+labels: bug, open source
+assignees: pallabmaiti
 ---
 
-<!-- Before raising, please check if somebody else has already reported your issue. -->
+**Describe the bug**
+Please provide the following information:
 
-### Describe the bug
-A clear and concise description of what the bug is.
+1. A clear and concise description of what the bug is
+2. Share the event payload
+3. Offer a minimal viable example to reproduce the issue
+4. Indicate if the SDK is being initialized or events are being created on a separate thread or coroutine apart from the main thread
+5. Specify if the issue is specific to a particular device model or OS version
+6. Include the error's stack trace
+7. Mention the date when the issue began
 
-### Steps to reproduce
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**To Reproduce**
+Steps to reproduce the behaviour:
 
-### Environment
-* Bugsnag version:
-* CocoaPods version:
-* Carthage version (if any):
-* iOS/tvOS/macOS version(s):
-* Simulator or physical device:
-* Xcode version:
-* Swift version (if applicable):
+1. Initialise iOS SDK
+2. Make events '....'
+3. See the error
 
-<!--
-  Below are a few approaches you might take to communicate the issue, in
-  descending order of awesomeness. Please choose one and feel free to delete
-  the others from this template.
--->
+**Expected behavior**
+A clear and concise description of what you expected to happen.
 
-### Example Repo <!-- Option 1 -->
+**Screenshots**
+If applicable, add screenshots to help explain your problem.
 
-- [ ] Create a minimal repository that can reproduce the issue
-- [ ] Link to it here:
+**Version of the _iOS_ SDK**
+Please mention the version of the Rudder iOS SDK you are using (e.g., iOS SDK v1.0.0).
 
-### Example code snippet <!-- Option 2 -->
+**Mobile device mode integration**
+Please provide the following information:
 
-```
-# (Insert code sample to reproduce the problem)
-```
+1. `Name` and `version` of the mobile device mode integration (e.g., RudderAmplitude iOS v1.0.0 mobile device mode integration)
+2. Indicate if you are using the native SDK directly and specify its version (e.g., Amplitude native iOS SDK v2.0.0)
 
-<!-- Error messages, if any -->
-<details><summary>Error messages:</summary>
+**SDK initialisation snippet**
+Please provide the following information:
 
-```
+1. Share the code snippet used for initializing the iOS SDK
+2. Indicate if the SDK initialization depends on any specific condition or event (e.g., initialization of the iOS SDK after Firebase initialization or initialization in a callback)
 
-```
-</details>
+**Check for Correct Usage of _writeKey_ and _dataPlaneUrl_**
+Confirm that the correct `writeKey` and `dataPlaneUrl` are utilized during SDK initialization.

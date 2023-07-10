@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import <Bugsnag/BugsnagDefines.h>
+#import <RSCrashReporter/BugsnagDefines.h>
 
 /**
  * Information about the current user of your application.

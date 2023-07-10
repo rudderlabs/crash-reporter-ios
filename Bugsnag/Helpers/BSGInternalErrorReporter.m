@@ -115,14 +115,15 @@ static void (^ startupBlock_)(BSGInternalErrorReporter *);
 - (void)reportException:(NSException *)exception
             diagnostics:(nullable NSDictionary<NSString *, id> *)diagnostics
            groupingHash:(nullable NSString *)groupingHash {
-    @try {
+    // MARK: - Rudder Commented
+    /*@try {
         BugsnagEvent *event = [self eventWithException:exception diagnostics:diagnostics groupingHash:groupingHash];
         if (event) {
             [self sendEvent:event];
         }
     } @catch (NSException *exception) {
         bsg_log_err(@"%@", exception);
-    }
+    }*/
 }
 
 - (void)reportRecrash:(NSDictionary *)recrashReport {
@@ -267,13 +268,14 @@ static void (^ startupBlock_)(BSGInternalErrorReporter *);
 }
 
 - (void)sendEvent:(nonnull BugsnagEvent *)event {
-    NSError *error = nil;
+    // MARK: - Rudder Commented
+    /*NSError *error = nil;
     NSURLRequest *request = [self requestForEvent:event error:&error];
     if (!request) {
         bsg_log_err(@"%@", error);
         return;
     }
-    [[self.session dataTaskWithRequest:request] resume];
+    [[self.session dataTaskWithRequest:request] resume];*/
 }
 
 @end

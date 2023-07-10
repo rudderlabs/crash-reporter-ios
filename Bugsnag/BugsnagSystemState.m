@@ -14,7 +14,7 @@
 #import "BSGUIKit.h"
 #endif
 
-#import <Bugsnag/Bugsnag.h>
+#import <RSCrashReporter/RSCrashReporter.h>
 
 #import "BSGFileLocations.h"
 #import "BSGJSONSerialization.h"

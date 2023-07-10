@@ -8,10 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
-#import <Bugsnag/BugsnagApp.h>
-#import <Bugsnag/BugsnagDefines.h>
-#import <Bugsnag/BugsnagDevice.h>
-#import <Bugsnag/BugsnagUser.h>
+#import <RSCrashReporter/BugsnagApp.h>
+#import <RSCrashReporter/BugsnagDefines.h>
+#import <RSCrashReporter/BugsnagDevice.h>
+#import <RSCrashReporter/BugsnagUser.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

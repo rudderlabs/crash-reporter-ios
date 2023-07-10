@@ -26,14 +26,14 @@
 
 #import <Foundation/Foundation.h>
 
-#import <Bugsnag/BSG_KSCrashReportWriter.h>
-#import <Bugsnag/BugsnagBreadcrumb.h>
-#import <Bugsnag/BugsnagDefines.h>
-#import <Bugsnag/BugsnagEvent.h>
-#import <Bugsnag/BugsnagFeatureFlagStore.h>
-#import <Bugsnag/BugsnagMetadata.h>
-#import <Bugsnag/BugsnagMetadataStore.h>
-#import <Bugsnag/BugsnagPlugin.h>
+#import <RSCrashReporter/BSG_KSCrashReportWriter.h>
+#import <RSCrashReporter/BugsnagBreadcrumb.h>
+#import <RSCrashReporter/BugsnagDefines.h>
+#import <RSCrashReporter/BugsnagEvent.h>
+#import <RSCrashReporter/BugsnagFeatureFlagStore.h>
+#import <RSCrashReporter/BugsnagMetadata.h>
+#import <RSCrashReporter/BugsnagMetadataStore.h>
+#import <RSCrashReporter/BugsnagPlugin.h>
 
 @class BugsnagUser;
 @class BugsnagEndpointConfiguration;

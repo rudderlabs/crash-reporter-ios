@@ -25,7 +25,7 @@
 //
 
 #import "BSGConnectivity.h"
-#import "Bugsnag.h"
+#import "RSCrashReporter.h"
 
 #if BSG_HAVE_REACHABILITY
 

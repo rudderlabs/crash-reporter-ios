@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 
 #import "BSGDefines.h"
+#import "BugsnagClient.h"
 
 @class BugsnagApiClient;
 @class BugsnagConfiguration;
@@ -20,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 BSG_OBJC_DIRECT_MEMBERS
 @interface BSGEventUploader : NSObject
 
-- (instancetype)initWithConfiguration:(BugsnagConfiguration *)configuration notifier:(BugsnagNotifier *)notifier;
+- (instancetype)initWithConfiguration:(BugsnagConfiguration *)configuration notifier:(BugsnagNotifier *)notifier delegate:(id<RSCrashReporterNotifyDelegate> _Nullable)delegate;
 
 - (void)storeEvent:(BugsnagEvent *)event;
 

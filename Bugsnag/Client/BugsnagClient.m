@@ -46,7 +46,7 @@
 #import "BSGUtils.h"
 #import "BSG_KSCrashC.h"
 #import "BSG_KSSystemInfo.h"
-#import "Bugsnag.h"
+#import "RSCrashReporter.h"
 #import "BugsnagApp+Private.h"
 #import "BugsnagAppWithState+Private.h"
 #import "BugsnagBreadcrumb+Private.h"
@@ -186,7 +186,7 @@ __attribute__((annotate("oclint:suppress[too many methods]")))
 BSG_OBJC_DIRECT_MEMBERS
 @implementation BugsnagClient
 
-- (instancetype)initWithConfiguration:(BugsnagConfiguration *)configuration {
+- (instancetype)initWithConfiguration:(BugsnagConfiguration *)configuration delegate:(id<RSCrashReporterNotifyDelegate> _Nullable)delegate {
     if ((self = [super init])) {
         // Take a shallow copy of the configuration
         _configuration = [configuration copy];
@@ -215,7 +215,7 @@ BSG_OBJC_DIRECT_MEMBERS
         self.stateEventBlocks = [NSMutableArray new];
         self.extraRuntimeInfo = [NSMutableDictionary new];
 
-        _eventUploader = [[BSGEventUploader alloc] initWithConfiguration:_configuration notifier:_notifier];
+        _eventUploader = [[BSGEventUploader alloc] initWithConfiguration:_configuration notifier:_notifier delegate:delegate];
         bsg_g_bugsnag_data.onCrash = (void (*)(const BSG_KSCrashReportWriter *))self.configuration.onCrashHandler;
 
         _breadcrumbStore = [[BugsnagBreadcrumbs alloc] initWithConfiguration:self.configuration];
@@ -229,8 +229,9 @@ BSG_OBJC_DIRECT_MEMBERS
 - (void)start {
     // Called here instead of in init so that a bad config will only throw an exception
     // from the start method.
-    [self.configuration validate];
-
+    // MARK: - Rudder Commented
+    // [self.configuration validate];
+    
     // MUST be called before any code that accesses bsg_runContext
     BSGRunContextInit(BSGFileLocations.current.runContext);
 
@@ -266,9 +267,10 @@ BSG_OBJC_DIRECT_MEMBERS
     [self.state setStorageBuffer:&bsg_g_bugsnag_data.stateJSON file:BSGFileLocations.current.state];
     [self.breadcrumbStore removeAllBreadcrumbs];
 
-#if BSG_HAVE_REACHABILITY
+    // MARK: - Rudder Commented
+/*#if BSG_HAVE_REACHABILITY
     [self setupConnectivityListener];
-#endif
+#endif*/
 
     self.notificationBreadcrumbs = [[BSGNotificationBreadcrumbs alloc] initWithConfiguration:self.configuration breadcrumbSink:self];
     [self.notificationBreadcrumbs start];
@@ -297,12 +299,12 @@ BSG_OBJC_DIRECT_MEMBERS
             bsg_log_err(@"Plugin %@ threw exception in -load: %@", plugin, exception);
         }
     }
+    // MARK: - Rudder Commented
+    /*self.sessionTracker = [[BugsnagSessionTracker alloc] initWithConfig:self.configuration client:self];
+    [self.sessionTracker startWithNotificationCenter:center isInForeground:bsg_runContext->isForeground];*/
 
-    self.sessionTracker = [[BugsnagSessionTracker alloc] initWithConfig:self.configuration client:self];
-    [self.sessionTracker startWithNotificationCenter:center isInForeground:bsg_runContext->isForeground];
-
-    // Record a "Bugsnag Loaded" message
-    [self addAutoBreadcrumbOfType:BSGBreadcrumbTypeState withMessage:@"Bugsnag loaded" andMetadata:nil];
+    // Record a "Metrics Loaded" message
+    [self addAutoBreadcrumbOfType:BSGBreadcrumbTypeState withMessage:@"Metrics loaded" andMetadata:nil];
 
     if (self.configuration.launchDurationMillis > 0) {
         self.appLaunchTimer = [NSTimer scheduledTimerWithTimeInterval:(double)self.configuration.launchDurationMillis / 1000.0

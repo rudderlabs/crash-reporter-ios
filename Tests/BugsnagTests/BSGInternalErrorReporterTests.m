@@ -8,7 +8,7 @@
 
 #import <XCTest/XCTest.h>
 
-#import <Bugsnag/Bugsnag.h>
+#import <RSCrashReporter/RSCrashReporter.h>
 
 #import "BSGInternalErrorReporter.h"
 #import "BSG_KSSystemInfo.h"

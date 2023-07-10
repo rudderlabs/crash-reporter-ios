@@ -34,6 +34,8 @@ static NSString * const RecrashReportPrefix = @"RecrashReport-";
 
 @property (readonly, nonatomic) NSOperationQueue *uploadQueue;
 
+@property (nonatomic, weak) id<RSCrashReporterNotifyDelegate> delegate;
+
 @end
 
 
@@ -45,9 +47,10 @@ BSG_OBJC_DIRECT_MEMBERS
 @synthesize configuration = _configuration;
 @synthesize notifier = _notifier;
 
-- (instancetype)initWithConfiguration:(BugsnagConfiguration *)configuration notifier:(BugsnagNotifier *)notifier {
+- (instancetype)initWithConfiguration:(BugsnagConfiguration *)configuration notifier:(BugsnagNotifier *)notifier delegate:(id<RSCrashReporterNotifyDelegate> _Nullable) delegate {
     if ((self = [super init])) {
         _configuration = configuration;
+        _delegate = delegate;
         _eventsDirectory = [BSGFileLocations current].events;
         _kscrashReportsDirectory = [BSGFileLocations current].kscrashReports;
         _notifier = notifier;
@@ -266,6 +269,10 @@ BSG_OBJC_DIRECT_MEMBERS
         }
         [self deleteExcessFiles:[self sortedEventFiles]];
     });
+}
+
+- (void)notifyCrashEvent:(BugsnagEvent *_Nullable)event withRequestPayload:(NSMutableDictionary *)requestPayload {
+    [self.delegate notifyCrashEvent:event withRequestPayload:requestPayload];
 }
 
 @end

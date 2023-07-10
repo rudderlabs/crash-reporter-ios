@@ -8,7 +8,7 @@
 #import "BSGJSONSerialization.h"
 #import "BSGKeys.h"
 #import "BSG_RFC3339DateTool.h"
-#import "Bugsnag.h"
+#import "RSCrashReporter.h"
 #import "BugsnagConfiguration.h"
 #import "BugsnagLogger.h"
 

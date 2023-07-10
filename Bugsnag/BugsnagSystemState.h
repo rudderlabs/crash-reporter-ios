@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import <Bugsnag/BugsnagConfiguration.h>
+#import <RSCrashReporter/BugsnagConfiguration.h>
 
 #import "BSGDefines.h"
 #import "BSGKeys.h"

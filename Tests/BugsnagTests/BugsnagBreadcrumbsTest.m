@@ -8,7 +8,7 @@
 
 #import "BSGUtils.h"
 #import "BSG_KSJSONCodec.h"
-#import "Bugsnag.h"
+#import "RSCrashReporter.h"
 #import "BugsnagBreadcrumb+Private.h"
 #import "BugsnagBreadcrumbs.h"
 #import "BugsnagClient+Private.h"
@@ -357,7 +357,7 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
     [configuration addOnSendErrorBlock:^BOOL(BugsnagEvent *_Nonnull event) {
         return false;
     }];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
 
     NSDictionary *md1 = @{ @"x" : @"y"};
@@ -384,7 +384,7 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
     XCTAssertEqual(client.breadcrumbs.count, 8);
 
     XCTAssertEqualObjects(bc0[@"type"], @"state");
-    XCTAssertEqualObjects(bc0[@"name"], @"Bugsnag loaded");
+    XCTAssertEqualObjects(bc0[@"name"], @"Metrics loaded");
     XCTAssertEqual([bc0[@"metaData"] count], 0);
 
     XCTAssertEqual([bc1[@"metaData"] count], 1);
@@ -432,7 +432,7 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
     [configuration addOnSendErrorBlock:^BOOL(BugsnagEvent *_Nonnull event) {
         return false;
     }];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
     
     [client leaveBreadcrumbWithMessage:@"message1"];
@@ -554,7 +554,7 @@ static void * executeBlock(void *ptr) {
     BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     configuration.maxBreadcrumbs = maxBreadcrumbs;
     [configuration addOnSendErrorBlock:^BOOL(BugsnagEvent *event) { return NO; }];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
     
     [self measureBlock:^{

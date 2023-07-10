@@ -1,3 +1,0 @@
-{
-  "disable-issue-type": ["DEAD_STORE", "RESOURCE_LEAK"]
-}

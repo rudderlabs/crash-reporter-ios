@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import <Bugsnag/BugsnagDefines.h>
+#import <RSCrashReporter/BugsnagDefines.h>
 
 /**
  * Stateless information set by the notifier about your app can be found on this class. These values

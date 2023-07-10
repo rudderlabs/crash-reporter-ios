@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import Bugsnag
+import RSCrashReporter
 
 class BugsnagSwiftConfigurationTests: XCTestCase {
 

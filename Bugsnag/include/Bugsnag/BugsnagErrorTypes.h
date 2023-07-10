@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import <Bugsnag/BugsnagDefines.h>
+#import <RSCrashReporter/BugsnagDefines.h>
 
 /**
  * The types of error that should be reported.

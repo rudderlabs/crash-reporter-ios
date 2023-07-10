@@ -6,7 +6,7 @@
 //  Copyright © 2021 Bugsnag Inc. All rights reserved.
 //
 
-#import <Bugsnag/BugsnagFeatureFlag.h>
+#import <RSCrashReporter/BugsnagFeatureFlag.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

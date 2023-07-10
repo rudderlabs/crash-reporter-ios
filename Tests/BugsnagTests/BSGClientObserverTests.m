@@ -8,7 +8,7 @@
 
 #import <XCTest/XCTest.h>
 
-#import "Bugsnag.h"
+#import "RSCrashReporter.h"
 #import "BugsnagClient+Private.h"
 #import "BugsnagConfiguration.h"
 #import "BugsnagTestConstants.h"
@@ -24,8 +24,8 @@
 @implementation BSGClientObserverTests
 
 - (void)setUp {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    self.client = [Bugsnag startWithConfiguration:config];
+    [RSCrashReporter startWithDelegate:nil];
+    self.client = RSCrashReporter.client;
 
     __weak __typeof__(self) weakSelf = self;
     self.client.observer = ^(BSGClientObserverEvent event, id value) {

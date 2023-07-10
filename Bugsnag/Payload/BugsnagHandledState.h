@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import <Bugsnag/BugsnagEvent.h>
+#import <RSCrashReporter/BugsnagEvent.h>
 
 typedef NS_ENUM(NSUInteger, SeverityReasonType) {
     UnhandledException,

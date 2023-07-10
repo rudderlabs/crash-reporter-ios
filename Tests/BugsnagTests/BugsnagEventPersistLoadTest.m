@@ -16,7 +16,7 @@
 #import "BugsnagStackframe.h"
 #import "BugsnagBreadcrumb.h"
 #import "BugsnagHandledState.h"
-#import "Bugsnag.h"
+#import "RSCrashReporter.h"
 #import "BugsnagError.h"
 #import "BugsnagSession+Private.h"
 #import "BugsnagStackframe.h"

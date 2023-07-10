@@ -21,7 +21,7 @@
 #import "BugsnagNotifier.h"
 
 
-static NSString * const EventPayloadVersion = @"4.0";
+static NSString * const EventPayloadVersion = @"5.0";
 
 typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
     BSGEventUploadOperationStateReady,
@@ -98,9 +98,10 @@ typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
     @try {
         [event truncateStrings:configuration.maxStringValueLength];
         eventPayload = [event toJsonWithRedactedKeys:configuration.redactedKeys];
-        if (!retryPayload || [retryPayload isEqualToDictionary:eventPayload]) {
+        // MARK: - Rudder Commented
+        /*if (!retryPayload || [retryPayload isEqualToDictionary:eventPayload]) {
             retryPayload = eventPayload;
-        }
+        }*/
     } @catch (NSException *exception) {
         bsg_log_err(@"Discarding event %@ due to exception %@", self.name, exception);
         [BSGInternalErrorReporter.sharedInstance reportException:exception diagnostics:nil groupingHash:
@@ -119,10 +120,11 @@ typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
     requestPayload[BSGKeyNotifier] = [delegate.notifier toDict];
     requestPayload[BSGKeyPayloadVersion] = EventPayloadVersion;
     
-    NSMutableDictionary *requestHeaders = [NSMutableDictionary dictionary];
+    // MARK: - Rudder Commented
+    /*NSMutableDictionary *requestHeaders = [NSMutableDictionary dictionary];
     requestHeaders[BugsnagHTTPHeaderNameApiKey] = apiKey;
     requestHeaders[BugsnagHTTPHeaderNamePayloadVersion] = EventPayloadVersion;
-    requestHeaders[BugsnagHTTPHeaderNameStacktraceTypes] = [event.stacktraceTypes componentsJoinedByString:@","];
+    requestHeaders[BugsnagHTTPHeaderNameStacktraceTypes] = [event.stacktraceTypes componentsJoinedByString:@","];*/
     
     NSURL *notifyURL = configuration.notifyURL;
     if (!notifyURL) {
@@ -147,7 +149,8 @@ typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
             [event trimBreadcrumbs:bytesToRemove];
             eventPayload = [event toJsonWithRedactedKeys:configuration.redactedKeys];
             requestPayload[BSGKeyEvents] = @[eventPayload];
-            data = BSGJSONDataFromDictionary(requestPayload, NULL);
+            // MARK: - Rudder Commented
+            // data = BSGJSONDataFromDictionary(requestPayload, NULL);
         } @catch (NSException *exception) {
             bsg_log_err(@"Discarding event %@ due to exception %@", self.name, exception);
             [BSGInternalErrorReporter.sharedInstance reportException:exception diagnostics:nil groupingHash:
@@ -159,7 +162,14 @@ typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
         }
     }
     
-    BSGPostJSONData(configuration.sessionOrDefault, data, requestHeaders, notifyURL, ^(BSGDeliveryStatus status, __unused NSError *deliveryError) {
+    if ([delegate respondsToSelector:@selector(notifyCrashEvent:withRequestPayload:)]) {
+        [delegate notifyCrashEvent:event withRequestPayload:requestPayload];
+        [self deleteEvent];
+    }
+    completionHandler();
+    
+    // MARK: - Rudder Commented
+    /*BSGPostJSONData(configuration.sessionOrDefault, data, requestHeaders, notifyURL, ^(BSGDeliveryStatus status, __unused NSError *deliveryError) {
         switch (status) {
             case BSGDeliveryStatusDelivered:
                 bsg_log_debug(@"Uploaded event %@", self.name);
@@ -178,7 +188,7 @@ typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
         }
         
         completionHandler();
-    });
+    });*/
 }
 
 // MARK: Subclassing

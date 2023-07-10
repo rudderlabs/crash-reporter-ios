@@ -6,7 +6,7 @@
 //  Copyright © 2022 Bugsnag Inc. All rights reserved.
 //
 
-#import <Bugsnag/Bugsnag.h>
+#import <RSCrashReporter/RSCrashReporter.h>
 
 /**
  * ** WARNING **
@@ -29,7 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark -
 
-@interface Bugsnag ()
+@interface RSCrashReporter ()
 
 @property (class, readonly, nonatomic) BOOL bugsnagReadyForInternalCalls;
 

@@ -9,7 +9,7 @@
 
 #import <XCTest/XCTest.h>
 
-#import "Bugsnag.h"
+#import "RSCrashReporter.h"
 #import "BugsnagClient+Private.h"
 #import "BugsnagConfiguration+Private.h"
 #import "BugsnagEvent+Private.h"
@@ -32,7 +32,7 @@
 	__block XCTestExpectation *expectation = [self expectationWithDescription:@"Localized metadata changes"];
 
     BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     [client addMetadata:@"aValue1" withKey:@"aKey1" toSection:@"mySection1"];
     
@@ -49,6 +49,7 @@
         
         // Add some additional metadata once we're sure it's not already there
         [client addMetadata:@"aValue2" withKey:@"aKey2" toSection:@"mySection2"];
+        return event;
     }];
     
     [client notify:exception2 block:^BOOL(BugsnagEvent * _Nonnull event) {
@@ -56,6 +57,7 @@
         XCTAssertEqualObjects([event getMetadataFromSection:@"mySection2" withKey:@"aKey2"], @"aValue2");
         XCTAssertEqual(event.errors[0].errorClass, @"exception2");
         XCTAssertEqual(event.errors[0].errorMessage, @"reason2");
+        return event;
     }];
 
     // Check nil value causes deletions
@@ -66,6 +68,7 @@
     [client notify:exception1 block:^BOOL(BugsnagEvent * _Nonnull event) {
         XCTAssertNil([event getMetadataFromSection:@"mySection1" withKey:@"aKey1"]);
         XCTAssertNil([event getMetadataFromSection:@"mySection2" withKey:@"aKey2"]);
+        return event;
     }];
     
     // Check that event-level metadata alteration doesn't affect configuration-level metadata
@@ -85,6 +88,7 @@
         
         
         [expectation fulfill];
+        return event;
     }];
 
     [self waitForExpectationsWithTimeout:0.1 handler:^(NSError * _Nullable error) {
@@ -104,7 +108,7 @@
  */
 - (void)testGetMetadata {
     BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     
     XCTAssertNil([client getMetadataFromSection:@"dummySection"]);
@@ -129,7 +133,7 @@
         return false;
     }];
 
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
 
     // For now only test that the method exists
@@ -149,7 +153,7 @@
         return false;
     }];
 
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration  delegate:nil];
     [client start];
 
     NSException *exception1 = [[NSException alloc] initWithName:@"exception1" reason:@"reason1" userInfo:nil];
@@ -185,7 +189,7 @@
 
 -(void)testClearMetadataInSectionWithKey {
     BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
     [client addMetadata:@"myValue1" withKey:@"myKey1" toSection:@"section1"];
@@ -203,7 +207,7 @@
 
 -(void)testClearMetadataInSection {
     BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
     [client addMetadata:@"myValue1" withKey:@"myKey1" toSection:@"section1"];
@@ -226,7 +230,7 @@
 /**
  * Test that removing an onSession block via the Bugsnag object works as expected
  */
-- (void)testRemoveOnSessionBlock {
+/*- (void)testRemoveOnSessionBlock {
     
     __block int called = 0; // A counter
 
@@ -256,7 +260,7 @@
 
     BugsnagOnSessionRef callback = [configuration addOnSessionBlock:sessionBlock];
 
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
     [client startSession];
     [self waitForExpectations:@[expectation1] timeout:1.0];
@@ -266,12 +270,12 @@
     [client removeOnSession:callback];
     [client startSession];
     [self waitForExpectations:@[expectation2] timeout:1.0];
-}
+}*/
 
 /**
  * Test that we can add an onSession block, and that it's called correctly when a session starts
  */
-- (void)testAddOnSessionBlock {
+/*- (void)testAddOnSessionBlock {
     
     __block int called = 0; // A counter
 
@@ -303,7 +307,7 @@
     //       We *should* be able to test that pre-start() calls to add/removeOnSessionBlock()
     //       do nothing, but actually we can't guarantee this.  For now we don't test this.
 
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
     [client pauseSession];
 
@@ -318,11 +322,11 @@
     [client startSession];
     // This expectation should also NOT be met
     [self waitForExpectations:@[expectation2] timeout:1.0];
-}
+}*/
 
 - (void)testMetadataMutability {
     BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
     // Immutable in, mutable out

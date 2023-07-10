@@ -7,7 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
-#import <Bugsnag/Bugsnag.h>
+#import <RSCrashReporter/RSCrashReporter.h>
 #import "BugsnagTestConstants.h"
 
 /**
@@ -24,7 +24,7 @@
     [config addOnSendErrorBlock:^BOOL(BugsnagEvent *event) {
         return NO;
     }];
-    self.client = [[BugsnagClient alloc] initWithConfiguration:config];
+    self.client = [[BugsnagClient alloc]initWithConfiguration:config delegate:nil];
 }
 
 - (void)testValidNotify {

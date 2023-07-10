@@ -10,7 +10,7 @@
 #import <XCTest/XCTest.h>
 
 #import "BSG_RFC3339DateTool.h"
-#import "Bugsnag.h"
+#import "RSCrashReporter.h"
 #import "BugsnagBreadcrumb+Private.h"
 #import "BugsnagClient+Private.h"
 #import "BugsnagEvent+Private.h"
@@ -203,7 +203,7 @@
  */
 - (void)testApiKey {
     BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
     NSException *ex = [[NSException alloc] initWithName:@"myName" reason:@"myReason1" userInfo:nil];
@@ -501,7 +501,7 @@
 - (void)testInvalidSectionData {
     NSException *ex = [[NSException alloc] initWithName:@"myName" reason:@"myReason1" userInfo:nil];
     BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
     [client notify:ex block:^BOOL(BugsnagEvent * _Nonnull event) {
@@ -522,7 +522,7 @@
 - (void)testInvalidKeyValueData {
     NSException *ex = [[NSException alloc] initWithName:@"myName" reason:@"myReason1" userInfo:nil];
     BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
     [client notify:ex block:^BOOL(BugsnagEvent * _Nonnull event) {
@@ -653,7 +653,7 @@
 
 - (void)testUnhandledOverride {
     BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
     NSException *ex = [[NSException alloc] initWithName:@"myName" reason:@"myReason1" userInfo:nil];

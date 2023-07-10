@@ -6,7 +6,7 @@
 //  Copyright © 2020 Bugsnag Inc. All rights reserved.
 //
 
-#import <Bugsnag/BugsnagBreadcrumb.h>
+#import <RSCrashReporter/BugsnagBreadcrumb.h>
 
 #import "BSGDefines.h"
 

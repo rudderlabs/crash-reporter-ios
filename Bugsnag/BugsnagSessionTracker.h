@@ -8,8 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
-#import <Bugsnag/BugsnagConfiguration.h>
-#import <Bugsnag/BugsnagSession.h>
+#import <RSCrashReporter/BugsnagConfiguration.h>
+#import <RSCrashReporter/BugsnagSession.h>
 
 #import "BSGSessionUploader.h"
 

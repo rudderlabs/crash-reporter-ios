@@ -26,12 +26,12 @@
 
 #import <Foundation/Foundation.h>
 
-#import <Bugsnag/BugsnagConfiguration.h>
-#import <Bugsnag/BugsnagDefines.h>
-#import <Bugsnag/BugsnagLastRunInfo.h>
-#import <Bugsnag/BugsnagFeatureFlagStore.h>
-#import <Bugsnag/BugsnagMetadata.h>
-#import <Bugsnag/BugsnagMetadataStore.h>
+#import <RSCrashReporter/BugsnagConfiguration.h>
+#import <RSCrashReporter/BugsnagDefines.h>
+#import <RSCrashReporter/BugsnagLastRunInfo.h>
+#import <RSCrashReporter/BugsnagFeatureFlagStore.h>
+#import <RSCrashReporter/BugsnagMetadata.h>
+#import <RSCrashReporter/BugsnagMetadataStore.h>
 
 @class BugsnagSessionTracker;
 
@@ -41,12 +41,19 @@
  * Use the static access provided by the Bugsnag class instead.
  */
 BUGSNAG_EXTERN
+
+@protocol RSCrashReporterNotifyDelegate
+
+- (void)notifyCrashEvent:(BugsnagEvent *_Nullable)event withRequestPayload:(NSMutableDictionary *_Nullable)requestPayload;
+
+@end
+
 @interface BugsnagClient : NSObject<BugsnagFeatureFlagStore, BugsnagMetadataStore>
 
 /**
  * Initializes the client with the provided configuration.
  */
-- (instancetype _Nonnull)initWithConfiguration:(BugsnagConfiguration *_Nonnull)configuration;
+- (instancetype _Nonnull)initWithConfiguration:(BugsnagConfiguration *_Nonnull)configuration delegate:(id<RSCrashReporterNotifyDelegate> _Nullable)delegate;
 
 // =============================================================================
 // MARK: - Notify

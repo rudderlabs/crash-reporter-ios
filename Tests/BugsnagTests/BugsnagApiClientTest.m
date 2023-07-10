@@ -8,7 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "BugsnagApiClient.h"
-#import <Bugsnag/Bugsnag.h>
+#import <RSCrashReporter/RSCrashReporter.h>
 #import "BugsnagTestConstants.h"
 #import "URLSessionMock.h"
 

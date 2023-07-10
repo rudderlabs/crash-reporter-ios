@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import <Bugsnag/BugsnagDefines.h>
+#import <RSCrashReporter/BugsnagDefines.h>
 
 typedef NS_OPTIONS(NSUInteger, BSGThreadType) {
     BSGThreadTypeCocoa NS_SWIFT_NAME(cocoa) = 0,

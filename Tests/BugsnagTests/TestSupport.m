@@ -28,7 +28,7 @@
         }
     });
     
-    [Bugsnag purge];
+    [RSCrashReporter purge];
     
     bsg_lastRunContext = NULL;
 }

@@ -26,8 +26,8 @@
 
 #import <Foundation/Foundation.h>
 
-#import <Bugsnag/BugsnagDefines.h>
-#import <Bugsnag/BugsnagMetadataStore.h>
+#import <RSCrashReporter/BugsnagDefines.h>
+#import <RSCrashReporter/BugsnagMetadataStore.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

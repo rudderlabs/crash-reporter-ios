@@ -8,8 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
-#import <Bugsnag/BugsnagDefines.h>
-#import <Bugsnag/BugsnagDevice.h>
+#import <RSCrashReporter/BugsnagDefines.h>
+#import <RSCrashReporter/BugsnagDevice.h>
 
 /**
  * Stateful information set by the notifier about the device on which the event occurred can be

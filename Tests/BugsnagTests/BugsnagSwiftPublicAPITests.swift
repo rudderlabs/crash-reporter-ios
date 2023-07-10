@@ -3,7 +3,7 @@
 //  Tests
 //
 //  Created by Robin Macharg on 15/05/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 import XCTest
@@ -46,41 +46,16 @@ class BugsnagSwiftPublicAPITests: XCTestCase {
     let onBreadcrumbBlock: BugsnagOnBreadcrumbBlock = { (breadcrumb) -> Bool in return false }
     
     func testBugsnagClass() throws {
-        Bugsnag.start(withApiKey: apiKey);
-        Bugsnag.start(with: BugsnagConfiguration(apiKey))
+        RSCrashReporter.start(with: nil)
         
-        let _ = Bugsnag.lastRunInfo?.crashed
+        RSCrashReporter.notify(ex)
+        RSCrashReporter.notify(ex) { (event) -> Bool in return false }
+        RSCrashReporter.notifyError(err)
+        RSCrashReporter.notifyError(err) { (event) -> Bool in return false }
         
-        Bugsnag.notify(ex)
-        Bugsnag.notify(ex) { (event) -> Bool in return false }
-        Bugsnag.notifyError(err)
-        Bugsnag.notifyError(err) { (event) -> Bool in return false }
-        
-        Bugsnag.leaveBreadcrumb(withMessage: "msg")
-        Bugsnag.leaveBreadcrumb(forNotificationName: "notif")
-        Bugsnag.leaveBreadcrumb("msg", metadata: ["foo" : "bar"], type: .error)
-        
-        Bugsnag.startSession()
-        Bugsnag.pauseSession()
-        Bugsnag.resumeSession()
-        
-        Bugsnag.setContext("ctx")
-        let _ = Bugsnag.context()
-        
-        Bugsnag.setUser("me", withEmail: "memail@foo.com", andName: "you")
-        let _ = Bugsnag.user()
-        
-        let onSession = Bugsnag.addOnSession(block: sessionBlock)
-        Bugsnag.addOnSession { (session: BugsnagSession) -> Bool in
-            return true
-        }
-        Bugsnag.removeOnSession(onSession)
-        
-        let onBreadcrumb = Bugsnag.addOnBreadcrumb(block: onBreadcrumbBlock)
-        Bugsnag.addOnBreadcrumb { (breadcrumb: BugsnagBreadcrumb) -> Bool in
-            return true
-        }
-        Bugsnag.removeOnBreadcrumb(onBreadcrumb)
+        RSCrashReporter.leaveBreadcrumb(withMessage: "msg")
+        RSCrashReporter.leaveBreadcrumb(forNotificationName: "notif")
+        RSCrashReporter.leaveBreadcrumb("msg", metadata: ["foo" : "bar"], type: .error)
     }
 
     func testBugsnagConfigurationClass() throws {
@@ -254,7 +229,7 @@ class BugsnagSwiftPublicAPITests: XCTestCase {
     func testBugsnagClientClass() throws {
         var client = BugsnagClient()
         let config = BugsnagConfiguration(apiKey)
-        client = BugsnagClient(configuration: config)
+        client = BugsnagClient(configuration: config, delegate: nil)
         client.notify(ex)
         client.notify(ex) { (event) -> Bool in return false }
         client.notifyError(err)

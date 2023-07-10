@@ -31,7 +31,7 @@
 extern "C" {
 #endif
 
-#include <Bugsnag/BugsnagDefines.h>
+#include <RSCrashReporter/BugsnagDefines.h>
 
 #include "BugsnagLogger.h"
 

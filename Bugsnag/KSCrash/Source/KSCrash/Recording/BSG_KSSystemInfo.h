@@ -24,7 +24,7 @@
 // THE SOFTWARE.
 //
 
-#import <Bugsnag/BugsnagDefines.h>
+#import <RSCrashReporter/BugsnagDefines.h>
 #import <Foundation/Foundation.h>
 
 #import "BSGDefines.h"

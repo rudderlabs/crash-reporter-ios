@@ -4,7 +4,7 @@
 #import "BSGRunContext.h"
 #import "BSG_KSCrashState.h"
 #import "BSG_KSSystemInfo.h"
-#import "Bugsnag.h"
+#import "RSCrashReporter.h"
 #import "BugsnagClient+Private.h"
 #import "BugsnagConfiguration.h"
 #import "BugsnagSystemState.h"
@@ -20,7 +20,7 @@
 //    config.autoDetectErrors = NO;
     config.releaseStage = @"MagicalTestingTime";
 
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     return client;
 }

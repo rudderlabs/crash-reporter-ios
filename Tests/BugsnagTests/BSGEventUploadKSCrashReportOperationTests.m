@@ -6,7 +6,7 @@
 //  Copyright © 2021 Bugsnag Inc. All rights reserved.
 //
 
-#import <Bugsnag/Bugsnag.h>
+#import <RSCrashReporter/RSCrashReporter.h>
 #import <XCTest/XCTest.h>
 
 #import "BSGEventUploadKSCrashReportOperation.h"

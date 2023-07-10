@@ -2,6 +2,6 @@
 //  Public headers exposed to Swift
 //
 
-#import <Bugsnag/Bugsnag.h>
+#import <RSCrashReporter/RSCrashReporter.h>
 
 #import "BugsnagTestConstants.h"

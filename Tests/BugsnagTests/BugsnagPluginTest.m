@@ -9,7 +9,7 @@
 #import <XCTest/XCTest.h>
 
 #import "BugsnagTestConstants.h"
-#import "Bugsnag.h"
+#import "RSCrashReporter.h"
 #import "BugsnagClient+Private.h"
 #import "BugsnagConfiguration+Private.h"
 
@@ -54,7 +54,7 @@
 
     BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     [config addPlugin:plugin];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     [self waitForExpectations:@[expectation] timeout:3.0];
 }
@@ -67,7 +67,7 @@
 
     BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     [config addPlugin:plugin];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     [self waitForExpectations:@[expectation] timeout:3.0];
 }

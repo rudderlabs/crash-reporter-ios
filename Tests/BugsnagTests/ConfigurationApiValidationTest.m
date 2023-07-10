@@ -7,7 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
-#import <Bugsnag/Bugsnag.h>
+#import <RSCrashReporter/RSCrashReporter.h>
 #import "BugsnagConfiguration+Private.h"
 #import "BugsnagPlugin.h"
 #import "BugsnagTestConstants.h"

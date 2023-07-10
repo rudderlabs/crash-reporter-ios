@@ -8,9 +8,9 @@
 
 #import <Foundation/Foundation.h>
 
-#import <Bugsnag/BugsnagDefines.h>
-#import <Bugsnag/BugsnagFeatureFlagStore.h>
-#import <Bugsnag/BugsnagMetadataStore.h>
+#import <RSCrashReporter/BugsnagDefines.h>
+#import <RSCrashReporter/BugsnagFeatureFlagStore.h>
+#import <RSCrashReporter/BugsnagMetadataStore.h>
 
 @class BugsnagConfiguration;
 @class BugsnagHandledState;

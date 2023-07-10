@@ -6,14 +6,14 @@
 //  Copyright © 2020 Bugsnag Inc. All rights reserved.
 //
 
-#import <Bugsnag/Bugsnag.h>
+#import <RSCrashReporter/RSCrashReporter.h>
 
 #import "BSGDefines.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 BSG_OBJC_DIRECT_MEMBERS
-@interface Bugsnag ()
+@interface RSCrashReporter ()
 
 #pragma mark Methods
 

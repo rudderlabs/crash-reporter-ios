@@ -14,7 +14,7 @@
 #import "BSG_KSCrashReportFields.h"
 #import "BSG_KSSystemInfo.h"
 #import "BSG_RFC3339DateTool.h"
-#import "Bugsnag.h"
+#import "RSCrashReporter.h"
 #import "BugsnagCollections.h"
 #import "BugsnagDevice+Private.h"
 #import "BugsnagLogger.h"

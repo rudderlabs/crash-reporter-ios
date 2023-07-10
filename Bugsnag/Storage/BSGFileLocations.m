@@ -50,7 +50,7 @@ static NSString *rootDirectory(NSString *fsVersion) {
             return;
         }
 
-        rootPath = [NSString stringWithFormat:@"%@/com.bugsnag.Bugsnag/%@/%@",
+        rootPath = [NSString stringWithFormat:@"%@/com.rudderstack.rscrashreporter/%@/%@",
                     url.path,
                     // Processes that don't have an Info.plist have no bundleIdentifier
                     NSBundle.mainBundle.bundleIdentifier ?: NSProcessInfo.processInfo.processName,

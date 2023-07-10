@@ -83,7 +83,7 @@ static void BSGCrashSentryAttemptyDelivery(void) {
     int64_t timeout = (int64_t)(BSGCrashSentryDeliveryTimeout * NSEC_PER_SEC);
     dispatch_time_t deadline = dispatch_time(DISPATCH_TIME_NOW, timeout);
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-    [Bugsnag.client.eventUploader uploadKSCrashReportWithFile:file completionHandler:^{
+    [RSCrashReporter.client.eventUploader uploadKSCrashReportWithFile:file completionHandler:^{
         bsg_log_debug(@"Sent crash.");
         dispatch_semaphore_signal(semaphore);
     }];

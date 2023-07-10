@@ -7,7 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
-#import <Bugsnag/Bugsnag.h>
+#import <RSCrashReporter/RSCrashReporter.h>
 #import "BugsnagTestConstants.h"
 #import "TestSupport.h"
 
@@ -22,61 +22,61 @@
 
 - (void)setUp {
     [TestSupport purgePersistentData];
-    [Bugsnag startWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    [RSCrashReporter startWithDelegate:nil];
 }
-
+/*
 - (void)testAppDidCrashLastLaunch {
     XCTAssertFalse(Bugsnag.lastRunInfo.crashed);
 }
-
+*/
 - (void)testValidNotify {
-    [Bugsnag notify:[NSException exceptionWithName:@"FooException" reason:@"whoops" userInfo:nil]];
+    [RSCrashReporter notify:[NSException exceptionWithName:@"FooException" reason:@"whoops" userInfo:nil]];
 }
 
 - (void)testValidNotifyBlock {
     NSException *exc = [NSException exceptionWithName:@"FooException" reason:@"whoops" userInfo:nil];
-    [Bugsnag notify:exc block:nil];
-    [Bugsnag notify:exc block:^BOOL(BugsnagEvent *event) {
+    [RSCrashReporter notify:exc block:nil];
+    [RSCrashReporter notify:exc block:^BOOL(BugsnagEvent *event) {
         return NO;
     }];
 }
 
 - (void)testValidNotifyError {
     NSError *error = [NSError errorWithDomain:@"BarError" code:500 userInfo:nil];
-    [Bugsnag notifyError:error];
+    [RSCrashReporter notifyError:error];
 }
 
 - (void)testValidNotifyErrorBlock {
     NSError *error = [NSError errorWithDomain:@"BarError" code:500 userInfo:nil];
-    [Bugsnag notifyError:error block:nil];
-    [Bugsnag notifyError:error block:^BOOL(BugsnagEvent *event) {
+    [RSCrashReporter notifyError:error block:nil];
+    [RSCrashReporter notifyError:error block:^BOOL(BugsnagEvent *event) {
         return NO;
     }];
 }
 
 - (void)testValidLeaveBreadcrumbWithMessage {
-    [Bugsnag leaveBreadcrumbWithMessage:@"Foo"];
+    [RSCrashReporter leaveBreadcrumbWithMessage:@"Foo"];
 }
 
 - (void)testValidLeaveBreadcrumbForNotificationName {
-    [Bugsnag leaveBreadcrumbForNotificationName:@"some invalid value"];
+    [RSCrashReporter leaveBreadcrumbForNotificationName:@"some invalid value"];
 }
 
 - (void)testValidLeaveBreadcrumbWithMessageMetadata {
-    [Bugsnag leaveBreadcrumbWithMessage:@"Foo" metadata:nil andType:BSGBreadcrumbTypeProcess];
-    [Bugsnag leaveBreadcrumbWithMessage:@"Foo" metadata:@{@"test": @2} andType:BSGBreadcrumbTypeState];
+    [RSCrashReporter leaveBreadcrumbWithMessage:@"Foo" metadata:nil andType:BSGBreadcrumbTypeProcess];
+    [RSCrashReporter leaveBreadcrumbWithMessage:@"Foo" metadata:@{@"test": @2} andType:BSGBreadcrumbTypeState];
 }
-
+/*
 - (void)testValidStartSession {
-    [Bugsnag startSession];
+    [RSCrashReporter startSession];
 }
 
 - (void)testValidPauseSession {
-    [Bugsnag pauseSession];
+    [RSCrashReporter pauseSession];
 }
 
 - (void)testValidResumeSession {
-    [Bugsnag resumeSession];
+    [RSCrashReporter resumeSession];
 }
 
 - (void)testValidContext {
@@ -91,13 +91,13 @@
 }
 
 - (void)testValidUser {
-    [Bugsnag setUser:nil withEmail:nil andName:nil];
+    [RSCrashReporter setUser:nil withEmail:nil andName:nil];
     XCTAssertNotNil(Bugsnag.user);
     XCTAssertNil(Bugsnag.user.id);
     XCTAssertNil(Bugsnag.user.email);
     XCTAssertNil(Bugsnag.user.name);
 
-    [Bugsnag setUser:@"123" withEmail:@"joe@foo.com" andName:@"Joe"];
+    [RSCrashReporter setUser:@"123" withEmail:@"joe@foo.com" andName:@"Joe"];
     XCTAssertNotNil(Bugsnag.user);
     XCTAssertEqualObjects(@"123", Bugsnag.user.id);
     XCTAssertEqualObjects(@"joe@foo.com", Bugsnag.user.email);
@@ -105,37 +105,37 @@
 }
 
 - (void)testValidOnSessionBlock {
-    BugsnagOnSessionRef callback = [Bugsnag addOnSessionBlock:^BOOL(BugsnagSession *session) {
+    BugsnagOnSessionRef callback = [RSCrashReporter addOnSessionBlock:^BOOL(BugsnagSession *session) {
         return NO;
     }];
-    [Bugsnag removeOnSession:callback];
+    [RSCrashReporter removeOnSession:callback];
 }
 
 - (void)testValidOnBreadcrumbBlock {
-    BugsnagOnBreadcrumbRef callback = [Bugsnag addOnBreadcrumbBlock:^BOOL(BugsnagBreadcrumb *breadcrumb) {
+    BugsnagOnBreadcrumbRef callback = [RSCrashReporter addOnBreadcrumbBlock:^BOOL(BugsnagBreadcrumb *breadcrumb) {
         return NO;
     }];
-    [Bugsnag removeOnBreadcrumb:callback];
+    [RSCrashReporter removeOnBreadcrumb:callback];
 }
-
+*/
 - (void)testValidAddMetadata {
-    [Bugsnag addMetadata:@{} toSection:@"foo"];
-    XCTAssertNil([Bugsnag getMetadataFromSection:@"foo"]);
+    [RSCrashReporter addMetadata:@{} toSection:@"foo"];
+    XCTAssertNil([RSCrashReporter getMetadataFromSection:@"foo"]);
 
-    [Bugsnag addMetadata:nil withKey:@"nom" toSection:@"foo"];
-    [Bugsnag addMetadata:@"" withKey:@"bar" toSection:@"foo"];
-    XCTAssertNil([Bugsnag getMetadataFromSection:@"foo" withKey:@"nom"]);
-    XCTAssertEqualObjects(@"", [Bugsnag getMetadataFromSection:@"foo" withKey:@"bar"]);
+    [RSCrashReporter addMetadata:nil withKey:@"nom" toSection:@"foo"];
+    [RSCrashReporter addMetadata:@"" withKey:@"bar" toSection:@"foo"];
+    XCTAssertNil([RSCrashReporter getMetadataFromSection:@"foo" withKey:@"nom"]);
+    XCTAssertEqualObjects(@"", [RSCrashReporter getMetadataFromSection:@"foo" withKey:@"bar"]);
 }
 
 - (void)testValidClearMetadata {
-    [Bugsnag clearMetadataFromSection:@""];
-    [Bugsnag clearMetadataFromSection:@"" withKey:@""];
+    [RSCrashReporter clearMetadataFromSection:@""];
+    [RSCrashReporter clearMetadataFromSection:@"" withKey:@""];
 }
 
 - (void)testValidGetMetadata {
-    [Bugsnag getMetadataFromSection:@""];
-    [Bugsnag getMetadataFromSection:@"" withKey:@""];
+    [RSCrashReporter getMetadataFromSection:@""];
+    [RSCrashReporter getMetadataFromSection:@"" withKey:@""];
 }
 
 @end

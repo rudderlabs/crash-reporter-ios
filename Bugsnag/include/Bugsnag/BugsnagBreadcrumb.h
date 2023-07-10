@@ -25,7 +25,7 @@
 //
 #import <Foundation/Foundation.h>
 
-#import <Bugsnag/BugsnagDefines.h>
+#import <RSCrashReporter/BugsnagDefines.h>
 
 /**
  * Types of breadcrumbs
