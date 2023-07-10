@@ -8,7 +8,7 @@
 
 #import <XCTest/XCTest.h>
 
-#import "Bugsnag.h"
+#import "RSCrashReporter.h"
 #import "BugsnagBreadcrumb+Private.h"
 #import "BugsnagClient+Private.h"
 #import "BugsnagConfiguration+Private.h"
@@ -45,7 +45,7 @@
     XCTAssertEqual([[config onBreadcrumbBlocks] count], 1);
 
     // Call onbreadcrumb blocks
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     [client leaveBreadcrumbWithMessage:@"Hello"];
     [self waitForExpectationsWithTimeout:5.0 handler:nil];
@@ -75,7 +75,7 @@
     [config removeOnBreadcrumb:callback];
     XCTAssertEqual([[config onBreadcrumbBlocks] count], 0);
 
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     [client leaveBreadcrumbWithMessage:@"Hello"];
 
@@ -116,7 +116,7 @@
     XCTAssertEqual([[config onBreadcrumbBlocks] count], 1);
 
     // Call onbreadcrumb blocks
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     [client leaveBreadcrumbWithMessage:@"Hello"];
     [self waitForExpectations:@[expectation1] timeout:1.0];
@@ -174,7 +174,7 @@
     }];
 
     // Call onbreadcrumb blocks
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     XCTAssertEqual([[config onBreadcrumbBlocks] count], 1);
     NSDictionary *crumb = [client.breadcrumbs.firstObject objectValue];
@@ -191,7 +191,7 @@
     [config addOnBreadcrumbBlock:^(BugsnagBreadcrumb * _Nonnull crumb) {
         return NO;
     }];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config];
+    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
     // Not always zero - breadcrumbs from previous tests can appear due to async behaviour

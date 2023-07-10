@@ -1,5 +1,5 @@
-framework module Bugsnag {
-    umbrella header "Bugsnag.h"
+framework module RSCrashReporter {
+    umbrella header "RSCrashReporter.h"
 
     export *
     module * { export * }

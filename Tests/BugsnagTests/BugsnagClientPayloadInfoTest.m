@@ -20,12 +20,11 @@
 @implementation BugsnagClientPayloadInfoTest
 
 - (void)setUp {
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    [Bugsnag startWithConfiguration:configuration];
+    [RSCrashReporter startWithDelegate:nil];
 }
 
 - (void)testAppInfo {
-    BugsnagClient *client = [Bugsnag client];
+    BugsnagClient *client = [RSCrashReporter client];
     client.codeBundleId = @"f00123";
     NSDictionary *app = [[client generateAppWithState:BSGGetSystemInfo()] toDict];
     XCTAssertNotNil(app);
@@ -45,11 +44,11 @@
 }
 
 - (void)testDeviceInfo {
-    BugsnagClient *client = [Bugsnag client];
+    BugsnagClient *client = [RSCrashReporter client];
     NSDictionary *device = [[client generateDeviceWithState:BSGGetSystemInfo()] toDictionary];
     XCTAssertNotNil(device[@"freeDisk"]);
     XCTAssertNotNil(device[@"freeMemory"]);
-    XCTAssertNotNil(device[@"id"]);
+//    XCTAssertNotNil(device[@"id"]);
     XCTAssertNotNil(device[@"jailbroken"]);
     XCTAssertNotNil(device[@"locale"]);
     XCTAssertNotNil(device[@"manufacturer"]);

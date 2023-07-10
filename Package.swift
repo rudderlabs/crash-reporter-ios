@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "Bugsnag",
+    name: "RSCrashReporter",
     platforms: [
         .macOS(.v10_11),
         .tvOS("9.2"),
@@ -10,15 +10,14 @@ let package = Package(
         .watchOS("6.3"),
     ],
     products: [
-        .library(name: "Bugsnag", targets: ["Bugsnag"]),
-        .library(name: "BugsnagNetworkRequestPlugin", targets: ["BugsnagNetworkRequestPlugin"]),
+        .library(name: "RSCrashReporter", targets: ["RSCrashReporter"]),
     ],
     dependencies: [],
     targets: [
         .target(
-            name: "Bugsnag",
+            name: "RSCrashReporter",
             dependencies: [],
-            path: "Bugsnag",
+            path: "RSCrashReporter",
             publicHeadersPath: "include",
             cSettings: [
                 .headerSearchPath("."),
@@ -27,7 +26,7 @@ let package = Package(
                 .headerSearchPath("Configuration"),
                 .headerSearchPath("Delivery"),
                 .headerSearchPath("Helpers"),
-                .headerSearchPath("include/Bugsnag"),
+                .headerSearchPath("include/RSCrashReporter"),
                 .headerSearchPath("KSCrash"),
                 .headerSearchPath("KSCrash/Source/KSCrash/Recording"),
                 .headerSearchPath("KSCrash/Source/KSCrash/Recording/Sentry"),
@@ -41,16 +40,6 @@ let package = Package(
             linkerSettings: [
                 .linkedLibrary("z"),
                 .linkedLibrary("c++"),
-            ]
-        ),
-        .target(
-            name: "BugsnagNetworkRequestPlugin",
-            dependencies: ["Bugsnag"],
-            path: "BugsnagNetworkRequestPlugin/BugsnagNetworkRequestPlugin",
-            publicHeadersPath: "include",
-            cSettings: [
-                .headerSearchPath("."),
-                .headerSearchPath("include/BugsnagNetworkRequestPlugin"),
             ]
         ),
     ],

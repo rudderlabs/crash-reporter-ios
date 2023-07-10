@@ -8,7 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import <objc/runtime.h>
-#import <Bugsnag/Bugsnag.h>
+#import <RSCrashReporter/RSCrashReporter.h>
 
 @interface BugsnagClientMirrorTest : XCTestCase
 @property NSSet *clientMethodsNotRequiredOnBugsnag;
@@ -62,7 +62,7 @@
             @"generateOutOfMemoryEvent @16@0:8",
             @"generateThermalKillEvent @16@0:8",
             @"generateThreads @16@0:8",
-            @"initWithConfiguration: @24@0:8@16",
+            @"initWithConfiguration:delegate: @32@0:8@16@24",
             @"initializeNotificationNameMap v16@0:8",
             @"leaveBreadcrumbForEvent: v24@0:8@16",
             @"loadAppHangEvent @16@0:8",
@@ -142,11 +142,12 @@
             @"start @16@0:8",
             @"startWithApiKey: @24@0:8@16",
             @"startWithConfiguration: @24@0:8@16",
+            @"startWithDelegate: v24@0:8@16"
     ]];
 }
 
 - (void)testBugsnagHasClientMethods {
-    NSMutableSet *bugsnagMethods = [self methodNamesForClass:object_getClass([Bugsnag class])];
+    NSMutableSet *bugsnagMethods = [self methodNamesForClass:object_getClass([RSCrashReporter class])];
     NSMutableSet *clientMethods = [self methodNamesForClass:[BugsnagClient class]];
 
     // remove all methods implemented on Bugsnag from Client.
@@ -155,12 +156,12 @@
     [clientMethods minusSet:self.clientMethodsNotRequiredOnBugsnag];
 
     for (NSString *method in clientMethods) {
-        XCTFail(@"The \"Bugsnag\" class should implement +%@", method);
+        XCTFail(@"The \"RSCrashReporter\" class should implement +%@", method);
     }
 }
 
 - (void)testClientHasBugsnagMethods {
-    NSMutableSet *bugsnagMethods = [self methodNamesForClass:object_getClass([Bugsnag class])];
+    NSMutableSet *bugsnagMethods = [self methodNamesForClass:object_getClass([RSCrashReporter class])];
     NSMutableSet *clientMethods = [self methodNamesForClass:[BugsnagClient class]];
 
     // remove all methods implemented on Client from Bugsnag.

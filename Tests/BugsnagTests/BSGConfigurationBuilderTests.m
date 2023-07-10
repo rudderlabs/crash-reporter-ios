@@ -1,6 +1,6 @@
 #import <XCTest/XCTest.h>
 
-#import <Bugsnag/Bugsnag.h>
+#import <RSCrashReporter/RSCrashReporter.h>
 #import "BSGConfigurationBuilder.h"
 #import "BugsnagConfiguration+Private.h"
 #import "BugsnagTestConstants.h"

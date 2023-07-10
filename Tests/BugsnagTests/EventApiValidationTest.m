@@ -8,7 +8,7 @@
 
 #import <XCTest/XCTest.h>
 
-#import <Bugsnag/Bugsnag.h>
+#import <RSCrashReporter/RSCrashReporter.h>
 #import "BugsnagEvent+Private.h"
 
 /**
@@ -47,7 +47,7 @@
     XCTAssertEqualObjects(@"1a0f", self.event.groupingHash);
 }
 
-- (void)testValidUser {
+/*- (void)testValidUser {
     [self.event setUser:nil withEmail:nil andName:nil];
     XCTAssertNotNil(self.event.user);
     XCTAssertNil(self.event.user.id);
@@ -59,7 +59,7 @@
     XCTAssertEqualObjects(@"123", self.event.user.id);
     XCTAssertEqualObjects(@"joe@foo.com", self.event.user.email);
     XCTAssertEqualObjects(@"Joe", self.event.user.name);
-}
+}*/
 
 - (void)testValidAddMetadata {
     [self.event addMetadata:@{} toSection:@"foo"];

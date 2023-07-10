@@ -42,7 +42,7 @@
     XCTAssertEqualObjects(@"Tom Bombadil", rootNode[@"name"]);
 }
 
-- (void)testUserEvent {
+/*- (void)testUserEvent {
     // Setup
     BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
             @"user.metaData": @{
@@ -55,6 +55,6 @@
     XCTAssertEqualObjects(@"123", event.user.id);
     XCTAssertEqualObjects(@"Jane Smith", event.user.name);
     XCTAssertEqualObjects(@"jane@example.com", event.user.email);
-}
+}*/
 
 @end

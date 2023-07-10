@@ -49,7 +49,7 @@
         return nil;
     }
 
-    return [NSString stringWithFormat:@"%@/com.bugsnag.Bugsnag/%@/v1",
+    return [NSString stringWithFormat:@"%@/com.rudderstack.rscrashreporter/%@/v1",
             dirs[0],
             NSBundle.mainBundle.bundleIdentifier ?: NSProcessInfo.processInfo.processName];
 }

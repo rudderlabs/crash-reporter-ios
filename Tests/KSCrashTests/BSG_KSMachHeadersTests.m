@@ -7,7 +7,7 @@
 //
 
 #import "BSG_KSMachHeaders.h"
-#import <Bugsnag/Bugsnag.h>
+#import <RSCrashReporter/RSCrashReporter.h>
 #import <XCTest/XCTest.h>
 #import <dlfcn.h>
 #import <mach-o/dyld.h>
@@ -116,7 +116,7 @@ static BSG_Mach_Header_Info *get_tail(BSG_Mach_Header_Info *head) {
 
 - (void)testGetSelfImage {
     XCTAssertEqualObjects(@(bsg_mach_headers_get_self_image()->name),
-                          @(class_getImageName([Bugsnag class])));
+                          @(class_getImageName([RSCrashReporter class])));
 }
 
 - (void)testMainImage {
