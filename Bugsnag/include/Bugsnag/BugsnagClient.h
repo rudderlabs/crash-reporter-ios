@@ -44,7 +44,7 @@ BUGSNAG_EXTERN
 
 @protocol RSCrashReporterNotifyDelegate
 
-- (void)notifyCrashEvent:(BugsnagEvent *_Nullable)event withRequestPayload:(NSMutableDictionary *_Nullable)requestPayload;
+- (void)notifyCrashEvent:(BugsnagEvent *_Nullable)event withRequestPayload:(NSDictionary *_Nullable)requestPayload;
 
 @end
 

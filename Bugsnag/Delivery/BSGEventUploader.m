@@ -271,7 +271,7 @@ BSG_OBJC_DIRECT_MEMBERS
     });
 }
 
-- (void)notifyCrashEvent:(BugsnagEvent *_Nullable)event withRequestPayload:(NSMutableDictionary *)requestPayload {
+- (void)notifyCrashEvent:(BugsnagEvent *_Nullable)event withRequestPayload:(NSDictionary *_Nullable)requestPayload {
     [self.delegate notifyCrashEvent:event withRequestPayload:requestPayload];
 }
 

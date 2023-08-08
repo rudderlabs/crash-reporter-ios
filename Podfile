@@ -1,5 +1,5 @@
 source 'https://github.com/CocoaPods/Specs.git'
-workspace 'CrashReporter.xcworkspace'
+workspace 'RSCrashReporter.xcworkspace'
 use_frameworks!
 inhibit_all_warnings!
 

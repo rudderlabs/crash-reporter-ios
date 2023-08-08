@@ -60,7 +60,7 @@ static const NSUInteger MaxPersistedSize = 1000000;
 
 - (void)storeEventPayload:(NSDictionary *)eventPayload;
 
-- (void)notifyCrashEvent:(BugsnagEvent *_Nullable)event withRequestPayload:(NSMutableDictionary *_Nullable)requestPayload;
+- (void)notifyCrashEvent:(BugsnagEvent *_Nullable)event withRequestPayload:(NSDictionary *_Nullable)requestPayload;
 
 @end
 
