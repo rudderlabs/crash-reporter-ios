@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "."
 
 SPEC CHECKSUMS:
-  RSCrashReporter: a2f4e7fdd4a82497b58affe0491a5e215385996f
+  RSCrashReporter: 9ed135f73529aceb60bd5ad46cc6a2d3cf169262
 
 PODFILE CHECKSUM: ebb806c32c0427ac2953dabbfb392bfeb6b3b54d
 

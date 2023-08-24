@@ -1839,7 +1839,7 @@
 			children = (
 				017824BD262D65A000D18AFA /* RSCrashReporter.xcconfig */,
 				ED1116422A4346B10008F1AF /* RSCrashReporter.podspec */,
-				00AD1C7424869B0E00A27979 /* Bugsnag */,
+				00AD1C7424869B0E00A27979 /* RSCrashReporter */,
 				01A617662733CF2D00024A0B /* Tests */,
 				00AD1C7324869B0E00A27979 /* Products */,
 				E746292324890BFE00F92D67 /* Frameworks */,
@@ -1863,7 +1863,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		00AD1C7424869B0E00A27979 /* Bugsnag */ = {
+		00AD1C7424869B0E00A27979 /* RSCrashReporter */ = {
 			isa = PBXGroup;
 			children = (
 				00AD1F002486A17900A27979 /* BSGCrashSentry.h */,
@@ -1889,7 +1889,7 @@
 				00AD1CF724869EF100A27979 /* Payload */,
 				00AD1CF924869F0100A27979 /* Storage */,
 			);
-			path = Bugsnag;
+			path = RSCrashReporter;
 			sourceTree = "<group>";
 		};
 		00AD1C7F24869B0E00A27979 /* BugsnagTests */ = {
@@ -2147,12 +2147,12 @@
 		3A700A7E24A63A8E0068CD1B /* include */ = {
 			isa = PBXGroup;
 			children = (
-				3A700A7F24A63A8E0068CD1B /* Bugsnag */,
+				3A700A7F24A63A8E0068CD1B /* RSCrashReporter */,
 			);
 			path = include;
 			sourceTree = "<group>";
 		};
-		3A700A7F24A63A8E0068CD1B /* Bugsnag */ = {
+		3A700A7F24A63A8E0068CD1B /* RSCrashReporter */ = {
 			isa = PBXGroup;
 			children = (
 				3A700A8624A63A8E0068CD1B /* BSG_KSCrashReportWriter.h */,
@@ -2180,7 +2180,7 @@
 				3A700A8A24A63A8E0068CD1B /* BugsnagUser.h */,
 				3A700A8C24A63A8E0068CD1B /* RSCrashReporter.h */,
 			);
-			path = Bugsnag;
+			path = RSCrashReporter;
 			sourceTree = "<group>";
 		};
 		E746292324890BFE00F92D67 /* Frameworks */ = {

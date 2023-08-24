@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import MetricsReporter
+import RSCrashReporter
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -15,8 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        let client = CrashReporterClient.shared
-        client.print()
+        RSCrashReporter.start(with: self)
         return true
     }
 
@@ -37,3 +36,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 }
 
+extension AppDelegate: RSCrashReporterNotifyDelegate {
+    func notifyCrash(_ event: BugsnagEvent?, withRequestPayload requestPayload: [AnyHashable : Any]?) {
+        
+    }
+}

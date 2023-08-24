@@ -53,7 +53,7 @@ BUGSNAG_EXTERN
 /**
  * All RSCrashReporter access is class-level.  Prevent the creation of instances.
  */
-- (instancetype _Nonnull )init NS_UNAVAILABLE NS_SWIFT_UNAVAILABLE("Use class methods to initialise Bugsnag.");
+- (instancetype _Nonnull )init NS_UNAVAILABLE NS_SWIFT_UNAVAILABLE("Use class methods to initialise RSCrashReporter.");
 
 /**
  * Start listening for crashes.

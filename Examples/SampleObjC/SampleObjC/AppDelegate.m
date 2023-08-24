@@ -7,7 +7,9 @@
 
 #import "AppDelegate.h"
 
-@interface AppDelegate ()
+@import RSCrashReporter;
+
+@interface AppDelegate () <RSCrashReporterNotifyDelegate>
 
 @end
 
@@ -16,6 +18,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    [RSCrashReporter startWithDelegate:self];
     return YES;
 }
 
@@ -36,5 +39,8 @@
     // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
 }
 
+- (void)notifyCrashEvent:(BugsnagEvent *)event withRequestPayload:(NSDictionary *)requestPayload {
+    
+}
 
 @end

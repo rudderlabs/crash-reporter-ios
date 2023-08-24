@@ -26,6 +26,6 @@ Pod::Spec.new do |s|
   s.prefix_header_file = false
   s.compiler_flags = [ "-fvisibility=hidden" ]
   
-  s.source_files = 'Bugsnag/{**/,}*.{m,h,mm,c}'
-  s.public_header_files = [ "Bugsnag/include/Bugsnag/*.h" ]
+  s.source_files = 'RSCrashReporter/{**/,}*.{m,h,mm,c}'
+  s.public_header_files = [ "RSCrashReporter/include/RSCrashReporter/*.h" ]
 end
