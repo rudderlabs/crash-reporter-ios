@@ -25,11 +25,20 @@ jobs:
 
       - name: Run build-wrapper
         run: |
-          build-wrapper-macosx-x86 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} xcodebuild -workspace <workspace-name>.xcworkspace -scheme <scheme-name> -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 13' | xcpretty
+          build-wrapper-macosx-x86 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} xcodebuild -workspace RSCrashReporter.xcworkspace -scheme RSCrashReporter-iOS -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 14' | xcpretty
           
-      - name: Run tests(suite)
+      - name: Run tests(iOS)
         run: |
-          xcodebuild -scheme <scheme-name> test -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 13' -enableCodeCoverage YES -derivedDataPath build | xcpretty
+          xcodebuild -workspace RSCrashReporter.xcworkspace -scheme RSCrashReporter-iOSTests test -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 14' -enableCodeCoverage YES -derivedDataPath build | xcpretty
+          
+      - name: Run tests(tvOS)
+        run: |
+          xcodebuild -workspace RSCrashReporter.xcworkspace -scheme RSCrashReporter-tvOSTests test -sdk appletvsimulator -destination 'platform=tvOS Simulator,name=Apple TV' -enableCodeCoverage YES -derivedDataPath build | xcpretty
+      
+      - name: Run tests(watchOS)
+        run: |
+          xcodebuild -workspace RSCrashReporter.xcworkspace -scheme RSCrashReporter-watchOSTests test -sdk watchsimulator -destination 'platform=watchOS Simulator,name=Apple Watch Series 7 (45mm)' -enableCodeCoverage YES -derivedDataPath build | xcpretty
+          
       - name: Collect coverage into one XML report
         run: |
           bash xccov-to-generic.sh build/Logs/Test/*.xcresult/ > generic-coverage.xml

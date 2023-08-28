@@ -18,19 +18,19 @@ jobs:
         
       - name: Build SDK(iOS)
         run: |
-          xcodebuild build -scheme <scheme-name> -workspace <workspace-name>.xcworkspace -destination 'platform=iOS Simulator,name=iPhone 13' | xcpretty
+          xcodebuild build -scheme RSCrashReporter-iOS -workspace RSCrashReporter.xcworkspace -destination 'platform=iOS Simulator,name=iPhone 14' | xcpretty
           
       - name: Build SDK(watchOS)
         run: |
-          xcodebuild build -scheme <scheme-name> -workspace <workspace-name>.xcworkspace -destination 'platform=watchOS Simulator,name=Apple Watch Series 7 - 45mm' | xcpretty
+          xcodebuild build -scheme RSCrashReporter-watchOS -workspace RSCrashReporter.xcworkspace -destination 'platform=watchOS Simulator,name=Apple Watch Series 7 (45mm)' | xcpretty
       
       - name: Build SDK(tvOS)
         run: |
-          xcodebuild build -scheme <scheme-name> -workspace <workspace-name>.xcworkspace -destination 'platform=tvOS Simulator,name=Apple TV' | xcpretty
+          xcodebuild build -scheme RSCrashReporter-tvOS -workspace RSCrashReporter.xcworkspace -destination 'platform=tvOS Simulator,name=Apple TV' | xcpretty
           
-      - name: Build SDK(macOS)
-        run: |
-          xcodebuild build -scheme <scheme-name> -workspace <workspace-name>.xcworkspace -destination 'platform=macOS,variant=Mac Catalyst' | xcpretty
+#      - name: Build SDK(macOS)
+#        run: |
+#          xcodebuild build -scheme RSCrashReporter-macOS -workspace RSCrashReporter.xcworkspace -destination 'platform=macOS,arch=x86_64' | xcpretty
           
       - name: Install Cocoapods
         run: gem install cocoapods

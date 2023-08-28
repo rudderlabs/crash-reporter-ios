@@ -19,7 +19,7 @@
     BugsnagDevice *device = [BugsnagDevice new];
     if (json != nil) {
         device.jailbroken = [json[@"jailbroken"] boolValue];
-        device.id = json[@"id"];
+        device.id = nil; //json[@"id"];
         device.locale = json[@"locale"];
         device.manufacturer = json[@"manufacturer"];
         device.model = json[@"model"];
@@ -42,7 +42,7 @@
             dictionary:(NSDictionary *)event {
     NSDictionary *system = event[@"system"];
     device.jailbroken = [system[@BSG_KSSystemField_Jailbroken] boolValue];
-    device.id = system[@BSG_KSSystemField_DeviceAppHash];
+    device.id = nil; //system[@BSG_KSSystemField_DeviceAppHash];
     device.locale = [[NSLocale currentLocale] localeIdentifier];
     device.manufacturer = @"Apple";
     device.model = system[@BSG_KSSystemField_Machine];
@@ -60,7 +60,7 @@
 - (NSDictionary *)toDictionary {
     NSMutableDictionary *dict = [NSMutableDictionary new];
     dict[@"jailbroken"] = @(self.jailbroken);
-    dict[@"id"] = self.id;
+    dict[@"id"] = nil; //self.id;
     dict[@"locale"] = self.locale;
     dict[@"manufacturer"] = self.manufacturer;
     dict[@"model"] = self.model;

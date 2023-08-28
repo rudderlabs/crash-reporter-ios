@@ -48,7 +48,7 @@
     NSDictionary *device = [[client generateDeviceWithState:BSGGetSystemInfo()] toDictionary];
     XCTAssertNotNil(device[@"freeDisk"]);
     XCTAssertNotNil(device[@"freeMemory"]);
-    XCTAssertNotNil(device[@"id"]);
+//    XCTAssertNotNil(device[@"id"]);
     XCTAssertNotNil(device[@"jailbroken"]);
     XCTAssertNotNil(device[@"locale"]);
     XCTAssertNotNil(device[@"manufacturer"]);

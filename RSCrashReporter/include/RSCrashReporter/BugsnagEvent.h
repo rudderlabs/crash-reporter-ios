@@ -120,7 +120,7 @@ BUGSNAG_EXTERN
 /**
  * The current user
  */
-@property (readonly, nonnull, nonatomic) BugsnagUser *user;
+//@property (readonly, nonnull, nonatomic) BugsnagUser *user;
 
 /**
  *  Set user metadata

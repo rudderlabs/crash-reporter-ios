@@ -777,7 +777,7 @@ BSG_OBJC_DIRECT_MEMBERS
         }
     }
 
-    event.user = [event.user withId];
+    // event.user = [event.user withId];
 
     BOOL originalUnhandledValue = event.unhandled;
     @try {

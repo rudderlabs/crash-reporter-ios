@@ -52,14 +52,6 @@ jobs:
           git for-each-ref refs/tags
           DEBUG=conventional-github-releaser npx conventional-github-releaser -p angular --config github-release.config.js
 
-      - name: Create pull request into develop
-        uses: repo-sync/pull-request@v2
-        with:
-          source_branch: 'master'
-          destination_branch: 'develop'
-          github_token: ${{ secrets.PAT }}
-          pr_title: "chore(release): pulling master into develop post release v${{ steps.extract-version.outputs.release_version }}"
-          pr_body: ':crown: *An automated PR*'
 
       - name: Delete hotfix release branch
         uses: koj-co/delete-merged-action@master

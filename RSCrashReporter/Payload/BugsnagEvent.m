@@ -161,9 +161,9 @@ BSG_OBJC_DIRECT_MEMBERS
         _device = device;
         _handledState = handledState;
         // _user is nonnull but this method is not public so _Nonnull is unenforcable,  Guard explicitly.
-        if (user != nil) {
+        /*if (user != nil) {
             _user = user;
-        }
+        }*/
         _metadata = metadata;
         _breadcrumbs = breadcrumbs;
         _errors = errors;
@@ -212,11 +212,11 @@ BSG_OBJC_DIRECT_MEMBERS
 
         _usage = BSGDeserializeDict(json[BSGKeyUsage]);
 
-        _user = BSGDeserializeObject(json[BSGKeyUser], ^id _Nullable(NSDictionary * _Nonnull dict) {
+        /*_user = BSGDeserializeObject(json[BSGKeyUser], ^id _Nullable(NSDictionary * _Nonnull dict) {
             return [[BugsnagUser alloc] initWithDictionary:dict];
         }) ?: [[BugsnagUser alloc] init];
 
-        _session = BSGSessionFromEventJson(json[BSGKeySession], _app, _device, _user);
+        _session = BSGSessionFromEventJson(json[BSGKeySession], _app, _device, _user);*/
     }
     return self;
 }
@@ -530,7 +530,7 @@ BSG_OBJC_DIRECT_MEMBERS
 - (void)setUser:(NSString *_Nullable)userId
       withEmail:(NSString *_Nullable)email
         andName:(NSString *_Nullable)name {
-    self.user = [[BugsnagUser alloc] initWithId:userId name:name emailAddress:email];
+    // self.user = [[BugsnagUser alloc] initWithId:userId name:name emailAddress:email];
 }
 
 /**
@@ -617,7 +617,7 @@ BSG_OBJC_DIRECT_MEMBERS
     [metadata removeObjectForKey:BSGKeyContext];
 
     // add user
-    event[BSGKeyUser] = [self.user toJson];
+//    event[BSGKeyUser] = [self.user toJson];
 
     event[BSGKeySession] = self.session ? BSGSessionToEventJson((BugsnagSession *_Nonnull)self.session) : nil;
 

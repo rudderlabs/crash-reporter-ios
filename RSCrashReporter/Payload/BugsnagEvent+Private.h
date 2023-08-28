@@ -45,7 +45,7 @@ BSG_OBJC_DIRECT_MEMBERS
 /// Usage telemetry info, from BSGTelemetryCreateUsage(), or nil if BSGTelemetryUsage is not enabled.
 @property (readwrite, nullable, nonatomic) NSDictionary *usage;
 
-@property (readwrite, nonnull, nonatomic) BugsnagUser *user;
+//@property (readwrite, nonnull, nonatomic) BugsnagUser *user;
 
 - (instancetype)initWithKSReport:(NSDictionary *)KSReport;
 

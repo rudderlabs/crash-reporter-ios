@@ -54,7 +54,7 @@ NSDictionary * BSGDeviceMetadataFromRunContext(const struct BSGRunContext *conte
 
 + (BugsnagDeviceWithState *) deviceFromJson:(NSDictionary *)json {
     BugsnagDeviceWithState *device = [BugsnagDeviceWithState new];
-    device.id = json[@"id"];
+    device.id = nil;
     device.freeMemory = json[@"freeMemory"];
     device.freeDisk = json[@"freeDisk"];
     device.locale = json[@"locale"];

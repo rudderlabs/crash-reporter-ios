@@ -70,8 +70,8 @@ jobs:
         run: |
           echo "Current version: $CURRENT_VERSION_VALUE"
           echo "New version: $NEW_VERSION_VALUE"
-          npx replace $CURRENT_VERSION_VALUE $NEW_VERSION_VALUE <path-to-version-file> package.json
-          git add <path-to-version-file> package.json
+          npx replace $CURRENT_VERSION_VALUE $NEW_VERSION_VALUE package.json
+          git add package.json
           echo ${{ steps.create-release.outputs.new_version }}
           echo "commit_summary=$SUMMARY" >> $GITHUB_OUTPUT
           git commit -m "chore(beta-relase): $NEW_VERSION_VALUE"

@@ -7,7 +7,7 @@ jobs:
   draft-new-release:
     name: Draft a new release
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: startsWith(github.ref, 'refs/heads/feat/') || startsWith(github.ref, 'refs/heads/fix/')
     steps:
       - name: Checkout source branch
         uses: actions/checkout@v3
@@ -70,8 +70,8 @@ jobs:
           echo $SUMMARY
           echo "Current version: $CURRENT_VERSION_VALUE"
           echo "New version: $NEW_VERSION_VALUE"
-          npx replace $CURRENT_VERSION_VALUE $NEW_VERSION_VALUE README.md <path-to-version-file> sonar-project.properties
-          git add README.md <path-to-version-file> sonar-project.properties
+          npx replace $CURRENT_VERSION_VALUE $NEW_VERSION_VALUE sonar-project.properties
+          git add sonar-project.properties
           echo ${{ steps.create-release.outputs.new_version }}
           echo "commit_summary=$SUMMARY" >> $GITHUB_OUTPUT
           npx standard-version -a --skip.tag

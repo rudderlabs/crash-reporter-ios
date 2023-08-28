@@ -1578,6 +1578,19 @@
 		E746293824890C7000F92D67 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS13.4.sdk/usr/lib/libc++.tbd"; sourceTree = DEVELOPER_DIR; };
 		E746293A24890C7900F92D67 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS13.4.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
 		ED1116422A4346B10008F1AF /* RSCrashReporter.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = RSCrashReporter.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		ED9B9E8C2A9C8D2200A8B1FD /* deploy-cocoapods.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "deploy-cocoapods.yml"; sourceTree = "<group>"; };
+		ED9B9E8D2A9C8D2200A8B1FD /* notion-pr-sync.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "notion-pr-sync.yml"; sourceTree = "<group>"; };
+		ED9B9E8F2A9C8D2200A8B1FD /* check-pr-title.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "check-pr-title.yml"; sourceTree = "<group>"; };
+		ED9B9E902A9C8D2200A8B1FD /* create-hotfix-branch.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "create-hotfix-branch.yml"; sourceTree = "<group>"; };
+		ED9B9E912A9C8D2200A8B1FD /* publish-new-release.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "publish-new-release.yml"; sourceTree = "<group>"; };
+		ED9B9E922A9C8D2200A8B1FD /* test.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = test.yml; sourceTree = "<group>"; };
+		ED9B9E932A9C8D2200A8B1FD /* deploy-cocoapods-manual.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "deploy-cocoapods-manual.yml"; sourceTree = "<group>"; };
+		ED9B9E942A9C8D2200A8B1FD /* slack-notify.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "slack-notify.yml"; sourceTree = "<group>"; };
+		ED9B9E952A9C8D2200A8B1FD /* build-and-quality-checks.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "build-and-quality-checks.yml"; sourceTree = "<group>"; };
+		ED9B9E962A9C8D2200A8B1FD /* draft-new-release.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "draft-new-release.yml"; sourceTree = "<group>"; };
+		ED9B9E972A9C8E3500A8B1FD /* draft-new-beta-release.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "draft-new-beta-release.yml"; sourceTree = "<group>"; };
+		ED9B9E982A9CA6E600A8B1FD /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		ED9B9E992A9CA6E600A8B1FD /* sonar-project.properties */ = {isa = PBXFileReference; lastKnownFileType = text; path = "sonar-project.properties"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1837,8 +1850,11 @@
 		00AD1C6824869B0E00A27979 = {
 			isa = PBXGroup;
 			children = (
+				ED9B9E8B2A9C8D2200A8B1FD /* workflows */,
+				ED9B9E982A9CA6E600A8B1FD /* Package.swift */,
 				017824BD262D65A000D18AFA /* RSCrashReporter.xcconfig */,
 				ED1116422A4346B10008F1AF /* RSCrashReporter.podspec */,
+				ED9B9E992A9CA6E600A8B1FD /* sonar-project.properties */,
 				00AD1C7424869B0E00A27979 /* RSCrashReporter */,
 				01A617662733CF2D00024A0B /* Tests */,
 				00AD1C7324869B0E00A27979 /* Products */,
@@ -2204,6 +2220,25 @@
 				E746292424890BFE00F92D67 /* Foundation.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		ED9B9E8B2A9C8D2200A8B1FD /* workflows */ = {
+			isa = PBXGroup;
+			children = (
+				ED9B9E952A9C8D2200A8B1FD /* build-and-quality-checks.yml */,
+				ED9B9E8F2A9C8D2200A8B1FD /* check-pr-title.yml */,
+				ED9B9E902A9C8D2200A8B1FD /* create-hotfix-branch.yml */,
+				ED9B9E932A9C8D2200A8B1FD /* deploy-cocoapods-manual.yml */,
+				ED9B9E8C2A9C8D2200A8B1FD /* deploy-cocoapods.yml */,
+				ED9B9E972A9C8E3500A8B1FD /* draft-new-beta-release.yml */,
+				ED9B9E962A9C8D2200A8B1FD /* draft-new-release.yml */,
+				ED9B9E8D2A9C8D2200A8B1FD /* notion-pr-sync.yml */,
+				ED9B9E912A9C8D2200A8B1FD /* publish-new-release.yml */,
+				ED9B9E942A9C8D2200A8B1FD /* slack-notify.yml */,
+				ED9B9E922A9C8D2200A8B1FD /* test.yml */,
+			);
+			name = workflows;
+			path = .github/workflows;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

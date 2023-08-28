@@ -161,7 +161,7 @@ class BugsnagSwiftPublicAPITests: XCTestCase {
         event.originalError = nil
         event.originalError = 123
         event.originalError = BugsnagError()
-        _ = event.user
+//        _ = event.user
         event.setUser("user", withEmail: "email", andName: "name")
         event.severity = .error
         _ = event.severity

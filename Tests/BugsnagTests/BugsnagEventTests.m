@@ -703,7 +703,7 @@
 /**
  * Legacy unhandled reports stored user in metadata - this should be loaded if present
  */
-- (void)testLoadUserFromMetadata {
+/*- (void)testLoadUserFromMetadata {
     BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
             @"user": @{
                     @"metaData": @{
@@ -718,12 +718,12 @@
     XCTAssertEqualObjects(@"someId", event.user.id);
     XCTAssertEqualObjects(@"someName", event.user.name);
     XCTAssertEqualObjects(@"someEmail", event.user.email);
-}
+}*/
 
 /**
  * Current unhandled reports store user in state - this should be loaded if present
  */
-- (void)testLoadUserFromState {
+/*- (void)testLoadUserFromState {
     BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
             @"user": @{
                     @"state": @{
@@ -745,7 +745,7 @@
     XCTAssertNil(event.user.id);
     XCTAssertNil(event.user.name);
     XCTAssertNil(event.user.email);
-}
+}*/
 
 - (void)testCodeBundleIdHandled {
     BugsnagEvent *event = [[BugsnagEvent alloc] initWithUserData:@{

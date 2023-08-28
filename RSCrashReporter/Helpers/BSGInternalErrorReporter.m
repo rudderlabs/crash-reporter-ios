@@ -44,7 +44,7 @@ NSString *BSGErrorDescription(NSError *error) {
                     error.userInfo[NSDebugDescriptionErrorKey] ?: error.localizedDescription] : nil;
 }
 
-static NSString * DeviceId(void);
+//static NSString * DeviceId(void);
 
 static NSString * Sysctl(const char *name);
 
@@ -210,7 +210,7 @@ static void (^ startupBlock_)(BSGInternalErrorReporter *);
                                    @"/System/Library/CoreServices/SystemVersion.plist"];
     
     BugsnagDeviceWithState *device = [BugsnagDeviceWithState new];
-    device.id           = DeviceId();
+    device.id           = nil; //DeviceId();
     device.manufacturer = @"Apple";
     device.osName       = systemVersion[@"ProductName"];
     device.osVersion    = systemVersion[@"ProductVersion"];
@@ -285,7 +285,7 @@ static void (^ startupBlock_)(BSGInternalErrorReporter *);
 
 // Intentionally differs from +[BSG_KSSystemInfo deviceAndAppHash]
 // See ROAD-1488
-static NSString * DeviceId(void) {
+/*static NSString * DeviceId(void) {
     CC_SHA1_CTX ctx;
     CC_SHA1_Init(&ctx);
 
@@ -320,7 +320,7 @@ static NSString * DeviceId(void) {
         hex[i * 2 + 1] = lookup[(md[i] & 0x0f)];
     }
     return [[NSString alloc] initWithBytes:hex length:sizeof(hex) encoding:NSASCIIStringEncoding];
-}
+}*/
 
 static NSString * Sysctl(const char *name) {
     char buffer[32] = {0};
