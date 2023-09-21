@@ -24,6 +24,7 @@ Pod::Spec.new do |s|
   s.swift_versions = ['5.0']
   s.requires_arc = true
   s.prefix_header_file = false
+  s.pod_target_xcconfig = { "DEFINES_MODULE" => "YES" }
   s.compiler_flags = [ "-fvisibility=hidden" ]
   
   s.source_files = 'RSCrashReporter/**/*.{m,h,mm,c}'

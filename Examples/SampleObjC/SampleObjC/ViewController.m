@@ -37,7 +37,7 @@
         NSLog(@"Got an error: %@", error);
     } else {
         NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-        NSLog(jsonString);
+        NSLog(@"%@", jsonString);
         [[NSFileManager defaultManager] createFileAtPath:@"file.json" contents:nil attributes:nil];
         [jsonString writeToFile:@"file.json" atomically:YES encoding:NSUTF8StringEncoding error:nil];
 
