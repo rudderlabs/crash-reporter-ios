@@ -18,7 +18,7 @@
 
 ---
 
-# Metrics Reporter
+# Crash Reporter
 
 This SDK is for capturing RudderStack iOS SDK crashes.
 
