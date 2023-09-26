@@ -18,26 +18,10 @@
 
 ---
 
-# \*\*Repo Name\*\*
+# Metrics Reporter
 
-\*\*Repo description\*\*
-
-## Overview
-
-\*\*Describe what the software does.\*\*
-
-## Features
-
-\*\*Describe the key features, if necessary.\*\*
-
-## Getting started
-
-\*\*Describe how to use the software.\*\*
-
-## Contribute
-
-We would love to see you contribute to RudderStack. Get more information on how to contribute [**here**](CONTRIBUTING.md).
+This SDK is for capturing RudderStack iOS SDK crashes.
 
 ## License
 
-The RudderStack \*\*software name\*\* is released under the [**MIT License**](https://opensource.org/licenses/MIT).
+The RudderStack **Metrics Reporter** is released under the [**MIT License**](https://opensource.org/licenses/MIT).
