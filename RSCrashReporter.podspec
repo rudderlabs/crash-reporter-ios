@@ -25,6 +25,7 @@ Pod::Spec.new do |s|
   s.requires_arc = true
   s.prefix_header_file = false
   s.pod_target_xcconfig = { "DEFINES_MODULE" => "YES" }
+  s.static_framework = true
   s.compiler_flags = [ "-fvisibility=hidden" ]
   
   s.source_files = 'RSCrashReporter/**/*.{m,h,mm,c}'
