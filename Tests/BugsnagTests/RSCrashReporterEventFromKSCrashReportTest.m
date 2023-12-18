@@ -3,7 +3,7 @@
 //  Tests
 //
 //  Created by Paul Zabelin on 6/6/19.
-//  Copyright © 2019 RSCrashReporter. All rights reserved.
+//  Copyright © 2019 Bugsnag. All rights reserved.
 //
 
 @import XCTest;

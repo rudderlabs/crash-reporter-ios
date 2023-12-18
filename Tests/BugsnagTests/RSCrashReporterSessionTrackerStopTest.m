@@ -3,7 +3,7 @@
 //  Tests
 //
 //  Created by Jamie Lynch on 15/02/2019.
-//  Copyright © 2019 RSCrashReporter. All rights reserved.
+//  Copyright © 2019 Bugsnag. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>

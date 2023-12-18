@@ -2,7 +2,7 @@
 //  RSCRunContext.m
 //  RSCrashReporter
 //
-//  Copyright © 2022 RSCrashReporter Inc. All rights reserved.
+//  Copyright © 2022 Bugsnag Inc. All rights reserved.
 //
 
 #import "RSCRunContext.h"

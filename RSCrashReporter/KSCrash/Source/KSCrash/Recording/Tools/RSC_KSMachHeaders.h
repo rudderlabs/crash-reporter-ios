@@ -3,7 +3,7 @@
 //  RSCrashReporter
 //
 //  Created by Robin Macharg on 04/05/2020.
-//  Copyright © 2020 RSCrashReporter. All rights reserved.
+//  Copyright © 2020 Bugsnag. All rights reserved.
 //
 
 #ifndef RSC_KSMachHeaders_h

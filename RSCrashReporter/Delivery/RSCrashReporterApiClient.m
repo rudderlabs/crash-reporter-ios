@@ -1,6 +1,6 @@
 //
 // Created by Jamie Lynch on 04/12/2017.
-// Copyright (c) 2017 RSCrashReporter. All rights reserved.
+// Copyright (c) 2017 Bugsnag. All rights reserved.
 //
 
 #import "RSCrashReporterApiClient.h"

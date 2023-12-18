@@ -2,7 +2,7 @@
 //  RSC_Symbolicate.h
 //  RSCrashReporter
 //
-//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
+//  Copyright © 2021 Bugsnag Inc. All rights reserved.
 //
 
 #ifndef RSC_Symbolicate_h

@@ -3,7 +3,7 @@
 //  RSCrashReporter
 //
 //  Created by Karl Stenerud on 10.05.22.
-//  Copyright © 2022 RSCrashReporter Inc. All rights reserved.
+//  Copyright © 2022 Bugsnag Inc. All rights reserved.
 //
 
 #if __has_include(<WatchKit/WatchKit.h>)

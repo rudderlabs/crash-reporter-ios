@@ -3,7 +3,7 @@
 //  RSCrashReporter-iOSTests
 //
 //  Created by Karl Stenerud on 07.01.21.
-//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
+//  Copyright © 2021 Bugsnag Inc. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>

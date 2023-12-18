@@ -3,7 +3,7 @@
 //  RSCrashReporter
 //
 //  Created by Nick Dowell on 23/10/2020.
-//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
+//  Copyright © 2020 Bugsnag Inc. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>

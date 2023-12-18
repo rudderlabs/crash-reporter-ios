@@ -3,7 +3,7 @@
 //  RSCrashReporter
 //
 //  Created by Nick Dowell on 31/08/2022.
-//  Copyright © 2022 RSCrashReporter Inc. All rights reserved.
+//  Copyright © 2022 Bugsnag Inc. All rights reserved.
 //
 
 #import <RSCrashReporter/RSCrashReporter.h>

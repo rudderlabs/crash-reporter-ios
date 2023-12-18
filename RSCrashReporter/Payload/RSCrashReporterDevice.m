@@ -3,7 +3,7 @@
 //  RSCrashReporter
 //
 //  Created by Jamie Lynch on 01/04/2020.
-//  Copyright © 2020 RSCrashReporter. All rights reserved.
+//  Copyright © 2020 Bugsnag. All rights reserved.
 //
 
 #import "RSCrashReporterDevice.h"

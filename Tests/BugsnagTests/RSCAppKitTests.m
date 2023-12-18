@@ -3,7 +3,7 @@
 //  RSCrashReporter-macOSTests
 //
 //  Created by Nick Dowell on 13/04/2021.
-//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
+//  Copyright © 2021 Bugsnag Inc. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>

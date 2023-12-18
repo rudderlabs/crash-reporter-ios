@@ -2,7 +2,7 @@
 //  RSCSessionUploader.m
 //  RSCrashReporter
 //
-//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
+//  Copyright © 2021 Bugsnag Inc. All rights reserved.
 //
 
 #import "RSCSessionUploader.h"

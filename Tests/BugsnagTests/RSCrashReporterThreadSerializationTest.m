@@ -1,6 +1,6 @@
 //
 // Created by Jamie Lynch on 02/08/2018.
-// Copyright (c) 2018 RSCrashReporter. All rights reserved.
+// Copyright (c) 2018 Bugsnag. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
