@@ -92,7 +92,7 @@
     [fm removeItemAtPath:[cachesPath stringByAppendingPathComponent:@"bugsnag"] error:nil];
     [fm removeItemAtPath:[cachesPath stringByAppendingPathComponent:@"Sessions"] error:nil];
     [fm removeItemAtPath:[cachesPath stringByAppendingPathComponent:@"KSCrashReports"] error:nil];
-    [fm removeItemAtPath:[cachesPath stringByAppendingPathComponent:@"rsc_kvstore"] error:nil];
+    [fm removeItemAtPath:[cachesPath stringByAppendingPathComponent:@"bsg_kvstore"] error:nil];
 
     // Now copy the faked app data across from the test fixture data.
     NSString *srcPath = [[bundle resourcePath] stringByAppendingPathComponent:@"v0_files/Caches"];

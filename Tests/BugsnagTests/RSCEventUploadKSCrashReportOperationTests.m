@@ -62,7 +62,7 @@
     RSCEventUploadKSCrashReportOperation *operation = [self operationWithFile:file];
     RSCrashReporterEvent *event = [operation loadEventAndReturnError:nil];
     XCTAssertEqual(event.threads.count, 20);
-    XCTAssertEqualObjects([event.breadcrumbs valueForKeyPath:NSStringFromSelector(@selector(message))], @[@"RSCrashReporter loaded"]);
+    XCTAssertEqualObjects([event.breadcrumbs valueForKeyPath:NSStringFromSelector(@selector(message))], @[@"Bugsnag loaded"]);
     XCTAssertEqualObjects(event.app.bundleVersion, @"5");
     XCTAssertEqualObjects(event.app.id, @"com.bugsnag.macOSTestApp");
     XCTAssertEqualObjects(event.app.releaseStage, @"development");

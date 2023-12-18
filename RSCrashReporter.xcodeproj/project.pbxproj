@@ -1908,7 +1908,7 @@
 			path = RSCrashReporter;
 			sourceTree = "<group>";
 		};
-		00AD1C7F24869B0E00A27979 /* RSCrashReporterTests */ = {
+		00AD1C7F24869B0E00A27979 /* BugsnagTests */ = {
 			isa = PBXGroup;
 			children = (
 				019480D32625F3EB00E833ED /* RSCAppKitTests.m */,
@@ -1984,7 +1984,7 @@
 				01E8765D256684E700F4B70A /* URLSessionMock.m */,
 				CB6419B325A7419400613D25 /* v0_files */,
 			);
-			path = RSCrashReporterTests;
+			path = BugsnagTests;
 			sourceTree = "<group>";
 		};
 		00AD1CF124869EBD00A27979 /* Breadcrumbs */ = {
@@ -2139,7 +2139,7 @@
 		01A617662733CF2D00024A0B /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				00AD1C7F24869B0E00A27979 /* RSCrashReporterTests */,
+				00AD1C7F24869B0E00A27979 /* BugsnagTests */,
 				008966D32486D43700DC48C2 /* KSCrashTests */,
 				01A6176C2733CFEA00024A0B /* TestHost-iOS */,
 			);
@@ -3979,7 +3979,7 @@
 					"$(inherited)",
 					"RSC_OBJC_DIRECT_MEMBERS=''",
 				);
-				INFOPLIST_FILE = Tests/RSCrashReporterTests/Info.plist;
+				INFOPLIST_FILE = Tests/BugsnagTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -3987,7 +3987,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.rudderstack.rscrashreporterTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "Tests/RSCrashReporterTests/Tests-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Tests/BugsnagTests/Tests-Bridging-Header.h";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TestHost-iOS.app/TestHost-iOS";
@@ -3999,7 +3999,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 372ZUL2ZB7;
-				INFOPLIST_FILE = Tests/RSCrashReporterTests/Info.plist;
+				INFOPLIST_FILE = Tests/BugsnagTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -4007,7 +4007,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.rudderstack.rscrashreporterTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "Tests/RSCrashReporterTests/Tests-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Tests/BugsnagTests/Tests-Bridging-Header.h";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TestHost-iOS.app/TestHost-iOS";
@@ -4073,7 +4073,7 @@
 					"$(inherited)",
 					"RSC_OBJC_DIRECT_MEMBERS=''",
 				);
-				INFOPLIST_FILE = Tests/RSCrashReporterTests/Info.plist;
+				INFOPLIST_FILE = Tests/BugsnagTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -4082,7 +4082,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.rudderstack.rscrashreporter-macOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				SWIFT_OBJC_BRIDGING_HEADER = "Tests/RSCrashReporterTests/Tests-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Tests/BugsnagTests/Tests-Bridging-Header.h";
 				SWIFT_VERSION = 4.2;
 			};
 			name = Debug;
@@ -4092,7 +4092,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = Tests/RSCrashReporterTests/Info.plist;
+				INFOPLIST_FILE = Tests/BugsnagTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -4101,7 +4101,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.rudderstack.rscrashreporter-macOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				SWIFT_OBJC_BRIDGING_HEADER = "Tests/RSCrashReporterTests/Tests-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Tests/BugsnagTests/Tests-Bridging-Header.h";
 				SWIFT_VERSION = 4.2;
 			};
 			name = Release;
@@ -4162,7 +4162,7 @@
 					"$(inherited)",
 					"RSC_OBJC_DIRECT_MEMBERS=''",
 				);
-				INFOPLIST_FILE = Tests/RSCrashReporterTests/Info.plist;
+				INFOPLIST_FILE = Tests/BugsnagTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -4171,7 +4171,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.rudderstack.rscrashreporter-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
-				SWIFT_OBJC_BRIDGING_HEADER = "Tests/RSCrashReporterTests/Tests-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Tests/BugsnagTests/Tests-Bridging-Header.h";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 3;
 			};
@@ -4181,7 +4181,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = Tests/RSCrashReporterTests/Info.plist;
+				INFOPLIST_FILE = Tests/BugsnagTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -4190,7 +4190,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.rudderstack.rscrashreporter-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
-				SWIFT_OBJC_BRIDGING_HEADER = "Tests/RSCrashReporterTests/Tests-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Tests/BugsnagTests/Tests-Bridging-Header.h";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 3;
 			};
@@ -4417,7 +4417,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_OBJC_BRIDGING_HEADER = "Tests/RSCrashReporterTests/Tests-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Tests/BugsnagTests/Tests-Bridging-Header.h";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 4;
 			};
@@ -4464,7 +4464,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_OBJC_BRIDGING_HEADER = "Tests/RSCrashReporterTests/Tests-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Tests/BugsnagTests/Tests-Bridging-Header.h";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 4;
 			};

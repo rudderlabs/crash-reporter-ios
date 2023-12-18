@@ -69,7 +69,7 @@
     
     RSCrashReporterEvent *event = [reporter eventWithException:exception diagnostics:nil groupingHash:@"test"];
     XCTAssertEqualObjects(event.errors[0].errorClass, @"NSRangeException");
-    XCTAssertEqualObjects(event.errors[0].errorMessage, @"*** -[__NSArray0 objectAtIndex:]: index 0 beyond bounds for empty NSArray");
+    XCTAssertEqualObjects(event.errors[0].errorMessage, @"*** -[__NSArray0 objectAtIndex:]: index 0 beyond bounds for empty array");
     XCTAssertEqualObjects(event.groupingHash, @"test");
     XCTAssertEqualObjects(event.threads, @[]);
     XCTAssertGreaterThan(event.errors[0].stacktrace.count, 0);

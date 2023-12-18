@@ -20,17 +20,17 @@
 
 - (void)setUp {
     self.frameDict = @{
-            @"symbol_addr": @0x10b574fa0,
-            @"instruction_addr": @0x10b5756bf,
-            @"object_addr": @0x10b54b000,
-            @"object_name": @"/Library/bar/RSCrashReporter.h",
-            @"symbol_name": @"-[RSCrashReporterClient notify:handledState:block:]",
+        @"symbol_addr": @0x10b574fa0,
+        @"instruction_addr": @0x10b5756bf,
+        @"object_addr": @0x10b54b000,
+        @"object_name": @"/Library/bar/RSCrashReporter.h",
+        @"symbol_name": @"-[RSCrashReporterClient notify:handledState:block:]",
     };
     self.binaryImages = @[@{
-            @"image_addr": @0x10b54b000,
-            @"image_vmaddr": @0x102340922,
-            @"uuid": @"B6D80CB5-A772-3D2F-B5A1-A3A137B8B58F",
-            @"name": @"/Users/foo/RSCrashReporter.h",
+        @"image_addr": @0x10b54b000,
+        @"image_vmaddr": @0x102340922,
+        @"uuid": @"B6D80CB5-A772-3D2F-B5A1-A3A137B8B58F",
+        @"name": @"/Users/foo/RSCrashReporter.h",
     }];
 }
 
@@ -142,13 +142,13 @@
 
 - (void)testStackframeBools {
     NSDictionary *dict = @{
-            @"symbol_addr": @0x10b574fa0,
-            @"instruction_addr": @0x10b5756bf,
-            @"object_addr": @0x10b54b000,
-            @"object_name": @"/Users/foo/RSCrashReporter.h",
-            @"symbol_name": @"-[RSCrashReporterClient notify:handledState:block:]",
-            @"isPC": @YES,
-            @"isLR": @NO
+        @"symbol_addr": @0x10b574fa0,
+        @"instruction_addr": @0x10b5756bf,
+        @"object_addr": @0x10b54b000,
+        @"object_name": @"/Users/foo/RSCrashReporter.h",
+        @"symbol_name": @"-[RSCrashReporterClient notify:handledState:block:]",
+        @"isPC": @YES,
+        @"isLR": @NO
     };
     RSCrashReporterStackframe *frame = [RSCrashReporterStackframe frameFromDict:dict withImages:self.binaryImages];
     XCTAssertTrue(frame.isPc);
@@ -166,10 +166,10 @@
 }
 
 #define AssertStackframeValues(stackframe_, machoFile_, frameAddress_, method_) \
-    XCTAssertEqualObjects(stackframe_.method, method_); \
-    XCTAssertEqualObjects(stackframe_.machoFile, machoFile_); \
-    XCTAssertEqualObjects(stackframe_.frameAddress, @(frameAddress_)); \
-    XCTAssertNil(stackframe_.type);
+XCTAssertEqualObjects(stackframe_.method, method_); \
+XCTAssertEqualObjects(stackframe_.machoFile, machoFile_); \
+XCTAssertEqualObjects(stackframe_.frameAddress, @(frameAddress_)); \
+XCTAssertNil(stackframe_.type);
 
 - (void)testDummyCallStackSymbols {
     rsc_mach_headers_initialize(); // Prevent symbolication
@@ -251,6 +251,10 @@
 #if TARGET_OS_SIMULATOR
         if ([callStackSymbols[idx] containsString:@"0x0 + "]) {
             // This frame is not in any known image
+            return;
+        }
+        if ([stackframe.method isEqualToString: @"start_sim"]) {
+            // This frame is part of the simulator environment
             return;
         }
 #endif
