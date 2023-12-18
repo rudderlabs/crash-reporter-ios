@@ -1,19 +1,19 @@
 //
-//  BSGFileLocations.h
-//  Bugsnag
+//  RSCFileLocations.h
+//  RSCrashReporter
 //
 //  Created by Karl Stenerud on 05.01.21.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-#import "BSGDefines.h"
+#import "RSCDefines.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSGFileLocations : NSObject
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCFileLocations : NSObject
 
 @property (readonly, nonatomic) NSString *breadcrumbs;
 @property (readonly, nonatomic) NSString *events;
@@ -32,7 +32,7 @@ BSG_OBJC_DIRECT_MEMBERS
 @property (readonly, nonatomic) NSString *flagHandledCrash;
 
 /**
- * Bugsnag client configuration
+ * RSCrashReporter client configuration
  */
 @property (readonly, nonatomic) NSString *configuration;
 
@@ -42,7 +42,7 @@ BSG_OBJC_DIRECT_MEMBERS
 @property (readonly, nonatomic) NSString *metadata;
 
 /**
- * BSGRunContext
+ * RSCRunContext
  */
 @property (readonly, nonatomic) NSString *runContext;
 

@@ -1,3 +1,3 @@
-#import <RSCrashReporter/BugsnagConfiguration.h>
+#import <RSCrashReporter/RSCrashReporterConfiguration.h>
 
-BugsnagConfiguration * BSGConfigurationWithOptions(NSDictionary *options);
+RSCrashReporterConfiguration * RSCConfigurationWithOptions(NSDictionary *options);

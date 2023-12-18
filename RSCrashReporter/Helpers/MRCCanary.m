@@ -1,9 +1,9 @@
 //
 //  MRCCanary.m
-//  Bugsnag
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 27/01/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
 //
@@ -11,4 +11,4 @@
 //
 #import <RSCrashReporter/RSCrashReporter.h>
 
-#import "BugsnagInternals.h"
+#import "RSCrashReporterInternals.h"

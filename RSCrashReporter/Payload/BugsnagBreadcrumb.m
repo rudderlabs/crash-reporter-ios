@@ -1,9 +1,9 @@
 //
-//  BugsnagBreadcrumb.m
+//  RSCrashReporterBreadcrumb.m
 //
 //  Created by Delisa Mason on 9/16/15.
 //
-//  Copyright (c) 2015 Bugsnag, Inc. All rights reserved.
+//  Copyright (c) 2015 RSCrashReporter, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,94 +23,94 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-#import "BSG_RFC3339DateTool.h"
+#import "RSC_RFC3339DateTool.h"
 
-#import "BSGKeys.h"
-#import "BugsnagBreadcrumb+Private.h"
-#import "BugsnagBreadcrumbs.h"
-#import "BugsnagCollections.h"
+#import "RSCKeys.h"
+#import "RSCrashReporterBreadcrumb+Private.h"
+#import "RSCrashReporterBreadcrumbs.h"
+#import "RSCrashReporterCollections.h"
 
-typedef void (^BSGBreadcrumbConfiguration)(BugsnagBreadcrumb *_Nonnull);
+typedef void (^RSCBreadcrumbConfiguration)(RSCrashReporterBreadcrumb *_Nonnull);
 
-NSString *BSGBreadcrumbTypeValue(BSGBreadcrumbType type) {
+NSString *RSCBreadcrumbTypeValue(RSCBreadcrumbType type) {
     switch (type) {
-    case BSGBreadcrumbTypeLog:
+    case RSCBreadcrumbTypeLog:
         return @"log";
-    case BSGBreadcrumbTypeUser:
+    case RSCBreadcrumbTypeUser:
         return @"user";
-    case BSGBreadcrumbTypeError:
-        return BSGKeyError;
-    case BSGBreadcrumbTypeState:
+    case RSCBreadcrumbTypeError:
+        return RSCKeyError;
+    case RSCBreadcrumbTypeState:
         return @"state";
-    case BSGBreadcrumbTypeManual:
+    case RSCBreadcrumbTypeManual:
         return @"manual";
-    case BSGBreadcrumbTypeProcess:
+    case RSCBreadcrumbTypeProcess:
         return @"process";
-    case BSGBreadcrumbTypeRequest:
+    case RSCBreadcrumbTypeRequest:
         return @"request";
-    case BSGBreadcrumbTypeNavigation:
+    case RSCBreadcrumbTypeNavigation:
         return @"navigation";
     }
 }
 
-BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value) {
+RSCBreadcrumbType RSCBreadcrumbTypeFromString(NSString *value) {
     if ([value isEqual:@"log"]) {
-        return BSGBreadcrumbTypeLog;
+        return RSCBreadcrumbTypeLog;
     } else if ([value isEqual:@"user"]) {
-        return BSGBreadcrumbTypeUser;
+        return RSCBreadcrumbTypeUser;
     } else if ([value isEqual:@"error"]) {
-        return BSGBreadcrumbTypeError;
+        return RSCBreadcrumbTypeError;
     } else if ([value isEqual:@"state"]) {
-        return BSGBreadcrumbTypeState;
+        return RSCBreadcrumbTypeState;
     } else if ([value isEqual:@"process"]) {
-        return BSGBreadcrumbTypeProcess;
+        return RSCBreadcrumbTypeProcess;
     } else if ([value isEqual:@"request"]) {
-        return BSGBreadcrumbTypeRequest;
+        return RSCBreadcrumbTypeRequest;
     } else if ([value isEqual:@"navigation"]) {
-        return BSGBreadcrumbTypeNavigation;
+        return RSCBreadcrumbTypeNavigation;
     } else {
-        return BSGBreadcrumbTypeManual;
+        return RSCBreadcrumbTypeManual;
     }
 }
 
 
-@interface BugsnagBreadcrumb ()
+@interface RSCrashReporterBreadcrumb ()
 
 @property (readwrite, nullable, nonatomic) NSDate *timestamp;
 
 @end
 
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BugsnagBreadcrumb
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCrashReporterBreadcrumb
 
 - (instancetype)init {
     if ((self = [super init])) {
         _timestamp = [NSDate date];
-        _type = BSGBreadcrumbTypeManual;
+        _type = RSCBreadcrumbTypeManual;
         _metadata = @{};
     }
     return self;
 }
 
 - (BOOL)isValid {
-    return self.message.length > 0 && ([BSG_RFC3339DateTool isLikelyDateString:self.timestampString] || self.timestamp);
+    return self.message.length > 0 && ([RSC_RFC3339DateTool isLikelyDateString:self.timestampString] || self.timestamp);
 }
 
 - (NSDictionary *)objectValue {
-    NSString *timestamp = self.timestampString ?: [BSG_RFC3339DateTool stringFromDate:self.timestamp];
+    NSString *timestamp = self.timestampString ?: [RSC_RFC3339DateTool stringFromDate:self.timestamp];
     if (timestamp && self.message.length > 0) {
         NSMutableDictionary *metadata = [NSMutableDictionary new];
         for (NSString *key in self.metadata) {
             metadata[[key copy]] = [self.metadata[key] copy];
         }
         return @{
-            // Note: The Bugsnag Error Reporting API specifies that the breadcrumb "message"
+            // Note: The RSCrashReporter Error Reporting API specifies that the breadcrumb "message"
             // field should be delivered in as a "name" field.  This comment notes that variance.
-            BSGKeyName : [self.message copy],
-            BSGKeyTimestamp : timestamp,
-            BSGKeyType : BSGBreadcrumbTypeValue(self.type),
-            BSGKeyMetadata : metadata
+            RSCKeyName : [self.message copy],
+            RSCKeyTimestamp : timestamp,
+            RSCKeyType : RSCBreadcrumbTypeValue(self.type),
+            RSCKeyMetadata : metadata
         };
     }
     return nil;
@@ -121,7 +121,7 @@ BSG_OBJC_DIRECT_MEMBERS
 
 - (NSDate *)timestamp {
     if (!_timestamp) {
-        _timestamp = [BSG_RFC3339DateTool dateFromString:self.timestampString];
+        _timestamp = [RSC_RFC3339DateTool dateFromString:self.timestampString];
     }
     return _timestamp;
 }
@@ -134,16 +134,16 @@ BSG_OBJC_DIRECT_MEMBERS
 }
 
 + (instancetype)breadcrumbFromDict:(NSDictionary *)dict {
-    NSDictionary *metadata = BSGDeserializeDict(dict[BSGKeyMetadata] ?: dict[@"metadata"] /* react-native uses lowercase key */);
-    NSString *message = BSGDeserializeString(dict[BSGKeyMessage] ?: dict[BSGKeyName] /* Accept legacy 'name' value */);
-    NSString *timestamp = BSGDeserializeString(dict[BSGKeyTimestamp]); 
-    NSString *type = BSGDeserializeString(dict[BSGKeyType]);
+    NSDictionary *metadata = RSCDeserializeDict(dict[RSCKeyMetadata] ?: dict[@"metadata"] /* react-native uses lowercase key */);
+    NSString *message = RSCDeserializeString(dict[RSCKeyMessage] ?: dict[RSCKeyName] /* Accept legacy 'name' value */);
+    NSString *timestamp = RSCDeserializeString(dict[RSCKeyTimestamp]); 
+    NSString *type = RSCDeserializeString(dict[RSCKeyType]);
     if (timestamp && type && message) {
-        BugsnagBreadcrumb *crumb = [BugsnagBreadcrumb new];
+        RSCrashReporterBreadcrumb *crumb = [RSCrashReporterBreadcrumb new];
         crumb.message = message;
         crumb.metadata = metadata ?: @{};
         crumb.timestampString = timestamp;
-        crumb.type = BSGBreadcrumbTypeFromString(type);
+        crumb.type = RSCBreadcrumbTypeFromString(type);
         return [crumb isValid] ? crumb : nil;
     }
     return nil;

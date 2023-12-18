@@ -1,9 +1,9 @@
 //
-//  BugsnagMetadataStore.h
-//  Bugsnag
+//  RSCrashReporterMetadataStore.h
+//  RSCrashReporter
 //
 //  Created by Robin Macharg on 30/03/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -17,13 +17,13 @@ NS_ASSUME_NONNULL_BEGIN
 */
 
 // -----------------------------------------------------------------------------
-// MARK: - <BugsnagMetadataStore>
+// MARK: - <RSCrashReporterMetadataStore>
 // -----------------------------------------------------------------------------
 
 /**
- * An internal protocol defining methods a Bugsnag metadata store must implement.
+ * An internal protocol defining methods a RSCrashReporter metadata store must implement.
  */
-@protocol BugsnagMetadataStore <NSObject>
+@protocol RSCrashReporterMetadataStore <NSObject>
 
 @required
 
@@ -119,13 +119,13 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 // -----------------------------------------------------------------------------
-// MARK: - <BugsnagClassLevelMetadataStore>
+// MARK: - <RSCrashReporterClassLevelMetadataStore>
 // -----------------------------------------------------------------------------
 
 /**
  * A class-level protocol supporting the MetadataStore interface
  */
-@protocol BugsnagClassLevelMetadataStore <NSObject>
+@protocol RSCrashReporterClassLevelMetadataStore <NSObject>
 
 @required
 

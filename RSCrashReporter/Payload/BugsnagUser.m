@@ -1,17 +1,17 @@
 //
-//  BugsnagUser.m
-//  Bugsnag
+//  RSCrashReporterUser.m
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 24/11/2017.
-//  Copyright © 2017 Bugsnag. All rights reserved.
+//  Copyright © 2017 RSCrashReporter. All rights reserved.
 //
 
-#import "BugsnagUser+Private.h"
+#import "RSCrashReporterUser+Private.h"
 
-#import "BSG_KSSystemInfo.h"
+#import "RSC_KSSystemInfo.h"
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BugsnagUser
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCrashReporterUser
 
 - (instancetype)initWithDictionary:(NSDictionary *)dict {
     if ((self = [super init])) {
@@ -39,11 +39,11 @@ BSG_OBJC_DIRECT_MEMBERS
     return [NSDictionary dictionaryWithDictionary:dict];
 }
 
-- (BugsnagUser *)withId {
+- (RSCrashReporterUser *)withId {
     if (self.id) {
         return self;
     } else {
-        return [[BugsnagUser alloc] initWithId:[BSG_KSSystemInfo deviceAndAppHash]
+        return [[RSCrashReporterUser alloc] initWithId:[RSC_KSSystemInfo deviceAndAppHash]
                                           name:self.name
                                   emailAddress:self.email];
     }
@@ -53,20 +53,20 @@ BSG_OBJC_DIRECT_MEMBERS
 
 // MARK: - User Persistence
 
-static NSString * const BugsnagUserEmailAddressKey = @"BugsnagUserEmailAddress";
-static NSString * const BugsnagUserIdKey           = @"BugsnagUserUserId";
-static NSString * const BugsnagUserNameKey         = @"BugsnagUserName";
+static NSString * const RSCrashReporterUserEmailAddressKey = @"RSCrashReporterUserEmailAddress";
+static NSString * const RSCrashReporterUserIdKey           = @"RSCrashReporterUserUserId";
+static NSString * const RSCrashReporterUserNameKey         = @"RSCrashReporterUserName";
 
-BugsnagUser * BSGGetPersistedUser(void) {
+RSCrashReporterUser * RSCGetPersistedUser(void) {
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    return [[BugsnagUser alloc] initWithId:[userDefaults stringForKey:BugsnagUserIdKey]
-                                      name:[userDefaults stringForKey:BugsnagUserNameKey]
-                              emailAddress:[userDefaults stringForKey:BugsnagUserEmailAddressKey]];
+    return [[RSCrashReporterUser alloc] initWithId:[userDefaults stringForKey:RSCrashReporterUserIdKey]
+                                      name:[userDefaults stringForKey:RSCrashReporterUserNameKey]
+                              emailAddress:[userDefaults stringForKey:RSCrashReporterUserEmailAddressKey]];
 }
 
-void BSGSetPersistedUser(BugsnagUser *user) {
+void RSCSetPersistedUser(RSCrashReporterUser *user) {
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults setObject:user.email forKey:BugsnagUserEmailAddressKey];
-    [userDefaults setObject:user.id forKey:BugsnagUserIdKey];
-    [userDefaults setObject:user.name forKey:BugsnagUserNameKey];
+    [userDefaults setObject:user.email forKey:RSCrashReporterUserEmailAddressKey];
+    [userDefaults setObject:user.id forKey:RSCrashReporterUserIdKey];
+    [userDefaults setObject:user.name forKey:RSCrashReporterUserNameKey];
 }

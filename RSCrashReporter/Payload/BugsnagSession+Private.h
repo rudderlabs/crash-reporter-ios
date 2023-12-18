@@ -1,62 +1,62 @@
 //
-//  BugsnagSession+Private.h
-//  Bugsnag
+//  RSCrashReporterSession+Private.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 23/11/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGDefines.h"
-#import "BSG_KSCrashReportWriter.h"
-#import "BugsnagInternals.h"
+#import "RSCDefines.h"
+#import "RSC_KSCrashReportWriter.h"
+#import "RSCrashReporterInternals.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class BugsnagUser;
+@class RSCrashReporterUser;
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BugsnagSession () <NSCopying>
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCrashReporterSession () <NSCopying>
 
 #pragma mark Initializers
 
 - (instancetype)initWithId:(NSString *)sessionId
                  startedAt:(NSDate *)startedAt
-                      user:(BugsnagUser *)user
-                       app:(BugsnagApp *)app
-                    device:(BugsnagDevice *)device;
+                      user:(RSCrashReporterUser *)user
+                       app:(RSCrashReporterApp *)app
+                    device:(RSCrashReporterDevice *)device;
 
 #pragma mark Properties
 
 @property (getter=isStopped, nonatomic) BOOL stopped;
 
-@property (readwrite, nonnull, nonatomic) BugsnagUser *user;
+@property (readwrite, nonnull, nonatomic) RSCrashReporterUser *user;
 
 @end
 
 #pragma mark Serialization
 
-/// Produces a session dictionary that contains all the information to fully recreate it via BSGSessionFromDictionary().
-NSDictionary * BSGSessionToDictionary(BugsnagSession *session);
+/// Produces a session dictionary that contains all the information to fully recreate it via RSCSessionFromDictionary().
+NSDictionary * RSCSessionToDictionary(RSCrashReporterSession *session);
 
-/// Parses a session dictionary produced by BSGSessionToDictionary() or added to a KSCrashReport by BSSerializeDataCrashHandler().
-BugsnagSession *_Nullable BSGSessionFromDictionary(NSDictionary *_Nullable json);
+/// Parses a session dictionary produced by RSCSessionToDictionary() or added to a KSCrashReport by BSSerializeDataCrashHandler().
+RSCrashReporterSession *_Nullable RSCSessionFromDictionary(NSDictionary *_Nullable json);
 
 /// Produces a session dictionary suitable for inclusion in an event's JSON representation.
-NSDictionary * BSGSessionToEventJson(BugsnagSession *session);
+NSDictionary * RSCSessionToEventJson(RSCrashReporterSession *session);
 
 /// Parses a session dictionary from an event's JSON representation.
-BugsnagSession *_Nullable BSGSessionFromEventJson(NSDictionary *_Nullable json, BugsnagApp *app, BugsnagDevice *device, BugsnagUser *user);
+RSCrashReporterSession *_Nullable RSCSessionFromEventJson(NSDictionary *_Nullable json, RSCrashReporterApp *app, RSCrashReporterDevice *device, RSCrashReporterUser *user);
 
-/// Saves the session info into bsg_runContext.
-void BSGSessionUpdateRunContext(BugsnagSession *_Nullable session);
+/// Saves the session info into rsc_runContext.
+void RSCSessionUpdateRunContext(RSCrashReporterSession *_Nullable session);
 
-/// Returns session information from bsg_lastRunContext.
-BugsnagSession *_Nullable BSGSessionFromLastRunContext(BugsnagApp *app, BugsnagDevice *device, BugsnagUser *user);
+/// Returns session information from rsc_lastRunContext.
+RSCrashReporterSession *_Nullable RSCSessionFromLastRunContext(RSCrashReporterApp *app, RSCrashReporterDevice *device, RSCrashReporterUser *user);
 
-/// Saves current session information (from bsg_runContext) into a crash report.
-void BSGSessionWriteCrashReport(const BSG_KSCrashReportWriter *writer);
+/// Saves current session information (from rsc_runContext) into a crash report.
+void RSCSessionWriteCrashReport(const RSC_KSCrashReportWriter *writer);
 
-/// Returns session information from a crash report previously written to by BSGSessionWriteCrashReport or BSSerializeDataCrashHandler.
-BugsnagSession *_Nullable BSGSessionFromCrashReport(NSDictionary *report, BugsnagApp *app, BugsnagDevice *device, BugsnagUser *user);
+/// Returns session information from a crash report previously written to by RSCSessionWriteCrashReport or BSSerializeDataCrashHandler.
+RSCrashReporterSession *_Nullable RSCSessionFromCrashReport(NSDictionary *report, RSCrashReporterApp *app, RSCrashReporterDevice *device, RSCrashReporterUser *user);
 
 NS_ASSUME_NONNULL_END

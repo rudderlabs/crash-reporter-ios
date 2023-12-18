@@ -1,6 +1,6 @@
 //
-//  BSGCrashSentry.h
-//  Bugsnag
+//  RSCCrashSentry.h
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 11/08/2017.
 //
@@ -8,16 +8,16 @@
 
 #import <Foundation/Foundation.h>
 
-#import "BSG_KSCrashReportWriter.h"
-#import "BSG_KSCrashType.h"
+#import "RSC_KSCrashReportWriter.h"
+#import "RSC_KSCrashType.h"
 
-@class BugsnagConfiguration;
-@class BugsnagErrorTypes;
+@class RSCrashReporterConfiguration;
+@class RSCrashReporterErrorTypes;
 
 NS_ASSUME_NONNULL_BEGIN
 
-void BSGCrashSentryInstall(BugsnagConfiguration *, BSG_KSReportWriteCallback);
+void RSCCrashSentryInstall(RSCrashReporterConfiguration *, RSC_KSReportWriteCallback);
 
-BSG_KSCrashType BSG_KSCrashTypeFromBugsnagErrorTypes(BugsnagErrorTypes *);
+RSC_KSCrashType RSC_KSCrashTypeFromRSCrashReporterErrorTypes(RSCrashReporterErrorTypes *);
 
 NS_ASSUME_NONNULL_END

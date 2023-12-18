@@ -24,17 +24,17 @@
 // THE SOFTWARE.
 //
 
-#include "BSG_KSFileUtils.h"
+#include "RSC_KSFileUtils.h"
 
-//#define BSG_KSLogger_LocalLevel TRACE
-#include "BSG_KSLogger.h"
+//#define RSC_KSLogger_LocalLevel TRACE
+#include "RSC_KSLogger.h"
 
 #include <errno.h>
 #include <string.h>
 #include <sys/mount.h>
 #include <unistd.h>
 
-const char *bsg_ksfulastPathEntry(const char *const path) {
+const char *rsc_ksfulastPathEntry(const char *const path) {
     if (path == NULL) {
         return NULL;
     }
@@ -43,7 +43,7 @@ const char *bsg_ksfulastPathEntry(const char *const path) {
     return lastFile == NULL ? path : lastFile + 1;
 }
 
-bool bsg_ksfuwriteBytesToFD(const int fd, const char *const bytes,
+bool rsc_ksfuwriteBytesToFD(const int fd, const char *const bytes,
                             ssize_t length) {
     ssize_t bytesRemaining = length;
     ssize_t bytesWritten = 0;
@@ -83,7 +83,7 @@ bool bsg_ksfuwriteBytesToFD(const int fd, const char *const bytes,
     return true;
 }
 
-bool bsg_ksfuStatfs(const char *path, uint64_t *free, uint64_t *total) {
+bool rsc_ksfuStatfs(const char *path, uint64_t *free, uint64_t *total) {
     struct statfs st;
     if (statfs(path, &st) != 0) {
         return false;

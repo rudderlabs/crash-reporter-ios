@@ -1,54 +1,54 @@
 //
-//  BugsnagClientTests.m
+//  RSCrashReporterClientTests.m
 //  Tests
 //
 //  Created by Robin Macharg on 18/03/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
-#import "BSGInternalErrorReporter.h"
-#import "BSGKeys.h"
-#import "BSGRunContext.h"
-#import "Bugsnag+Private.h"
-#import "BugsnagBreadcrumb+Private.h"
-#import "BugsnagBreadcrumbs.h"
-#import "BugsnagClient+Private.h"
-#import "BugsnagConfiguration+Private.h"
-#import "BugsnagSystemState.h"
-#import "BugsnagTestConstants.h"
-#import "BugsnagUser.h"
+#import "RSCInternalErrorReporter.h"
+#import "RSCKeys.h"
+#import "RSCRunContext.h"
+#import "RSCrashReporter+Private.h"
+#import "RSCrashReporterBreadcrumb+Private.h"
+#import "RSCrashReporterBreadcrumbs.h"
+#import "RSCrashReporterClient+Private.h"
+#import "RSCrashReporterConfiguration+Private.h"
+#import "RSCrashReporterSystemState.h"
+#import "RSCrashReporterTestConstants.h"
+#import "RSCrashReporterUser.h"
 
 #import <objc/runtime.h>
 #import <XCTest/XCTest.h>
 
 /**
- * Tests for BugsnagClient.
+ * Tests for RSCrashReporterClient.
  *
- * BugsnagClient is an expensive object and not suitable for unit testing because it depends on and alters global
+ * RSCrashReporterClient is an expensive object and not suitable for unit testing because it depends on and alters global
  * state like the file system and default notification center. Furthermore, instances never get deallocated - so
  * clients instantiated by previous test cases can alter the results of a client instantiated in a later test
  * case due to the shared global state.
  *
  * For these reasons, test cases should only be added here as a matter of last resort.
  */
-@interface BugsnagClientTests : XCTestCase
+@interface RSCrashReporterClientTests : XCTestCase
 @end
 
-NSString *BSGFormatSeverity(BSGSeverity severity);
+NSString *RSCFormatSeverity(RSCSeverity severity);
 
-@implementation BugsnagClientTests
+@implementation RSCrashReporterClientTests
 
 /**
- * A boilerplate helper method to setup Bugsnag
+ * A boilerplate helper method to setup RSCrashReporter
  */
--(BugsnagClient *)setUpBugsnagWillCallNotify:(bool)willNotify {
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+-(RSCrashReporterClient *)setUpRSCrashReporterWillCallNotify:(bool)willNotify {
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     if (willNotify) {
-        [configuration addOnSendErrorBlock:^BOOL(BugsnagEvent *_Nonnull event) {
+        [configuration addOnSendErrorBlock:^BOOL(RSCrashReporterEvent *_Nonnull event) {
             return false;
         }];
     }
-    return [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
+    return [[RSCrashReporterClient alloc] initWithConfiguration:configuration delegate:nil];
 }
 
 /**
@@ -57,7 +57,7 @@ NSString *BSGFormatSeverity(BSGSeverity severity);
  */
 - (void)testAutomaticNotifyBreadcrumbData {
 
-    BugsnagClient *client = [self setUpBugsnagWillCallNotify:false];
+    RSCrashReporterClient *client = [self setUpRSCrashReporterWillCallNotify:false];
 
     NSException *ex = [[NSException alloc] initWithName:@"myName" reason:@"myReason1" userInfo:nil];
 
@@ -67,14 +67,14 @@ NSString *BSGFormatSeverity(BSGSeverity severity);
     __block NSString *eventSeverity;
 
     // Check that the event is passed the apiKey
-    [client notify:ex block:^BOOL(BugsnagEvent * _Nonnull event) {
+    [client notify:ex block:^BOOL(RSCrashReporterEvent * _Nonnull event) {
         XCTAssertEqualObjects(event.apiKey, DUMMY_APIKEY_32CHAR_1);
 
         // Grab the values that end up in the event for later comparison
         eventErrorClass = event.errors[0].errorClass;
         eventErrorMessage = event.errors[0].errorMessage;
         eventUnhandled = [event valueForKeyPath:@"handledState.unhandled"] ? YES : NO;
-        eventSeverity = BSGFormatSeverity([event severity]);
+        eventSeverity = RSCFormatSeverity([event severity]);
         return true;
     }];
 
@@ -96,10 +96,10 @@ NSString *BSGFormatSeverity(BSGSeverity severity);
  * Test that Client inherits metadata from Configuration on init()
  */
 - (void) testClientConfigurationHaveSeparateMetadata {
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     [configuration addMetadata:@{@"exampleKey" : @"exampleValue"} toSection:@"exampleSection"];
 
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
 
     // We expect that the client metadata is the same as the configuration's to start with
@@ -119,38 +119,38 @@ NSString *BSGFormatSeverity(BSGSeverity severity);
 }
 /*
 - (void)testMissingApiKey {
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:@""];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:@""];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:configuration delegate:nil];
     XCTAssertThrowsSpecificNamed([client start], NSException, NSInvalidArgumentException,
-                                 @"An empty apiKey should cause [BugsnagClient start] to throw an exception.");
+                                 @"An empty apiKey should cause [RSCrashReporterClient start] to throw an exception.");
     
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnonnull"
     configuration.apiKey = nil;
 #pragma clang diagnostic pop
     XCTAssertThrowsSpecificNamed([client start], NSException, NSInvalidArgumentException,
-                                 @"A missing apiKey should cause [BugsnagClient start] to throw an exception.");
+                                 @"A missing apiKey should cause [RSCrashReporterClient start] to throw an exception.");
 }
 */
 - (void)testInvalidApiKey {
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:@"INVALID-API-KEY"];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
-    XCTAssertNoThrow([client start], @"[BugsnagClient start] should not throw an exception if the apiKey appears to be malformed");
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:@"INVALID-API-KEY"];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:configuration delegate:nil];
+    XCTAssertNoThrow([client start], @"[RSCrashReporterClient start] should not throw an exception if the apiKey appears to be malformed");
 }
 
 /**
  * Test that user info is stored and retreived correctly
  */
 - (void) testUserInfoStorageRetrieval {
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
 
     [client setUser:@"Jiminy" withEmail:@"jiminy@bugsnag.com" andName:@"Jiminy Cricket"];
 
-    XCTAssertNil([client.metadata getMetadataFromSection:BSGKeyUser withKey:BSGKeyId], @"Jiminy");
-    XCTAssertNil([client.metadata getMetadataFromSection:BSGKeyUser withKey:BSGKeyName], @"Jiminy Cricket");
-    XCTAssertNil([client.metadata getMetadataFromSection:BSGKeyUser withKey:BSGKeyEmail], @"jiminy@bugsnag.com");
+    XCTAssertNil([client.metadata getMetadataFromSection:RSCKeyUser withKey:RSCKeyId], @"Jiminy");
+    XCTAssertNil([client.metadata getMetadataFromSection:RSCKeyUser withKey:RSCKeyName], @"Jiminy Cricket");
+    XCTAssertNil([client.metadata getMetadataFromSection:RSCKeyUser withKey:RSCKeyEmail], @"jiminy@bugsnag.com");
 
     XCTAssertEqualObjects([client user].id, @"Jiminy");
     XCTAssertEqualObjects([client user].name, @"Jiminy Cricket");
@@ -164,8 +164,8 @@ NSString *BSGFormatSeverity(BSGSeverity severity);
 }
 
 - (void)testMetadataMutability {
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
 
     // Immutable in, mutable out
@@ -180,9 +180,9 @@ NSString *BSGFormatSeverity(BSGSeverity severity);
 }
 
 /**
- * Helper for asserting two BugsnagConfiguration objects are equal
+ * Helper for asserting two RSCrashReporterConfiguration objects are equal
  */
-- (void)assertEqualConfiguration:(BugsnagConfiguration *)expected withActual:(BugsnagConfiguration *)actual {
+- (void)assertEqualConfiguration:(RSCrashReporterConfiguration *)expected withActual:(RSCrashReporterConfiguration *)actual {
     XCTAssertEqualObjects(expected.apiKey, actual.apiKey);
     XCTAssertEqualObjects(expected.appType, actual.appType);
     XCTAssertEqualObjects(expected.appVersion, actual.appVersion);
@@ -213,15 +213,15 @@ NSString *BSGFormatSeverity(BSGSeverity severity);
 }
 
 /**
- * After starting Bugsnag, any changes to the supplied Configuration should be ignored
- * Instead it should be changed by mutating the returned Configuration from "[Bugsnag configuration]"
+ * After starting RSCrashReporter, any changes to the supplied Configuration should be ignored
+ * Instead it should be changed by mutating the returned Configuration from "[RSCrashReporter configuration]"
  */
 - (void)testChangesToConfigurationAreIgnoredAfterCallingStart {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     // Take a copy of our Configuration object so we can compare with it later
-    BugsnagConfiguration *initialConfig = [config copy];
+    RSCrashReporterConfiguration *initialConfig = [config copy];
 
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
     // Modify some arbitrary properties
@@ -238,27 +238,27 @@ NSString *BSGFormatSeverity(BSGSeverity severity);
     XCTAssertNotEqual(initialConfig.maxBreadcrumbs, config.maxBreadcrumbs);
     XCTAssertNotEqualObjects(initialConfig.appVersion, config.appVersion);
 
-    BugsnagConfiguration *configAfter = client.configuration;
+    RSCrashReporterConfiguration *configAfter = client.configuration;
 
     [self assertEqualConfiguration:initialConfig withActual:configAfter];
 }
 /*
-- (void)testStartingBugsnagTwiceLogsAWarningAndIgnoresNewConfiguration {
-    [Bugsnag startWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagConfiguration *initialConfig = Bugsnag.client.configuration;
+- (void)testStartingRSCrashReporterTwiceLogsAWarningAndIgnoresNewConfiguration {
+    [RSCrashReporter startWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *initialConfig = RSCrashReporter.client.configuration;
 
     // Create a new Configuration object and modify some arbitrary properties
-    // These updates should all be ignored as Bugsnag has been started already
-    BugsnagConfiguration *updatedConfig = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_2];
+    // These updates should all be ignored as RSCrashReporter has been started already
+    RSCrashReporterConfiguration *updatedConfig = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_2];
     updatedConfig.persistUser = !initialConfig.persistUser;
     updatedConfig.maxBreadcrumbs = initialConfig.maxBreadcrumbs * 2;
     updatedConfig.maxPersistedEvents = initialConfig.maxPersistedEvents * 2;
     updatedConfig.maxPersistedSessions = initialConfig.maxPersistedSessions * 2;
     updatedConfig.appVersion = @"99.99.99";
 
-    [Bugsnag startWithConfiguration:updatedConfig];
+    [RSCrashReporter startWithConfiguration:updatedConfig];
 
-    BugsnagConfiguration *configAfter = Bugsnag.client.configuration;
+    RSCrashReporterConfiguration *configAfter = RSCrashReporter.client.configuration;
 
     [self assertEqualConfiguration:initialConfig withActual:configAfter];
 }*/
@@ -267,9 +267,9 @@ NSString *BSGFormatSeverity(BSGSeverity severity);
  * Verifies that a large breadcrumb is not dropped (historically there was a 4kB limit)
  */
 - (void)testLargeBreadcrumbSize {
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    configuration.enabledBreadcrumbTypes = BSGEnabledBreadcrumbTypeNone;
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    configuration.enabledBreadcrumbTypes = RSCEnabledBreadcrumbTypeNone;
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
 
     XCTAssertEqual(client.breadcrumbs.count, 0);
@@ -280,9 +280,9 @@ NSString *BSGFormatSeverity(BSGSeverity severity);
 
     // large breadcrumb is also left without issue
     __block NSUInteger crumbSize = 0;
-    __block BugsnagBreadcrumb *crumb;
+    __block RSCrashReporterBreadcrumb *crumb;
 
-    [client addOnBreadcrumbBlock:^BOOL(BugsnagBreadcrumb *breadcrumb) {
+    [client addOnBreadcrumbBlock:^BOOL(RSCrashReporterBreadcrumb *breadcrumb) {
         NSData *data = [NSJSONSerialization dataWithJSONObject:[breadcrumb objectValue] options:0 error:nil];
         crumbSize = data.length;
         crumb = breadcrumb;
@@ -292,7 +292,7 @@ NSString *BSGFormatSeverity(BSGSeverity severity);
     NSDictionary *largeMetadata = [self generateLargeMetadata];
     [client leaveBreadcrumbWithMessage:@"Hello World"
                               metadata:largeMetadata
-                               andType:BSGBreadcrumbTypeManual];
+                               andType:RSCBreadcrumbTypeManual];
     XCTAssertTrue(crumbSize > 4096); // previous 4kb limit
     XCTAssertEqual(client.breadcrumbs.count, 2);
     XCTAssertNotNil(crumb);
@@ -301,9 +301,9 @@ NSString *BSGFormatSeverity(BSGSeverity severity);
 }
 
 - (void)testMetadataInvalidKey {
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    configuration.enabledBreadcrumbTypes = BSGEnabledBreadcrumbTypeNone;
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    configuration.enabledBreadcrumbTypes = RSCEnabledBreadcrumbTypeNone;
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
 
     id badMetadata = @{

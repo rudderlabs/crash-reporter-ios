@@ -1,14 +1,14 @@
 //
-//  BugsnagLastRunInfo.m
-//  Bugsnag
+//  RSCrashReporterLastRunInfo.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 10/02/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BugsnagLastRunInfo+Private.h"
+#import "RSCrashReporterLastRunInfo+Private.h"
 
-@implementation BugsnagLastRunInfo
+@implementation RSCrashReporterLastRunInfo
 
 - (instancetype)initWithConsecutiveLaunchCrashes:(NSUInteger)consecutiveLaunchCrashes
                                          crashed:(BOOL)crashed

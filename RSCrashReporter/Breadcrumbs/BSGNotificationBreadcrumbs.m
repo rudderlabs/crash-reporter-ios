@@ -1,29 +1,29 @@
 //
-//  BSGNotificationBreadcrumbs.m
-//  Bugsnag
+//  RSCNotificationBreadcrumbs.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 10/12/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGNotificationBreadcrumbs.h"
+#import "RSCNotificationBreadcrumbs.h"
 
-#import "BSGAppKit.h"
-#import "BSGDefines.h"
-#import "BSGKeys.h"
-#import "BSGUIKit.h"
-#import "BSGUtils.h"
-#import "BugsnagBreadcrumbs.h"
-#import "BugsnagConfiguration+Private.h"
+#import "RSCAppKit.h"
+#import "RSCDefines.h"
+#import "RSCKeys.h"
+#import "RSCUIKit.h"
+#import "RSCUtils.h"
+#import "RSCrashReporterBreadcrumbs.h"
+#import "RSCrashReporterConfiguration+Private.h"
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSGNotificationBreadcrumbs ()
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCNotificationBreadcrumbs ()
 
 @property (nonatomic) NSDictionary<NSNotificationName, NSString *> *notificationNameMap;
 
 @end
 
-@interface BSGNotificationBreadcrumbs (/* not objc_direct */)
+@interface RSCNotificationBreadcrumbs (/* not objc_direct */)
 
 - (void)addBreadcrumbForNotification:(NSNotification *)notification;
 
@@ -42,11 +42,11 @@ BSG_OBJC_DIRECT_MEMBERS
 @end
 
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BSGNotificationBreadcrumbs
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCNotificationBreadcrumbs
 
-- (instancetype)initWithConfiguration:(BugsnagConfiguration *)configuration
-                       breadcrumbSink:(id<BSGBreadcrumbSink>)breadcrumbSink {
+- (instancetype)initWithConfiguration:(RSCrashReporterConfiguration *)configuration
+                       breadcrumbSink:(id<RSCBreadcrumbSink>)breadcrumbSink {
     if ((self = [super init])) {
         _configuration = configuration;
         _notificationCenter = NSNotificationCenter.defaultCenter;
@@ -67,7 +67,7 @@ BSG_OBJC_DIRECT_MEMBERS
             UIApplicationDidReceiveMemoryWarningNotification : @"Memory Warning",
             UIApplicationUserDidTakeScreenshotNotification : @"Took Screenshot",
             UIApplicationWillEnterForegroundNotification : @"App Will Enter Foreground",
-            UIApplicationWillTerminateNotification : BSGNotificationBreadcrumbsMessageAppWillTerminate,
+            UIApplicationWillTerminateNotification : RSCNotificationBreadcrumbsMessageAppWillTerminate,
             UIDeviceBatteryLevelDidChangeNotification : @"Battery Level Changed",
             UIDeviceBatteryStateDidChangeNotification : @"Battery State Changed",
             UIDeviceOrientationDidChangeNotification : @"Orientation Changed",
@@ -84,7 +84,7 @@ BSG_OBJC_DIRECT_MEMBERS
             NSApplicationDidHideNotification : @"App Did Hide",
             NSApplicationDidResignActiveNotification : @"App Resigned Active",
             NSApplicationDidUnhideNotification : @"App Did Unhide",
-            NSApplicationWillTerminateNotification : BSGNotificationBreadcrumbsMessageAppWillTerminate,
+            NSApplicationWillTerminateNotification : RSCNotificationBreadcrumbsMessageAppWillTerminate,
             NSControlTextDidBeginEditingNotification : @"Control Text Began Edit",
             NSControlTextDidEndEditingNotification : @"Control Text Ended Edit",
             NSMenuWillSendActionNotification : @"Menu Will Send Action",
@@ -211,11 +211,11 @@ BSG_OBJC_DIRECT_MEMBERS
     return self.notificationNameMap[name] ?: [name stringByReplacingOccurrencesOfString:@"Notification" withString:@""];
 }
 
-- (void)addBreadcrumbWithType:(BSGBreadcrumbType)type forNotificationName:(NSNotificationName)notificationName {
+- (void)addBreadcrumbWithType:(RSCBreadcrumbType)type forNotificationName:(NSNotificationName)notificationName {
     [self addBreadcrumbWithType:type forNotificationName:notificationName metadata:nil];
 }
 
-- (void)addBreadcrumbWithType:(BSGBreadcrumbType)type forNotificationName:(NSNotificationName)notificationName metadata:(NSDictionary *)metadata {
+- (void)addBreadcrumbWithType:(RSCBreadcrumbType)type forNotificationName:(NSNotificationName)notificationName metadata:(NSDictionary *)metadata {
     [self.breadcrumbSink leaveBreadcrumbWithMessage:[self messageForNotificationName:notificationName] metadata:metadata ?: @{} andType:type];
 }
 
@@ -223,7 +223,7 @@ BSG_OBJC_DIRECT_MEMBERS
 
 - (void)start {
     // State events
-    if ([self.configuration shouldRecordBreadcrumbType:BSGBreadcrumbTypeState]) {
+    if ([self.configuration shouldRecordBreadcrumbType:RSCBreadcrumbTypeState]) {
         // Generic state events
         for (NSNotificationName name in [self automaticBreadcrumbStateEvents]) {
             [self startListeningForStateChangeNotification:name];
@@ -263,7 +263,7 @@ BSG_OBJC_DIRECT_MEMBERS
     }
     
     // Navigation events
-    if ([self.configuration shouldRecordBreadcrumbType:BSGBreadcrumbTypeNavigation]) {
+    if ([self.configuration shouldRecordBreadcrumbType:RSCBreadcrumbTypeNavigation]) {
         // UI/NSTableView events
         for (NSNotificationName name in [self automaticBreadcrumbTableItemEvents]) {
             [self.notificationCenter addObserver:self
@@ -274,7 +274,7 @@ BSG_OBJC_DIRECT_MEMBERS
     }
     
     // User events
-    if ([self.configuration shouldRecordBreadcrumbType:BSGBreadcrumbTypeUser]) {
+    if ([self.configuration shouldRecordBreadcrumbType:RSCBreadcrumbTypeUser]) {
         // UITextField/NSControl events (text editing)
         for (NSNotificationName name in [self automaticBreadcrumbControlEvents]) {
             [self.notificationCenter addObserver:self
@@ -297,11 +297,11 @@ BSG_OBJC_DIRECT_MEMBERS
             UIScene *scene = notification.object;
             NSMutableDictionary *metadata = [NSMutableDictionary dictionary];
             metadata[@"configuration"] = scene.session.configuration.name;
-            metadata[@"delegateClass"] = BSGStringFromClass(scene.session.configuration.delegateClass);
+            metadata[@"delegateClass"] = RSCStringFromClass(scene.session.configuration.delegateClass);
             metadata[@"role"] = scene.session.role;
-            metadata[@"sceneClass"] = BSGStringFromClass(scene.session.configuration.sceneClass);
+            metadata[@"sceneClass"] = RSCStringFromClass(scene.session.configuration.sceneClass);
             metadata[@"title"] = scene.title.length ? scene.title : nil;
-            [self addBreadcrumbWithType:BSGBreadcrumbTypeState forNotificationName:notification.name metadata:metadata];
+            [self addBreadcrumbWithType:RSCBreadcrumbTypeState forNotificationName:notification.name metadata:metadata];
             return YES;
         }
     }
@@ -336,7 +336,7 @@ static NSString *nullStringIfBlank(NSString *str) {
 #endif
         metadata[@"viewController"] = nullStringIfBlank(window.rootViewController.description);
         metadata[@"viewControllerTitle"] = nullStringIfBlank(window.rootViewController.title);
-        [self addBreadcrumbWithType:BSGBreadcrumbTypeState forNotificationName:notification.name metadata:metadata];
+        [self addBreadcrumbWithType:RSCBreadcrumbTypeState forNotificationName:notification.name metadata:metadata];
         return YES;
     }
 #endif
@@ -355,7 +355,7 @@ static NSString *nullStringIfBlank(NSString *str) {
         metadata[@"representedURL"] = nullStringIfBlank(window.representedURL.absoluteString);
         metadata[@"viewController"] = nullStringIfBlank(window.contentViewController.description);
         metadata[@"viewControllerTitle"] = nullStringIfBlank(window.contentViewController.title);
-        [self addBreadcrumbWithType:BSGBreadcrumbTypeState forNotificationName:notification.name metadata:metadata];
+        [self addBreadcrumbWithType:RSCBreadcrumbTypeState forNotificationName:notification.name metadata:metadata];
         return YES;
     }
 #endif
@@ -370,17 +370,17 @@ static NSString *nullStringIfBlank(NSString *str) {
     if ([self tryAddWindowNotification:notification]) {
         return;
     }
-    [self addBreadcrumbWithType:BSGBreadcrumbTypeState forNotificationName:notification.name];
+    [self addBreadcrumbWithType:RSCBreadcrumbTypeState forNotificationName:notification.name];
 }
 
 - (void)addBreadcrumbForTableViewNotification:(__unused NSNotification *)notification {
 #if TARGET_OS_IOS || TARGET_OS_TV
     NSIndexPath *indexPath = ((UITableView *)notification.object).indexPathForSelectedRow;
-    [self addBreadcrumbWithType:BSGBreadcrumbTypeNavigation forNotificationName:notification.name metadata:
+    [self addBreadcrumbWithType:RSCBreadcrumbTypeNavigation forNotificationName:notification.name metadata:
      indexPath ? @{@"row" : @(indexPath.row), @"section" : @(indexPath.section)} : nil];
 #elif TARGET_OS_OSX
     NSTableView *tableView = notification.object;
-    [self addBreadcrumbWithType:BSGBreadcrumbTypeNavigation forNotificationName:notification.name metadata:
+    [self addBreadcrumbWithType:RSCBreadcrumbTypeNavigation forNotificationName:notification.name metadata:
      tableView ? @{@"selectedRow" : @(tableView.selectedRow), @"selectedColumn" : @(tableView.selectedColumn)} : nil];
 #endif
 }
@@ -388,26 +388,26 @@ static NSString *nullStringIfBlank(NSString *str) {
 - (void)addBreadcrumbForMenuItemNotification:(__unused NSNotification *)notification {
 #if TARGET_OS_OSX
     NSMenuItem *menuItem = [[notification userInfo] valueForKey:@"MenuItem"];
-    [self addBreadcrumbWithType:BSGBreadcrumbTypeState forNotificationName:notification.name metadata:
-     [menuItem isKindOfClass:NSMENUITEM] ? @{BSGKeyAction : menuItem.title} : nil];
+    [self addBreadcrumbWithType:RSCBreadcrumbTypeState forNotificationName:notification.name metadata:
+     [menuItem isKindOfClass:NSMENUITEM] ? @{RSCKeyAction : menuItem.title} : nil];
 #endif
 }
 
 - (void)addBreadcrumbForControlNotification:(__unused NSNotification *)notification {
 #if TARGET_OS_IOS
     NSString *label = ((UIControl *)notification.object).accessibilityLabel;
-    [self addBreadcrumbWithType:BSGBreadcrumbTypeUser forNotificationName:notification.name metadata:
-     label.length ? @{BSGKeyLabel : label} : nil];
+    [self addBreadcrumbWithType:RSCBreadcrumbTypeUser forNotificationName:notification.name metadata:
+     label.length ? @{RSCKeyLabel : label} : nil];
 #elif TARGET_OS_OSX
     NSControl *control = notification.object;
     NSDictionary *metadata = nil;
     if ([control respondsToSelector:@selector(accessibilityLabel)]) {
         NSString *label = control.accessibilityLabel;
         if (label.length > 0) {
-            metadata = @{BSGKeyLabel : label};
+            metadata = @{RSCKeyLabel : label};
         }
     }
-    [self addBreadcrumbWithType:BSGBreadcrumbTypeUser forNotificationName:notification.name metadata:metadata];
+    [self addBreadcrumbWithType:RSCBreadcrumbTypeUser forNotificationName:notification.name metadata:metadata];
 #endif
 }
 
@@ -425,11 +425,11 @@ static NSString *nullStringIfBlank(NSString *str) {
     }
     
     NSMutableDictionary *metadata = [NSMutableDictionary dictionary];
-    metadata[@"from"] = BSGStringFromDeviceOrientation(previousOrientation);
-    metadata[@"to"] =  BSGStringFromDeviceOrientation(device.orientation);
+    metadata[@"from"] = RSCStringFromDeviceOrientation(previousOrientation);
+    metadata[@"to"] =  RSCStringFromDeviceOrientation(device.orientation);
     previousOrientation = device.orientation;
     
-    [self addBreadcrumbWithType:BSGBreadcrumbTypeState
+    [self addBreadcrumbWithType:RSCBreadcrumbTypeState
             forNotificationName:notification.name
                        metadata:metadata];
 }
@@ -445,11 +445,11 @@ static NSString *nullStringIfBlank(NSString *str) {
     }
     
     NSMutableDictionary *metadata = [NSMutableDictionary dictionary];
-    metadata[@"from"] = BSGStringFromThermalState(previousThermalState);
-    metadata[@"to"] = BSGStringFromThermalState(processInfo.thermalState);
+    metadata[@"from"] = RSCStringFromThermalState(previousThermalState);
+    metadata[@"to"] = RSCStringFromThermalState(processInfo.thermalState);
     previousThermalState = processInfo.thermalState;
     
-    [self addBreadcrumbWithType:BSGBreadcrumbTypeState
+    [self addBreadcrumbWithType:RSCBreadcrumbTypeState
             forNotificationName:notification.name
                        metadata:metadata];
 }

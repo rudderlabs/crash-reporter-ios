@@ -1,48 +1,48 @@
 //
-//  BugsnagClient+Private.h
-//  Bugsnag
+//  RSCrashReporterClient+Private.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 26/11/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGDefines.h"
-#import "BugsnagInternals.h"
+#import "RSCDefines.h"
+#import "RSCrashReporterInternals.h"
 
-@class BSGAppHangDetector;
-@class BSGEventUploader;
-@class BugsnagAppWithState;
-@class BugsnagBreadcrumbs;
-@class BugsnagConfiguration;
-@class BugsnagDeviceWithState;
-@class BugsnagMetadata;
-@class BugsnagNotifier;
-@class BugsnagSessionTracker;
-@class BugsnagSystemState;
+@class RSCAppHangDetector;
+@class RSCEventUploader;
+@class RSCrashReporterAppWithState;
+@class RSCrashReporterBreadcrumbs;
+@class RSCrashReporterConfiguration;
+@class RSCrashReporterDeviceWithState;
+@class RSCrashReporterMetadata;
+@class RSCrashReporterNotifier;
+@class RSCrashReporterSessionTracker;
+@class RSCrashReporterSystemState;
 
 NS_ASSUME_NONNULL_BEGIN
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BugsnagClient ()
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCrashReporterClient ()
 
 #pragma mark Properties
 
 @property (nonatomic) BOOL appDidCrashLastLaunch;
 
-@property (nonatomic) BSGAppHangDetector *appHangDetector;
+@property (nonatomic) RSCAppHangDetector *appHangDetector;
 
-@property (nullable, nonatomic) BugsnagEvent *appHangEvent;
+@property (nullable, nonatomic) RSCrashReporterEvent *appHangEvent;
 
 /// The App hang or OOM event that caused the last launch to crash.
-@property (nullable, nonatomic) BugsnagEvent *eventFromLastLaunch;
+@property (nullable, nonatomic) RSCrashReporterEvent *eventFromLastLaunch;
 
-@property (strong, nonatomic) BSGEventUploader *eventUploader;
+@property (strong, nonatomic) RSCEventUploader *eventUploader;
 
 @property (nonatomic) NSMutableDictionary *extraRuntimeInfo;
 
 @property (atomic) BOOL isStarted;
 
-/// YES if BugsnagClient is ready to handle some internal method calls.
+/// YES if RSCrashReporterClient is ready to handle some internal method calls.
 /// It does not mean that it is fully started and ready to receive method calls from outside of the library.
 @property (atomic) BOOL readyForInternalCalls;
 
@@ -65,11 +65,11 @@ BSG_OBJC_DIRECT_MEMBERS
 ///         "name": "bob"
 ///     }
 /// }
-@property (strong, nonatomic) BugsnagMetadata *state;
+@property (strong, nonatomic) RSCrashReporterMetadata *state;
 
 @property (strong, nonatomic) NSMutableArray *stateEventBlocks;
 
-@property (strong, nonatomic) BugsnagSystemState *systemState;
+@property (strong, nonatomic) RSCrashReporterSystemState *systemState;
 
 #pragma mark Methods
 

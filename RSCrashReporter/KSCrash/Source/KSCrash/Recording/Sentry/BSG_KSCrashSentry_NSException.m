@@ -1,5 +1,5 @@
 //
-//  BSG_KSCrashSentry_NSException.m
+//  RSC_KSCrashSentry_NSException.m
 //
 //  Created by Karl Stenerud on 2012-01-28.
 //
@@ -24,18 +24,18 @@
 // THE SOFTWARE.
 //
 
-#import "BSG_KSCrashSentry_NSException.h"
+#import "RSC_KSCrashSentry_NSException.h"
 
-#import "BSGDefines.h"
-#import "BSGJSONSerialization.h"
-#import "BSGUtils.h"
-#import "BSG_KSCrashC.h"
-#import "BSG_KSCrashSentry_Private.h"
-#import "BSG_KSMach.h"
-#import "BugsnagCollections.h"
+#import "RSCDefines.h"
+#import "RSCJSONSerialization.h"
+#import "RSCUtils.h"
+#import "RSC_KSCrashC.h"
+#import "RSC_KSCrashSentry_Private.h"
+#import "RSC_KSMach.h"
+#import "RSCrashReporterCollections.h"
 
-//#define BSG_KSLogger_LocalLevel TRACE
-#import "BSG_KSLogger.h"
+//#define RSC_KSLogger_LocalLevel TRACE
+#import "RSC_KSLogger.h"
 
 #import <objc/runtime.h>
 
@@ -47,15 +47,15 @@
  * It's not fully thread safe, but it's safer than locking and slightly better
  * than nothing.
  */
-static volatile sig_atomic_t bsg_g_installed = 0;
+static volatile sig_atomic_t rsc_g_installed = 0;
 
 /** The exception handler that was in place before we installed ours. */
-static NSUncaughtExceptionHandler *bsg_g_previousUncaughtExceptionHandler;
+static NSUncaughtExceptionHandler *rsc_g_previousUncaughtExceptionHandler;
 
 /** Context to fill with crash information. */
-static BSG_KSCrash_SentryContext *bsg_g_context;
+static RSC_KSCrash_SentryContext *rsc_g_context;
 
-static NSException *bsg_lastHandledException = NULL;
+static NSException *rsc_lastHandledException = NULL;
 
 static char * CopyUTF8String(NSString *string) {
     const char *UTF8String = [string UTF8String];
@@ -63,9 +63,9 @@ static char * CopyUTF8String(NSString *string) {
 }
 
 static char * CopyJSON(NSDictionary *userInfo) {
-    NSDictionary *json = BSGJSONDictionary(userInfo);
-    NSData *data = BSGJSONDataFromDictionary(json, NULL);
-    return BSGCStringWithData(data);
+    NSDictionary *json = RSCJSONDictionary(userInfo);
+    NSData *data = RSCJSONDataFromDictionary(json, NULL);
+    return RSCCStringWithData(data);
 }
 
 // ============================================================================
@@ -80,52 +80,52 @@ static char * CopyJSON(NSDictionary *userInfo) {
 
  @param exception The exception to process
  */
-void bsg_recordException(NSException *exception);
+void rsc_recordException(NSException *exception);
 
 /** Our custom excepetion handler.
  * Fetch the stack trace from the exception and write a report.
  *
  * @param exception The exception that was raised.
  */
-void bsg_ksnsexc_i_handleException(NSException *exception) {
-    BSG_KSLOG_DEBUG("Trapped exception %s", exception.description.UTF8String);
-    if (bsg_g_installed &&
-        bsg_kscrashsentry_beginHandlingCrash(bsg_ksmachthread_self())) {
+void rsc_ksnsexc_i_handleException(NSException *exception) {
+    RSC_KSLOG_DEBUG("Trapped exception %s", exception.description.UTF8String);
+    if (rsc_g_installed &&
+        rsc_kscrashsentry_beginHandlingCrash(rsc_ksmachthread_self())) {
 
-        bsg_recordException(exception);
+        rsc_recordException(exception);
 
-        BSG_KSLOG_DEBUG(
+        RSC_KSLOG_DEBUG(
             "Crash handling complete. Restoring original handlers.");
-        bsg_kscrashsentry_uninstall(BSG_KSCrashTypeAll);
+        rsc_kscrashsentry_uninstall(RSC_KSCrashTypeAll);
 
         // Must run before endHandlingCrash unblocks secondary crashed threads.
-        BSG_KSCrash_Context *context = crashContext();
+        RSC_KSCrash_Context *context = crashContext();
         if (context->crash.attemptDelivery) {
-            BSG_KSLOG_DEBUG("Attempting delivery.");
+            RSC_KSLOG_DEBUG("Attempting delivery.");
             context->crash.attemptDelivery();
         }
 
-        bsg_kscrashsentry_endHandlingCrash();
+        rsc_kscrashsentry_endHandlingCrash();
     }
 
-    if (bsg_g_previousUncaughtExceptionHandler != NULL) {
-        BSG_KSLOG_DEBUG("Calling original exception handler.");
-        bsg_g_previousUncaughtExceptionHandler(exception);
+    if (rsc_g_previousUncaughtExceptionHandler != NULL) {
+        RSC_KSLOG_DEBUG("Calling original exception handler.");
+        rsc_g_previousUncaughtExceptionHandler(exception);
     }
 }
 
-void bsg_recordException(NSException *exception) {
-    if (bsg_g_installed) {
-        BOOL previouslyHandled = exception == bsg_lastHandledException;
+void rsc_recordException(NSException *exception) {
+    if (rsc_g_installed) {
+        BOOL previouslyHandled = exception == rsc_lastHandledException;
         if (previouslyHandled) {
-            BSG_KSLOG_DEBUG("Handled exception previously, "
+            RSC_KSLOG_DEBUG("Handled exception previously, "
                             "exiting exception recorder.");
             return;
         }
-        bsg_lastHandledException = exception;
-        BSG_KSLOG_DEBUG("Writing exception info into a new report");
+        rsc_lastHandledException = exception;
+        RSC_KSLOG_DEBUG("Writing exception info into a new report");
 
-        BSG_KSLOG_DEBUG("Filling out context.");
+        RSC_KSLOG_DEBUG("Filling out context.");
         NSArray *addresses = [exception callStackReturnAddresses];
         NSUInteger numFrames = [addresses count];
         uintptr_t *callstack = malloc(numFrames * sizeof(*callstack));
@@ -135,31 +135,31 @@ void bsg_recordException(NSException *exception) {
             }
         }
 
-        bsg_g_context->crashType = BSG_KSCrashTypeNSException;
-        bsg_g_context->offendingThread = bsg_ksmachthread_self();
-        bsg_g_context->registersAreValid = false;
-        bsg_g_context->NSException.name = CopyUTF8String([exception name]);
-        bsg_g_context->NSException.userInfo = CopyJSON([exception userInfo]);
-        bsg_g_context->crashReason = CopyUTF8String([exception reason]);
-        bsg_g_context->stackTrace = callstack;
-        bsg_g_context->stackTraceLength = callstack ? (int)numFrames : 0;
+        rsc_g_context->crashType = RSC_KSCrashTypeNSException;
+        rsc_g_context->offendingThread = rsc_ksmachthread_self();
+        rsc_g_context->registersAreValid = false;
+        rsc_g_context->NSException.name = CopyUTF8String([exception name]);
+        rsc_g_context->NSException.userInfo = CopyJSON([exception userInfo]);
+        rsc_g_context->crashReason = CopyUTF8String([exception reason]);
+        rsc_g_context->stackTrace = callstack;
+        rsc_g_context->stackTraceLength = callstack ? (int)numFrames : 0;
 
-#if BSG_HAVE_MACH_THREADS
-        BSG_KSLOG_DEBUG("Suspending all threads.");
-        bsg_kscrashsentry_suspendThreads();
+#if RSC_HAVE_MACH_THREADS
+        RSC_KSLOG_DEBUG("Suspending all threads.");
+        rsc_kscrashsentry_suspendThreads();
 #else
         // We still need the threads list for other purposes:
         // - Stack traces
         // - Thread names
         // - Thread states
-        bsg_g_context->allThreads = bsg_ksmachgetAllThreads(&bsg_g_context->allThreadsCount);
+        rsc_g_context->allThreads = rsc_ksmachgetAllThreads(&rsc_g_context->allThreadsCount);
 #endif
 
-        BSG_KSLOG_DEBUG("Calling main crash handler.");
-        bsg_g_context->onCrash(crashContext());
+        RSC_KSLOG_DEBUG("Calling main crash handler.");
+        rsc_g_context->onCrash(crashContext());
 
-#if BSG_HAVE_MACH_THREADS
-        bsg_kscrashsentry_resumeThreads();
+#if RSC_HAVE_MACH_THREADS
+        rsc_kscrashsentry_resumeThreads();
 #endif
     }
 }
@@ -182,12 +182,12 @@ static Method NSApplication_reportException;
 static void (* NSApplication_reportException_imp)(id, SEL, NSException *);
 
 /// Overrides -[NSApplication reportException:]
-static void bsg_reportException(id self, SEL _cmd, NSException *exception) {
-    BSG_KSLOG_DEBUG("reportException: %s", exception.description.UTF8String);
+static void rsc_reportException(id self, SEL _cmd, NSException *exception) {
+    RSC_KSLOG_DEBUG("reportException: %s", exception.description.UTF8String);
 
-    if (bsg_kscrashsentry_beginHandlingCrash(bsg_ksmachthread_self())) {
-        bsg_recordException(exception);
-        bsg_kscrashsentry_endHandlingCrash();
+    if (rsc_kscrashsentry_beginHandlingCrash(rsc_ksmachthread_self())) {
+        rsc_recordException(exception);
+        rsc_kscrashsentry_endHandlingCrash();
     }
 
 #if defined(TARGET_OS_MACCATALYST) && TARGET_OS_MACCATALYST
@@ -200,7 +200,7 @@ static void bsg_reportException(id self, SEL _cmd, NSException *exception) {
     // not point to where the exception was raised (its top frame will be
     // -[NSApplication _crashOnException:]) so we should uninstall our crash
     // sentries.
-    bsg_kscrashsentry_uninstall(BSG_KSCrashTypeAll);
+    rsc_kscrashsentry_uninstall(RSC_KSCrashTypeAll);
 #endif
 
     NSApplication_reportException_imp(self, _cmd, exception);
@@ -212,57 +212,57 @@ static void bsg_reportException(id self, SEL _cmd, NSException *exception) {
 #pragma mark - API -
 // ============================================================================
 
-bool bsg_kscrashsentry_installNSExceptionHandler(
-    BSG_KSCrash_SentryContext *const context) {
-    BSG_KSLOG_DEBUG("Installing NSException handler.");
-    if (bsg_g_installed) {
+bool rsc_kscrashsentry_installNSExceptionHandler(
+    RSC_KSCrash_SentryContext *const context) {
+    RSC_KSLOG_DEBUG("Installing NSException handler.");
+    if (rsc_g_installed) {
         return true;
     }
-    bsg_g_installed = 1;
+    rsc_g_installed = 1;
 
-    bsg_g_context = context;
+    rsc_g_context = context;
 
-    BSG_KSLOG_DEBUG("Backing up original handler.");
-    bsg_g_previousUncaughtExceptionHandler = NSGetUncaughtExceptionHandler();
+    RSC_KSLOG_DEBUG("Backing up original handler.");
+    rsc_g_previousUncaughtExceptionHandler = NSGetUncaughtExceptionHandler();
 
-    BSG_KSLOG_DEBUG("Setting new handler.");
-    NSSetUncaughtExceptionHandler(&bsg_ksnsexc_i_handleException);
+    RSC_KSLOG_DEBUG("Setting new handler.");
+    NSSetUncaughtExceptionHandler(&rsc_ksnsexc_i_handleException);
 
 #if TARGET_OS_IOS
     NSApplication_reportException =
     class_getInstanceMethod(NSClassFromString(@"NSApplication"),
                             NSSelectorFromString(@"reportException:"));
     if (NSApplication_reportException) {
-        BSG_KSLOG_DEBUG("Overriding -[NSApplication reportException:]");
+        RSC_KSLOG_DEBUG("Overriding -[NSApplication reportException:]");
         NSApplication_reportException_imp = (void *)
         method_setImplementation(NSApplication_reportException,
-                                 (IMP)bsg_reportException);
+                                 (IMP)rsc_reportException);
     }
 #endif
 
     return true;
 }
 
-void bsg_kscrashsentry_uninstallNSExceptionHandler(void) {
-    BSG_KSLOG_DEBUG("Uninstalling NSException handler.");
-    if (!bsg_g_installed) {
+void rsc_kscrashsentry_uninstallNSExceptionHandler(void) {
+    RSC_KSLOG_DEBUG("Uninstalling NSException handler.");
+    if (!rsc_g_installed) {
         return;
     }
 
-    BSG_KSLOG_DEBUG("Restoring original handler.");
-    NSSetUncaughtExceptionHandler(bsg_g_previousUncaughtExceptionHandler);
+    RSC_KSLOG_DEBUG("Restoring original handler.");
+    NSSetUncaughtExceptionHandler(rsc_g_previousUncaughtExceptionHandler);
 
 #if TARGET_OS_IOS
     if (NSApplication_reportException && NSApplication_reportException_imp) {
-        BSG_KSLOG_DEBUG("Restoring original -[NSApplication reportException:]");
+        RSC_KSLOG_DEBUG("Restoring original -[NSApplication reportException:]");
         method_setImplementation(NSApplication_reportException,
                                  (IMP)NSApplication_reportException_imp);
     }
 #endif
 
-    bsg_g_installed = 0;
+    rsc_g_installed = 0;
 }
 
-bool bsg_kscrashsentry_isNSExceptionHandlerInstalled(void) {
-    return bsg_g_installed;
+bool rsc_kscrashsentry_isNSExceptionHandlerInstalled(void) {
+    return rsc_g_installed;
 }

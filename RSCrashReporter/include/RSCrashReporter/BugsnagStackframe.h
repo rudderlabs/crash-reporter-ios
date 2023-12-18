@@ -1,26 +1,26 @@
 //
-//  BugsnagStackframe.h
-//  Bugsnag
+//  RSCrashReporterStackframe.h
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 01/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-#import <RSCrashReporter/BugsnagDefines.h>
+#import <RSCrashReporter/RSCrashReporterDefines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef NSString * BugsnagStackframeType NS_TYPED_ENUM;
+typedef NSString * RSCrashReporterStackframeType NS_TYPED_ENUM;
 
-BUGSNAG_EXTERN BugsnagStackframeType const BugsnagStackframeTypeCocoa;
+RSCRASHREPORTER_EXTERN RSCrashReporterStackframeType const RSCrashReporterStackframeTypeCocoa;
 
 /**
  * Represents a single stackframe from a stacktrace.
  */
-BUGSNAG_EXTERN
-@interface BugsnagStackframe : NSObject
+RSCRASHREPORTER_EXTERN
+@interface RSCrashReporterStackframe : NSObject
 
 /**
  * The method name of the stackframe
@@ -70,7 +70,7 @@ BUGSNAG_EXTERN
 /**
  * The type of the stack frame, if it differs from that of the containing error or event.
  */
-@property (copy, nullable, nonatomic) BugsnagStackframeType type;
+@property (copy, nullable, nonatomic) RSCrashReporterStackframeType type;
 
 /**
  * Creates an array of stackframe objects representing the provided call stack.
@@ -78,7 +78,7 @@ BUGSNAG_EXTERN
  * @param callStackReturnAddresses An array containing the call stack return addresses, as returned by
  * `NSThread.callStackReturnAddresses` or `NSException.callStackReturnAddresses`.
  */
-+ (NSArray<BugsnagStackframe *> *)stackframesWithCallStackReturnAddresses:(NSArray<NSNumber *> *)callStackReturnAddresses;
++ (NSArray<RSCrashReporterStackframe *> *)stackframesWithCallStackReturnAddresses:(NSArray<NSNumber *> *)callStackReturnAddresses;
 
 /**
  * Creates an array of stackframe objects representing the provided call stack.
@@ -87,7 +87,7 @@ BUGSNAG_EXTERN
  * Each element should be in a format determined by the `backtrace_symbols()` function.
 
  */
-+ (nullable NSArray<BugsnagStackframe *> *)stackframesWithCallStackSymbols:(NSArray<NSString *> *)callStackSymbols;
++ (nullable NSArray<RSCrashReporterStackframe *> *)stackframesWithCallStackSymbols:(NSArray<NSString *> *)callStackSymbols;
 
 @end
 

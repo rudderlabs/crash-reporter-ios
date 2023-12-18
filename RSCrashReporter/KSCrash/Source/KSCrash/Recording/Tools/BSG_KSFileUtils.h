@@ -27,8 +27,8 @@
 /* Basic file reading/writing functions.
  */
 
-#ifndef HDR_BSG_KSFileUtils_h
-#define HDR_BSG_KSFileUtils_h
+#ifndef HDR_RSC_KSFileUtils_h
+#define HDR_RSC_KSFileUtils_h
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,7 +44,7 @@ extern "C" {
  *
  * @return the last entry in the path.
  */
-const char *bsg_ksfulastPathEntry(const char *path);
+const char *rsc_ksfulastPathEntry(const char *path);
 
 /** Write bytes to a file descriptor.
  *
@@ -56,14 +56,14 @@ const char *bsg_ksfulastPathEntry(const char *path);
  *
  * @return true if the operation was successful.
  */
-bool bsg_ksfuwriteBytesToFD(const int fd, const char *bytes, ssize_t length);
+bool rsc_ksfuwriteBytesToFD(const int fd, const char *bytes, ssize_t length);
 
 /**
  * Flushes the write buffer
  *
  * @param fd The file descriptor
  */
-bool bsg_ksfuflushWriteBuffer(const int fd);
+bool rsc_ksfuflushWriteBuffer(const int fd);
 
 /**
  * Get file system statistics.
@@ -75,7 +75,7 @@ bool bsg_ksfuflushWriteBuffer(const int fd);
  * @param total A pointer to where the total number of bytes in the file system
  *              should be written.
  */
-bool bsg_ksfuStatfs(const char *path, uint64_t *free, uint64_t *total);
+bool rsc_ksfuStatfs(const char *path, uint64_t *free, uint64_t *total);
 
 #ifdef __cplusplus
 }

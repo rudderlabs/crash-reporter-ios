@@ -1,22 +1,22 @@
 //
-//  BugsnagDevice+Private.h
-//  Bugsnag
+//  RSCrashReporterDevice+Private.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 04/12/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
-#import <RSCrashReporter/BugsnagDevice.h>
+#import <RSCrashReporter/RSCrashReporterDevice.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface BugsnagDevice ()
+@interface RSCrashReporterDevice ()
 
 + (instancetype)deviceWithKSCrashReport:(NSDictionary *)event;
 
 + (instancetype)deserializeFromJson:(nullable NSDictionary *)json;
 
-+ (void)populateFields:(BugsnagDevice *)device dictionary:(NSDictionary *)event;
++ (void)populateFields:(RSCrashReporterDevice *)device dictionary:(NSDictionary *)event;
 
 - (void)appendRuntimeInfo:(NSDictionary *)info;
 

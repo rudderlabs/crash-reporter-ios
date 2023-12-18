@@ -1,22 +1,22 @@
 //
-//  BSGAppKitTests.m
-//  Bugsnag-macOSTests
+//  RSCAppKitTests.m
+//  RSCrashReporter-macOSTests
 //
 //  Created by Nick Dowell on 13/04/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-@interface BSGAppKitTests : XCTestCase
+@interface RSCAppKitTests : XCTestCase
 
 @end
 
-@implementation BSGAppKitTests
+@implementation RSCAppKitTests
 
 - (void)testNotificationNames {
     // The notifier uses hard-coded notification names so that it can avoid linking to AppKit.
-    // These tests ensure that the hard-coded names in BSGAppKit.h match the SDK.
+    // These tests ensure that the hard-coded names in RSCAppKit.h match the SDK.
     #define ASSERT_NOTIFICATION_NAME(name) XCTAssertEqualObjects(name, @#name)
     ASSERT_NOTIFICATION_NAME(NSApplicationDidBecomeActiveNotification);
     ASSERT_NOTIFICATION_NAME(NSApplicationDidFinishLaunchingNotification);

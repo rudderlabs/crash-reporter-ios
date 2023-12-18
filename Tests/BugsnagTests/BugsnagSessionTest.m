@@ -1,28 +1,28 @@
 //
-//  BugsnagSessionTest.m
+//  RSCrashReporterSessionTest.m
 //  Tests
 //
 //  Created by Jamie Lynch on 27/11/2017.
-//  Copyright © 2017 Bugsnag. All rights reserved.
+//  Copyright © 2017 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BugsnagApp+Private.h"
-#import "BugsnagConfiguration+Private.h"
-#import "BugsnagDevice+Private.h"
-#import "BugsnagSession+Private.h"
-#import "BugsnagUser+Private.h"
-#import "BSG_RFC3339DateTool.h"
-#import "BugsnagTestConstants.h"
+#import "RSCrashReporterApp+Private.h"
+#import "RSCrashReporterConfiguration+Private.h"
+#import "RSCrashReporterDevice+Private.h"
+#import "RSCrashReporterSession+Private.h"
+#import "RSCrashReporterUser+Private.h"
+#import "RSC_RFC3339DateTool.h"
+#import "RSCrashReporterTestConstants.h"
 
-@interface BugsnagSessionTest : XCTestCase
-@property BugsnagApp *app;
-@property BugsnagDevice *device;
+@interface RSCrashReporterSessionTest : XCTestCase
+@property RSCrashReporterApp *app;
+@property RSCrashReporterDevice *device;
 @property NSDictionary *serializedSession;
 @end
 
-@implementation BugsnagSessionTest
+@implementation RSCrashReporterSessionTest
 
 - (void)setUp {
     self.app = [self generateApp];
@@ -30,7 +30,7 @@
     self.serializedSession = [self generateSerializedSession];
 }
 
-- (BugsnagApp *)generateApp {
+- (RSCrashReporterApp *)generateApp {
     NSDictionary *appData = @{
             @"system": @{
                     @"application_stats": @{
@@ -51,13 +51,13 @@
             }
     };
 
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithDictionaryRepresentation:appData[@"user"][@"config"]];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithDictionaryRepresentation:appData[@"user"][@"config"]];
     config.appType = @"iOS";
     config.bundleVersion = nil;
-    return [BugsnagApp appWithDictionary:appData config:config codeBundleId:@"bundle-123"];
+    return [RSCrashReporterApp appWithDictionary:appData config:config codeBundleId:@"bundle-123"];
 }
 
-- (BugsnagDevice *)generateDevice {
+- (RSCrashReporterDevice *)generateDevice {
     NSDictionary *deviceData = @{
             @"system": @{
                     @"model": @"iPhone 6",
@@ -84,7 +84,7 @@
                     }
             }
     };
-    BugsnagDevice *device = [BugsnagDevice deviceWithKSCrashReport:deviceData];
+    RSCrashReporterDevice *device = [RSCrashReporterDevice deviceWithKSCrashReport:deviceData];
     device.locale = @"en-US";
     return device;
 }
@@ -92,7 +92,7 @@
 - (NSDictionary *)generateSerializedSession {
     NSDictionary *dict = @{
             @"id": @"test",
-            @"startedAt": [BSG_RFC3339DateTool stringFromDate:[NSDate dateWithTimeIntervalSince1970:0]],
+            @"startedAt": [RSC_RFC3339DateTool stringFromDate:[NSDate dateWithTimeIntervalSince1970:0]],
             @"unhandledCount": @1,
             @"handledCount": @2,
             @"user": @{
@@ -108,8 +108,8 @@
 
 - (void)testPayloadSerialization {
     NSDate *now = [NSDate date];
-    BugsnagUser *user = [[BugsnagUser alloc] initWithId:@"123" name:@"Joe Bloggs" emailAddress:@"joe@example.com"];
-    BugsnagSession *payload = [[BugsnagSession alloc] initWithId:@"test"
+    RSCrashReporterUser *user = [[RSCrashReporterUser alloc] initWithId:@"123" name:@"Joe Bloggs" emailAddress:@"joe@example.com"];
+    RSCrashReporterSession *payload = [[RSCrashReporterSession alloc] initWithId:@"test"
                                                        startedAt:now
                                                             user:user
                                                              app:self.app
@@ -117,10 +117,10 @@
     payload.unhandledCount = 1;
     payload.handledCount = 2;
 
-    NSDictionary *rootNode = BSGSessionToDictionary(payload);
+    NSDictionary *rootNode = RSCSessionToDictionary(payload);
     XCTAssertNotNil(rootNode);
     XCTAssertEqualObjects(@"test", rootNode[@"id"]);
-    XCTAssertEqualObjects([BSG_RFC3339DateTool stringFromDate:now], rootNode[@"startedAt"]);
+    XCTAssertEqualObjects([RSC_RFC3339DateTool stringFromDate:now], rootNode[@"startedAt"]);
 
     // user
     XCTAssertEqualObjects(@"123", rootNode[@"user"][@"id"]);
@@ -159,7 +159,7 @@
 }
 
 - (void)testPayloadDeserialization {
-    BugsnagSession *session = BSGSessionFromDictionary(self.serializedSession);
+    RSCrashReporterSession *session = RSCSessionFromDictionary(self.serializedSession);
     XCTAssertNotNil(session);
 
     XCTAssertEqualObjects(@"test", session.id);
@@ -174,7 +174,7 @@
     XCTAssertEqualObjects(@"joe@example.com", session.user.email);
 
     // app
-    BugsnagApp *app = session.app;
+    RSCrashReporterApp *app = session.app;
     XCTAssertNotNil(app);
     XCTAssertEqualObjects(@"1", app.bundleVersion);
     XCTAssertEqualObjects(@"bundle-123", app.codeBundleId);
@@ -185,7 +185,7 @@
     XCTAssertEqualObjects(@"5.6.3", app.version);
 
     // device
-    BugsnagDevice *device = session.device;
+    RSCrashReporterDevice *device = session.device;
     XCTAssertNotNil(device);
     XCTAssertTrue(device.jailbroken);
 //    XCTAssertEqualObjects(@"123", device.id);
@@ -207,11 +207,11 @@
 - (void)testDeserializingEmptyPayload {
     NSDictionary *dict = @{
             @"id": @"test",
-            @"startedAt": [BSG_RFC3339DateTool stringFromDate:[NSDate dateWithTimeIntervalSince1970:0]],
+            @"startedAt": [RSC_RFC3339DateTool stringFromDate:[NSDate dateWithTimeIntervalSince1970:0]],
             @"unhandledCount": @1,
             @"handledCount": @2
     };
-    BugsnagSession *session = BSGSessionFromDictionary(dict);
+    RSCrashReporterSession *session = RSCSessionFromDictionary(dict);
     XCTAssertNotNil(session);
     XCTAssertEqualObjects(@"test", session.id);
     XCTAssertNotNil(session.startedAt);

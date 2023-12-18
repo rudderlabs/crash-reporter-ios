@@ -1,28 +1,28 @@
 /**
- * Unit test the BugsnagConfiguration class
+ * Unit test the RSCrashReporterConfiguration class
  */
 
 #import <XCTest/XCTest.h>
 
-#import "BugsnagConfiguration+Private.h"
+#import "RSCrashReporterConfiguration+Private.h"
 
-#import "BSGCrashSentry.h"
-#import "BugsnagClient+Private.h"
-#import "BugsnagEndpointConfiguration.h"
-#import "BugsnagErrorTypes.h"
-#import "BugsnagNotifier.h"
-#import "BugsnagSessionTracker.h"
-#import "BugsnagTestConstants.h"
-#import "BugsnagUser+Private.h"
+#import "RSCCrashSentry.h"
+#import "RSCrashReporterClient+Private.h"
+#import "RSCrashReporterEndpointConfiguration.h"
+#import "RSCrashReporterErrorTypes.h"
+#import "RSCrashReporterNotifier.h"
+#import "RSCrashReporterSessionTracker.h"
+#import "RSCrashReporterTestConstants.h"
+#import "RSCrashReporterUser+Private.h"
 
 // =============================================================================
 // MARK: - Tests
 // =============================================================================
 
-@interface BugsnagConfigurationTests : XCTestCase
+@interface RSCrashReporterConfigurationTests : XCTestCase
 @end
 
-@implementation BugsnagConfigurationTests
+@implementation RSCrashReporterConfigurationTests
 
 - (void)tearDown {
     [super tearDown];
@@ -34,34 +34,34 @@
 // =============================================================================
 
 - (void)testDefaultSessionNotNil {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertNotNil(config.sessionOrDefault);
 }
 
 - (void)testDefaultSessionConfig {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertTrue([config autoTrackSessions]);
 }
 
 - (void)testSessionEndpoints {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
 
     // Default endpoints
     XCTAssertEqualObjects([NSURL URLWithString:@"https://sessions.bugsnag.com"], config.sessionURL);
 
     // Test overriding the session endpoint (use dummy endpoints to avoid hitting production)
 
-    config.endpoints = [[BugsnagEndpointConfiguration alloc] initWithNotify:@"http://localhost:1234"
+    config.endpoints = [[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@"http://localhost:1234"
                                                                    sessions:@"http://localhost:8000"];
     XCTAssertEqualObjects([NSURL URLWithString:@"http://localhost:8000"], config.sessionURL);
 }
 
 - (void)testSetEmptySessionsEndpoint {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    config.endpoints = [[BugsnagEndpointConfiguration alloc] initWithNotify:@"http://notify.example.com"
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    config.endpoints = [[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@"http://notify.example.com"
                                                                    sessions:@""];
-    BugsnagSessionTracker *sessionTracker
-    = [[BugsnagSessionTracker alloc] initWithConfig:config client:nil];
+    RSCrashReporterSessionTracker *sessionTracker
+    = [[RSCrashReporterSessionTracker alloc] initWithConfig:config client:nil];
 
     XCTAssertNil(sessionTracker.runningSession);
     [sessionTracker startNewSession];
@@ -69,11 +69,11 @@
 }
 
 - (void)testSetMalformedSessionsEndpoint {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    config.endpoints = [[BugsnagEndpointConfiguration alloc] initWithNotify:@"http://notify.example.com"
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    config.endpoints = [[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@"http://notify.example.com"
                                                                    sessions:@"f"];
-    BugsnagSessionTracker *sessionTracker
-    = [[BugsnagSessionTracker alloc] initWithConfig:config client:nil];
+    RSCrashReporterSessionTracker *sessionTracker
+    = [[RSCrashReporterSessionTracker alloc] initWithConfig:config client:nil];
 
     XCTAssertNil(sessionTracker.runningSession);
     [sessionTracker startNewSession];
@@ -87,11 +87,11 @@
 
     // Setup
     __block XCTestExpectation *expectation = [self expectationWithDescription:@"Remove On Session Block"];
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    config.endpoints = [[BugsnagEndpointConfiguration alloc] initWithNotify:@"http://notreal.bugsnag.com"
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    config.endpoints = [[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@"http://notreal.bugsnag.com"
                                                                    sessions:@"http://notreal.bugsnag.com"];
     XCTAssertEqual([[config onSessionBlocks] count], 0);
-    BugsnagOnSessionBlock sessionBlock = ^BOOL(BugsnagSession * _Nonnull sessionPayload) {
+    RSCrashReporterOnSessionBlock sessionBlock = ^BOOL(RSCrashReporterSession * _Nonnull sessionPayload) {
         // We expect the session block to be called
         [expectation fulfill];
         return true;
@@ -100,7 +100,7 @@
     XCTAssertEqual([[config onSessionBlocks] count], 1);
 
     // Call onSession blocks
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     [client resumeSession];
     [self waitForExpectationsWithTimeout:5.0 handler:nil];
@@ -114,22 +114,22 @@
     __block XCTestExpectation *calledExpectation = [self expectationWithDescription:@"Remove On Session Block"];
     calledExpectation.inverted = YES;
 
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    config.endpoints = [[BugsnagEndpointConfiguration alloc] initWithNotify:@"http://notreal.bugsnag.com"
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    config.endpoints = [[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@"http://notreal.bugsnag.com"
                                                                    sessions:@"http://notreal.bugsnag.com"];
     XCTAssertEqual([[config onSessionBlocks] count], 0);
-    BugsnagOnSessionBlock sessionBlock = ^BOOL(BugsnagSession * _Nonnull sessionPayload) {
+    RSCrashReporterOnSessionBlock sessionBlock = ^BOOL(RSCrashReporterSession * _Nonnull sessionPayload) {
         [calledExpectation fulfill];
         return true;
     };
 
     // It's there (and from other tests we know it gets called) and then it's not there
-    BugsnagOnSessionRef callback = [config addOnSessionBlock:sessionBlock];
+    RSCrashReporterOnSessionRef callback = [config addOnSessionBlock:sessionBlock];
     XCTAssertEqual([[config onSessionBlocks] count], 1);
     [config removeOnSession:callback];
     XCTAssertEqual([[config onSessionBlocks] count], 0);
 
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
     // Wait a second NOT to be called
@@ -151,12 +151,12 @@
     expectation3.inverted = YES;
     expectation4.inverted = YES;
 
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    config.endpoints = [[BugsnagEndpointConfiguration alloc] initWithNotify:@"http://notreal.bugsnag.com"
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    config.endpoints = [[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@"http://notreal.bugsnag.com"
                                                                    sessions:@"http://notreal.bugsnag.com"];
     XCTAssertEqual([[config onSessionBlocks] count], 0);
 
-    BugsnagOnSessionBlock sessionBlock = ^BOOL(BugsnagSession * _Nonnull sessionPayload) {
+    RSCrashReporterOnSessionBlock sessionBlock = ^BOOL(RSCrashReporterSession * _Nonnull sessionPayload) {
         switch (called) {
         case 0:
             [expectation1 fulfill];
@@ -176,11 +176,11 @@
         return true;
     };
 
-    BugsnagOnSessionRef callback = [config addOnSessionBlock:sessionBlock];
+    RSCrashReporterOnSessionRef callback = [config addOnSessionBlock:sessionBlock];
     XCTAssertEqual([[config onSessionBlocks] count], 1);
 
     // Call onSession blocks
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     [client resumeSession];
     [self waitForExpectations:@[expectation1] timeout:1.0];
@@ -210,12 +210,12 @@
  * Make sure slightly invalid removals and duplicate additions don't break things
  */
 - (void)testRemoveNonexistentOnSessionBlocks {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertEqual([[config onSessionBlocks] count], 0);
-    BugsnagOnSessionBlock sessionBlock1 = ^BOOL(BugsnagSession * _Nonnull sessionPayload) { return true; };
-    BugsnagOnSessionBlock sessionBlock2 = ^BOOL(BugsnagSession * _Nonnull sessionPayload) { return true; };
+    RSCrashReporterOnSessionBlock sessionBlock1 = ^BOOL(RSCrashReporterSession * _Nonnull sessionPayload) { return true; };
+    RSCrashReporterOnSessionBlock sessionBlock2 = ^BOOL(RSCrashReporterSession * _Nonnull sessionPayload) { return true; };
 
-    BugsnagOnSessionRef callback = [config addOnSessionBlock:sessionBlock1];
+    RSCrashReporterOnSessionRef callback = [config addOnSessionBlock:sessionBlock1];
     XCTAssertEqual([[config onSessionBlocks] count], 1);
     [config removeOnSession:sessionBlock2];
     XCTAssertEqual([[config onSessionBlocks] count], 1);
@@ -235,8 +235,8 @@
 }
 
 - (void)testRemoveInvalidOnSessionDoesNotCrash {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    [config addOnSessionBlock:^BOOL(BugsnagSession *session) { return NO; }];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    [config addOnSessionBlock:^BOOL(RSCrashReporterSession *session) { return NO; }];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnonnull"
     [config removeOnSession:nil];
@@ -251,40 +251,40 @@
 // =============================================================================
 
 - (void)testEnabledReleaseStagesDefaultSends {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertTrue([config shouldSendReports]);
 }
 
 - (void)testEnabledReleaseStagesNilSends {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     config.releaseStage = @"beta";
     config.enabledReleaseStages = nil;
     XCTAssertTrue([config shouldSendReports]);
 }
 
 - (void)testEnabledReleaseStagesEmptySends {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     config.releaseStage = @"beta";
     config.enabledReleaseStages = [NSSet setWithArray:@[]];
     XCTAssertTrue([config shouldSendReports]);
 }
 
 - (void)testEnabledReleaseStagesIncludedSends {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     config.releaseStage = @"beta";
     config.enabledReleaseStages = [NSSet setWithArray:@[ @"beta" ]];
     XCTAssertTrue([config shouldSendReports]);
 }
 
 - (void)testEnabledReleaseStagesIncludedInManySends {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     config.releaseStage = @"beta";
     config.enabledReleaseStages = [NSSet setWithArray:@[ @"beta", @"production" ]];
     XCTAssertTrue([config shouldSendReports]);
 }
 
 - (void)testEnabledReleaseStagesExcludedSkipsSending {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     config.releaseStage = @"beta";
     config.enabledReleaseStages = [NSSet setWithArray:@[ @"production" ]];
     XCTAssertFalse([config shouldSendReports]);
@@ -295,18 +295,18 @@
 // =============================================================================
 
 - (void)testNotifyEndpoint {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertEqualObjects([NSURL URLWithString:@"https://notify.bugsnag.com"], config.notifyURL);
 
     // Test overriding the notify endpoint (use dummy endpoints to avoid hitting production)
-    config.endpoints = [[BugsnagEndpointConfiguration alloc] initWithNotify:@"http://localhost:1234"
+    config.endpoints = [[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@"http://localhost:1234"
                                                                    sessions:@"http://localhost:8000"];
     XCTAssertEqualObjects([NSURL URLWithString:@"http://localhost:1234"], config.notifyURL);
 }
 
 - (void)testSetEndpoints {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    config.endpoints = [[BugsnagEndpointConfiguration alloc] initWithNotify:@"http://notify.example.com"
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    config.endpoints = [[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@"http://notify.example.com"
                                                                    sessions:@"http://sessions.example.com"];
     XCTAssertEqualObjects([NSURL URLWithString:@"http://notify.example.com"], config.notifyURL);
     XCTAssertEqualObjects([NSURL URLWithString:@"http://sessions.example.com"], config.sessionURL);
@@ -314,41 +314,41 @@
 
 // in debug these throw exceptions though in release are "tolerated"
 - (void)testSetNilNotifyEndpoint {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     NSString *notify = @"foo";
     notify = nil;
 #if DEBUG
-    XCTAssertThrowsSpecificNamed([config setEndpoints:[[BugsnagEndpointConfiguration alloc] initWithNotify:notify
+    XCTAssertThrowsSpecificNamed([config setEndpoints:[[RSCrashReporterEndpointConfiguration alloc] initWithNotify:notify
                                                                                                   sessions:@"http://sessions.example.com"]],
             NSException, NSInternalInconsistencyException);
 #else
-    XCTAssertNoThrow([config setEndpoints:[[BugsnagEndpointConfiguration alloc] initWithNotify:@""
+    XCTAssertNoThrow([config setEndpoints:[[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@""
                                                                                                   sessions:@"http://sessions.example.com"]]);
 #endif
 }
 
 // in debug these throw exceptions though in release are "tolerated"
 - (void)testSetEmptyNotifyEndpoint {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
 #if DEBUG
-    XCTAssertThrowsSpecificNamed([config setEndpoints:[[BugsnagEndpointConfiguration alloc] initWithNotify:@""
+    XCTAssertThrowsSpecificNamed([config setEndpoints:[[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@""
             sessions:@"http://sessions.example.com"]],
             NSException, NSInternalInconsistencyException);
 #else
-    XCTAssertNoThrow([config setEndpoints:[[BugsnagEndpointConfiguration alloc] initWithNotify:@""
+    XCTAssertNoThrow([config setEndpoints:[[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@""
             sessions:@"http://sessions.example.com"]]);
 #endif
 }
 
 // in debug these throw exceptions though in release are "tolerated"
 - (void)testSetMalformedNotifyEndpoint {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
 #if DEBUG
-    XCTAssertThrowsSpecificNamed([config setEndpoints:[[BugsnagEndpointConfiguration alloc] initWithNotify:@"http://"
+    XCTAssertThrowsSpecificNamed([config setEndpoints:[[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@"http://"
                                                                                                   sessions:@"http://sessions.example.com"]],
             NSException, NSInternalInconsistencyException);
 #else
-    XCTAssertNoThrow([config setEndpoints:[[BugsnagEndpointConfiguration alloc] initWithNotify:@"http://"
+    XCTAssertNoThrow([config setEndpoints:[[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@"http://"
             sessions:@"http://sessions.example.com"]]);
 #endif
 }
@@ -359,14 +359,14 @@
 
 // Helper
 - (void)getName:(NSString **)name email:(NSString **)email id:(NSString **  )id {
-    BugsnagUser *user = BSGGetPersistedUser();
+    RSCrashReporterUser *user = RSCGetPersistedUser();
     *email = user.email;
     *id = user.id;
     *name = user.name;
 }
 
 - (void)deletePersistedUserData {
-    BSGSetPersistedUser(nil);
+    RSCSetPersistedUser(nil);
 }
 
 - (void)testUserPersistence {
@@ -375,7 +375,7 @@
     NSString *name   = @"foo";
     NSString *userId = @"123";
 
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
 
     // Check property defaults to True
     XCTAssertTrue(config.persistUser);
@@ -397,7 +397,7 @@
     XCTAssertEqualObjects(userDefaultUserId, userId);
 
     // Check persistence between invocations (when values have been set)
-    BugsnagConfiguration *config2 = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config2 = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertEqualObjects(config2.user.email, email);
     XCTAssertEqualObjects(config2.user.name, name);
     XCTAssertEqualObjects(config2.user.id, userId);
@@ -416,7 +416,7 @@
 - (void)testUserNonPesistence {
     NSString *userDefaultEmail, *userDefaultName, *userDefaultUserId;
 
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     config.persistUser = false;
     [self deletePersistedUserData];
 
@@ -427,7 +427,7 @@
     XCTAssertNil(userDefaultName);
     XCTAssertNil(userDefaultUserId);
 
-    BugsnagConfiguration *config2 = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config2 = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertNotNil(config2.user);
     XCTAssertNil(config2.user.id);
     XCTAssertNil(config2.user.name);
@@ -446,7 +446,7 @@
     NSString *name   = @"foo";
     NSString *userId = @"123";
     
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertTrue(config.persistUser);
     [self deletePersistedUserData];
 
@@ -477,12 +477,12 @@
 }
 
 /**
- * Test that persisting a BugsnagUser with all nil fields behaves as expected
+ * Test that persisting a RSCrashReporterUser with all nil fields behaves as expected
  */
 - (void)testAllUserDataNilPersistence {
     NSString *userDefaultEmail, *userDefaultName, *userDefaultUserId;
     
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertTrue(config.persistUser);
     [self deletePersistedUserData];
 
@@ -507,7 +507,7 @@
     NSString *name   = @"foo";
     NSString *userId = @"123";
 
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertTrue(config.persistUser);
     [self deletePersistedUserData];
 
@@ -522,7 +522,7 @@
 
     // Check that retrieving persisted user data also sets configuration metadata
     // Check persistence between invocations (when values have been set)
-    BugsnagConfiguration *config2 = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config2 = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertEqualObjects(config2.user.email, email);
     XCTAssertEqualObjects(config2.user.name, name);
     XCTAssertEqualObjects(config2.user.id, userId);
@@ -533,7 +533,7 @@
 }
 
 - (void)testSettingPersistUser {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertTrue(config.persistUser);
     [config setPersistUser:false];
     XCTAssertFalse(config.persistUser);
@@ -546,7 +546,7 @@
 // =============================================================================
 
 - (void)testMaxPersistedEvents {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertEqual(config.maxPersistedEvents, 32, @"maxPersistedEvents should default to 32");
 
     config.maxPersistedEvents = 10;
@@ -567,7 +567,7 @@
 // =============================================================================
 
 - (void)testMaxPersistedSessions {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertEqual(config.maxPersistedSessions, 128, @"maxPersistedSessions should default to 128");
 
     config.maxPersistedSessions = 10;
@@ -588,7 +588,7 @@
 // =============================================================================
 
 - (void)testMaxBreadcrumb {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertEqual(100, config.maxBreadcrumbs);
 
     // alter to valid value
@@ -617,7 +617,7 @@
 // =============================================================================
 
 - (void)testDefaultConfigurationValues {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
 
 #if TARGET_OS_TV
     XCTAssertEqualObjects(@"tvOS", config.appType);
@@ -632,7 +632,7 @@
     XCTAssertTrue(config.autoTrackSessions);
     XCTAssertEqualObjects(NSBundle.mainBundle.infoDictionary[@"CFBundleVersion"], config.bundleVersion);
     XCTAssertNil(config.context);
-    XCTAssertEqual(BSGEnabledBreadcrumbTypeAll, config.enabledBreadcrumbTypes);
+    XCTAssertEqual(RSCEnabledBreadcrumbTypeAll, config.enabledBreadcrumbTypes);
     XCTAssertTrue(config.enabledErrorTypes.cppExceptions);
     XCTAssertTrue(config.enabledErrorTypes.unhandledExceptions);
     XCTAssertTrue(config.enabledErrorTypes.unhandledRejections);
@@ -657,7 +657,7 @@
 #endif
 
 #if !TARGET_OS_WATCH
-    XCTAssertEqual(BSGThreadSendPolicyAlways, config.sendThreads);
+    XCTAssertEqual(RSCThreadSendPolicyAlways, config.sendThreads);
 #endif
 }
 
@@ -666,7 +666,7 @@
 // =============================================================================
 
 - (void)testDictionaryRepresentation {
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertNotNil(configuration.dictionaryRepresentation[@"appType"]);
     XCTAssertNotNil(configuration.dictionaryRepresentation[@"releaseStage"]);
     
@@ -691,38 +691,38 @@
 - (void)testValidateThrowsWhenMissingApiKey {
     NSString *nilKey = nil;
 
-    XCTAssertThrows([[[BugsnagConfiguration alloc] initWithApiKey:nilKey] validate]);
-    XCTAssertThrows([[[BugsnagConfiguration alloc] initWithApiKey:@""] validate]);
+    XCTAssertThrows([[[RSCrashReporterConfiguration alloc] initWithApiKey:nilKey] validate]);
+    XCTAssertThrows([[[RSCrashReporterConfiguration alloc] initWithApiKey:@""] validate]);
 }
 
 /**
  * When passed an invalid API Key we log a warning message but will still use the key
  */
 - (void)testInitWithApiKeyUsesInvalidApiKeys {
-    BugsnagConfiguration *invalidApiConfig = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_16CHAR];
+    RSCrashReporterConfiguration *invalidApiConfig = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_16CHAR];
     XCTAssertNotNil(invalidApiConfig);
     XCTAssertEqualObjects(invalidApiConfig.apiKey, DUMMY_APIKEY_16CHAR);
 }
 
 -(void)testDesignatedInitializerValidApiKey {
-    BugsnagConfiguration *validApiConfig1 = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *validApiConfig1 = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertNotNil(validApiConfig1);
     XCTAssertEqual([validApiConfig1 apiKey], DUMMY_APIKEY_32CHAR_1);
 
-    BugsnagConfiguration *validApiConfig2 = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_2];
+    RSCrashReporterConfiguration *validApiConfig2 = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_2];
     XCTAssertNotNil(validApiConfig2);
     XCTAssertEqual([validApiConfig2 apiKey], DUMMY_APIKEY_32CHAR_2);
 }
 
 /**
- * [BugsnagConfiguration init] is explicitly made unavailable.
+ * [RSCrashReporterConfiguration init] is explicitly made unavailable.
  * Test that it throws if it *is* called.  An explanation of the reason for
  * the slightly involved code to call the method is given here (hint: ARC):
  *
  *     https://stackoverflow.com/a/20058585/2431627
  */
 -(void)testUnavailableConvenienceInitializer {
-    BugsnagConfiguration *config = [BugsnagConfiguration alloc];
+    RSCrashReporterConfiguration *config = [RSCrashReporterConfiguration alloc];
     SEL selector = NSSelectorFromString(@"init");
     IMP imp = [config methodForSelector:selector];
     void (*func)(id, SEL) = (void *)imp;
@@ -730,7 +730,7 @@
 }
 
 - (void)testUser {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     
     [config setUser:@"123" withEmail:@"test@example.com" andName:@"foo"];
     
@@ -741,8 +741,8 @@
 
 #if !TARGET_OS_WATCH
 
--(void)testBSGErrorTypes {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+-(void)testRSCErrorTypes {
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
 
     // Test all are set by default
     // See config init for details.  OOMs are disabled in debug.
@@ -771,32 +771,32 @@
 }
 
 /**
- * Test the mapping between BSGErrorTypes and KSCrashTypes
+ * Test the mapping between RSCErrorTypes and KSCrashTypes
  */
 -(void)testCrashTypeMapping {
-    XCTAssertEqual(BSG_KSCrashTypeFromBugsnagErrorTypes([BugsnagErrorTypes new]),
-                   BSG_KSCrashTypeNSException |
-                   BSG_KSCrashTypeMachException |
-                   BSG_KSCrashTypeSignal |
-                   BSG_KSCrashTypeCPPException);
+    XCTAssertEqual(RSC_KSCrashTypeFromRSCrashReporterErrorTypes([RSCrashReporterErrorTypes new]),
+                   RSC_KSCrashTypeNSException |
+                   RSC_KSCrashTypeMachException |
+                   RSC_KSCrashTypeSignal |
+                   RSC_KSCrashTypeCPPException);
 
     // Check partial sets
-    BugsnagErrorTypes *errorTypes = [BugsnagErrorTypes new];
+    RSCrashReporterErrorTypes *errorTypes = [RSCrashReporterErrorTypes new];
     errorTypes.ooms = false;
     errorTypes.signals = false;
     errorTypes.machExceptions = false;
-    XCTAssertEqual(BSG_KSCrashTypeFromBugsnagErrorTypes(errorTypes),
-                   BSG_KSCrashTypeNSException | BSG_KSCrashTypeCPPException);
+    XCTAssertEqual(RSC_KSCrashTypeFromRSCrashReporterErrorTypes(errorTypes),
+                   RSC_KSCrashTypeNSException | RSC_KSCrashTypeCPPException);
 
     errorTypes.signals = true;
     errorTypes.cppExceptions = false;
-    XCTAssertEqual(BSG_KSCrashTypeFromBugsnagErrorTypes(errorTypes),
-                   BSG_KSCrashTypeNSException | BSG_KSCrashTypeSignal);
+    XCTAssertEqual(RSC_KSCrashTypeFromRSCrashReporterErrorTypes(errorTypes),
+                   RSC_KSCrashTypeNSException | RSC_KSCrashTypeSignal);
 
     errorTypes.cppExceptions = true;
     errorTypes.unhandledExceptions = false;
-    XCTAssertEqual(BSG_KSCrashTypeFromBugsnagErrorTypes(errorTypes),
-                   BSG_KSCrashTypeCPPException | BSG_KSCrashTypeSignal);
+    XCTAssertEqual(RSC_KSCrashTypeFromRSCrashReporterErrorTypes(errorTypes),
+                   RSC_KSCrashTypeCPPException | RSC_KSCrashTypeSignal);
 }
 
 #endif
@@ -804,17 +804,17 @@
 /**
  * Test that removeOnSendBlock() performs as expected.
  * Note: We don't test that set blocks are executed since this is tested elsewhere
- * (e.g. in BugsnagBreadcrumbsTest)
+ * (e.g. in RSCrashReporterBreadcrumbsTest)
  */
 - (void) testRemoveOnSendBlock {
     // Prevent sending events
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertEqual([[configuration onSendBlocks] count], 0);
 
-    BugsnagOnSendErrorBlock block = ^BOOL(BugsnagEvent * _Nonnull event) { return false; };
+    RSCrashReporterOnSendErrorBlock block = ^BOOL(RSCrashReporterEvent * _Nonnull event) { return false; };
 
-    BugsnagOnSendErrorRef callback = [configuration addOnSendErrorBlock:block];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
+    RSCrashReporterOnSendErrorRef callback = [configuration addOnSendErrorBlock:block];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
 
     XCTAssertEqual([[configuration onSendBlocks] count], 1);
@@ -828,17 +828,17 @@
  */
 - (void) testClearOnSendBlock {
     // Prevent sending events
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertEqual([[configuration onSendBlocks] count], 0);
 
-    BugsnagOnSendErrorBlock block1 = ^BOOL(BugsnagEvent * _Nonnull event) { return false; };
-    BugsnagOnSendErrorBlock block2 = ^BOOL(BugsnagEvent * _Nonnull event) { return false; };
+    RSCrashReporterOnSendErrorBlock block1 = ^BOOL(RSCrashReporterEvent * _Nonnull event) { return false; };
+    RSCrashReporterOnSendErrorBlock block2 = ^BOOL(RSCrashReporterEvent * _Nonnull event) { return false; };
 
     // Add more than one
     [configuration addOnSendErrorBlock:block1];
     [configuration addOnSendErrorBlock:block2];
 
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
 
     XCTAssertEqual([[configuration onSendBlocks] count], 2);
@@ -846,13 +846,13 @@
 
 - (void)testSendThreadsDefault {
 #if !TARGET_OS_WATCH
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    XCTAssertEqual(BSGThreadSendPolicyAlways, config.sendThreads);
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    XCTAssertEqual(RSCThreadSendPolicyAlways, config.sendThreads);
 #endif
 }
 
 - (void)testNSCopying {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
 
     // Set some arbirtary values:
     [config setUser:@"foo" withEmail:@"bar@baz.com" andName:@"Bill"];
@@ -860,25 +860,25 @@
     [config setAutoDetectErrors:YES];
     [config setContext:@"context1"];
     [config setAppType:@"The most amazing app, a brilliant app, the app to end all apps"];
-    [config setNotifier:[[BugsnagNotifier alloc] initWithName:@"Example"
+    [config setNotifier:[[RSCrashReporterNotifier alloc] initWithName:@"Example"
                                                       version:@"0.0.0"
                                                           url:@"https://example.com"
-                                                 dependencies:@[[[BugsnagNotifier alloc] init]]]];
+                                                 dependencies:@[[[RSCrashReporterNotifier alloc] init]]]];
     [config setPersistUser:YES];
 #if !TARGET_OS_WATCH
-    [config setSendThreads:BSGThreadSendPolicyUnhandledOnly];
+    [config setSendThreads:RSCThreadSendPolicyUnhandledOnly];
 #endif
     [config setMaxStringValueLength:100];
     [config addPlugin:(id)[NSNull null]];
 
-    BugsnagOnSendErrorBlock onSendBlock1 = ^BOOL(BugsnagEvent * _Nonnull event) { return true; };
-    BugsnagOnSendErrorBlock onSendBlock2 = ^BOOL(BugsnagEvent * _Nonnull event) { return true; };
+    RSCrashReporterOnSendErrorBlock onSendBlock1 = ^BOOL(RSCrashReporterEvent * _Nonnull event) { return true; };
+    RSCrashReporterOnSendErrorBlock onSendBlock2 = ^BOOL(RSCrashReporterEvent * _Nonnull event) { return true; };
 
     NSArray *sendBlocks = @[ onSendBlock1, onSendBlock2 ];
     [config setOnSendBlocks:[sendBlocks mutableCopy]]; // Mutable arg required
 
     // Clone
-    BugsnagConfiguration *clone = [config copy];
+    RSCrashReporterConfiguration *clone = [config copy];
     XCTAssertNotEqual(config, clone);
 
     // Change values
@@ -909,7 +909,7 @@
     // Block
     [clone setOnCrashHandler:config.onCrashHandler];
     XCTAssertEqual(config.onCrashHandler, clone.onCrashHandler);
-    [clone setOnCrashHandler:(void *)^(const BSG_KSCrashReportWriter *_Nonnull writer){}];
+    [clone setOnCrashHandler:(void *)^(const RSC_KSCrashReportWriter *_Nonnull writer){}];
     XCTAssertNotEqual(config.onCrashHandler, clone.onCrashHandler);
 
     // Array (of blocks)
@@ -930,7 +930,7 @@
 }
 
 - (void)testMetadataMutability {
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
 
     // Immutable in, mutable out
     [configuration addMetadata:@{@"foo" : @"bar"} toSection:@"section1"];
@@ -944,7 +944,7 @@
 }
 
 - (void)testDiscardClasses {
-    XCTAssertNil([[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1].discardClasses, @"discardClasses should be nil be default");
+    XCTAssertNil([[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1].discardClasses, @"discardClasses should be nil be default");
     
     NSArray<NSString *> *errorClasses = @[@"EXC_BAD_ACCESS",
                                           @"EXC_BAD_INSTRUCTION",
@@ -963,7 +963,7 @@
     __block NSArray *discarded, *kept;
     
     void (^ applyDiscardClasses)(NSSet *) = ^(NSSet *discardClasses){
-        BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+        RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
         configuration.discardClasses = discardClasses;
         NSPredicate *shouldDiscard = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
             return [configuration shouldDiscardErrorClass:evaluatedObject];

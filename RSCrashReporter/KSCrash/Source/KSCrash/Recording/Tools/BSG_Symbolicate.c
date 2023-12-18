@@ -1,26 +1,26 @@
 //
-//  BSG_Symbolicate.c
-//  Bugsnag
+//  RSC_Symbolicate.c
+//  RSCrashReporter
 //
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#include "BSG_Symbolicate.h"
+#include "RSC_Symbolicate.h"
 
-#include "BSG_KSLogger.h"
-#include "BSG_KSMachHeaders.h"
+#include "RSC_KSLogger.h"
+#include "RSC_KSMachHeaders.h"
 
 #include <mach-o/loader.h>
 #include <mach-o/nlist.h>
 #include <string.h>
 
 #ifdef __LP64__
-#define LC_SEGMENT_BSG LC_SEGMENT_64
+#define LC_SEGMENT_RSC LC_SEGMENT_64
 typedef struct nlist_64 nlist_t;
 typedef struct segment_command_64 segment_command_t;
 typedef struct section_64 section_t;
 #else
-#define LC_SEGMENT_BSG LC_SEGMENT
+#define LC_SEGMENT_RSC LC_SEGMENT
 typedef struct nlist nlist_t;
 typedef struct segment_command segment_command_t;
 typedef struct section section_t;
@@ -47,15 +47,15 @@ static int leb128_uintptr_decode(struct leb128_uintptr_context *context, uint8_t
 #if __clang_major__ >= 11 // Xcode 10 does not like the following attribute
 __attribute__((annotate("oclint:suppress[deep nested block]")))
 #endif
-void bsg_symbolicate(const uintptr_t instruction_addr, struct bsg_symbolicate_result *result) {
+void rsc_symbolicate(const uintptr_t instruction_addr, struct rsc_symbolicate_result *result) {
     bzero(result, sizeof(*result));
     
-    struct bsg_mach_image *image = bsg_mach_headers_image_at_address(instruction_addr);
+    struct rsc_mach_image *image = rsc_mach_headers_image_at_address(instruction_addr);
     if (!image || !image->header) {
         return;
     }
     
-    const struct load_command *load_cmd = (const void *)bsg_mach_headers_first_cmd_after_header(image->header);
+    const struct load_command *load_cmd = (const void *)rsc_mach_headers_first_cmd_after_header(image->header);
     if (!load_cmd) {
         return;
     }
@@ -70,7 +70,7 @@ void bsg_symbolicate(const uintptr_t instruction_addr, struct bsg_symbolicate_re
     
     for (uint32_t lc_idx = 0; lc_idx < image->header->ncmds; ++lc_idx) {
         switch (load_cmd->cmd) {
-            case LC_SEGMENT_BSG: {
+            case LC_SEGMENT_RSC: {
                 const segment_command_t *seg_cmd = (const void *)load_cmd;
                 
                 // The function starts and symtab data resides in __LINKEDIT
@@ -90,7 +90,7 @@ void bsg_symbolicate(const uintptr_t instruction_addr, struct bsg_symbolicate_re
                             uintptr_t start = section->addr + slide;
                             uintptr_t end = start + section->size;
                             if (instruction_addr < start || instruction_addr >= end) {
-                                BSG_KSLOG_ERROR("Address %p is outside the " SECT_TEXT " section of image %s",
+                                RSC_KSLOG_ERROR("Address %p is outside the " SECT_TEXT " section of image %s",
                                                 (void *)instruction_addr, image->name);
                                 return;
                             }
@@ -119,7 +119,7 @@ void bsg_symbolicate(const uintptr_t instruction_addr, struct bsg_symbolicate_re
     }
     
     if (!linkedit) {
-        BSG_KSLOG_INFO(SEG_LINKEDIT " not found for %s", image->name);
+        RSC_KSLOG_INFO(SEG_LINKEDIT " not found for %s", image->name);
         return;
     }
     
@@ -130,10 +130,10 @@ void bsg_symbolicate(const uintptr_t instruction_addr, struct bsg_symbolicate_re
     // that lets us compute the data's address in memory regardless of layout.
 #define get_linkedit_data(__dataoff__, __size__) ({ \
     if (__dataoff__ < linkedit->fileoff) { \
-        BSG_KSLOG_DEBUG(#__dataoff__ " < linkedit->fileoff"); \
+        RSC_KSLOG_DEBUG(#__dataoff__ " < linkedit->fileoff"); \
         return; } \
     if (__dataoff__ + __size__ > linkedit->fileoff + linkedit->filesize) { \
-        BSG_KSLOG_DEBUG(#__dataoff__ " + " #__size__ " > linkedit->fileoff + linkedit->filesize"); \
+        RSC_KSLOG_DEBUG(#__dataoff__ " + " #__size__ " > linkedit->fileoff + linkedit->filesize"); \
         return; } \
     (const void *)(__dataoff__ - linkedit->fileoff + linkedit_addr); })
     
@@ -175,7 +175,7 @@ void bsg_symbolicate(const uintptr_t instruction_addr, struct bsg_symbolicate_re
         // may not have any symbols.
         //
         // The back-end will still be able to symbolicate if the dSYM was uploaded.
-        BSG_KSLOG_INFO("No LC_FUNCTION_STARTS, skipping in-process symbolication for %s", image->name);
+        RSC_KSLOG_INFO("No LC_FUNCTION_STARTS, skipping in-process symbolication for %s", image->name);
         return;
     }
     

@@ -1,39 +1,39 @@
 #import <XCTest/XCTest.h>
 
 #import <RSCrashReporter/RSCrashReporter.h>
-#import "BSGConfigurationBuilder.h"
-#import "BugsnagConfiguration+Private.h"
-#import "BugsnagTestConstants.h"
+#import "RSCConfigurationBuilder.h"
+#import "RSCrashReporterConfiguration+Private.h"
+#import "RSCrashReporterTestConstants.h"
 #import <TargetConditionals.h>
 
-@interface BSGConfigurationBuilderTests : XCTestCase
+@interface RSCConfigurationBuilderTests : XCTestCase
 @end
 
-@implementation BSGConfigurationBuilderTests
+@implementation RSCConfigurationBuilderTests
 
 // MARK: - rejecting invalid plists
 
 - (void)testDecodeEmptyApiKey {
-    BugsnagConfiguration *configuration;
-    XCTAssertNoThrow(configuration = BSGConfigurationWithOptions(@{@"apiKey": @""}));
+    RSCrashReporterConfiguration *configuration;
+    XCTAssertNoThrow(configuration = RSCConfigurationWithOptions(@{@"apiKey": @""}));
     XCTAssertEqualObjects(configuration.apiKey, @"");
     XCTAssertThrows([configuration validate]);
 }
 
 - (void)testDecodeInvalidTypeApiKey {
-    XCTAssertThrows(BSGConfigurationWithOptions(@{@"apiKey": @[@"one"]}));
+    XCTAssertThrows(RSCConfigurationWithOptions(@{@"apiKey": @[@"one"]}));
 }
 
 - (void)testDecodeWithoutApiKey {
-    BugsnagConfiguration *configuration;
-    XCTAssertNoThrow(configuration = BSGConfigurationWithOptions(@{@"autoDetectErrors": @NO}));
+    RSCrashReporterConfiguration *configuration;
+    XCTAssertNoThrow(configuration = RSCConfigurationWithOptions(@{@"autoDetectErrors": @NO}));
     XCTAssertNil(configuration.apiKey);
     XCTAssertFalse(configuration.autoDetectErrors);
     XCTAssertThrows([configuration validate]);
 }
 
 - (void)testDecodeUnknownKeys {
-    BugsnagConfiguration *config = BSGConfigurationWithOptions(@{
+    RSCrashReporterConfiguration *config = RSCConfigurationWithOptions(@{
             @"giraffes": @3,
             @"apiKey": DUMMY_APIKEY_32CHAR_1
     });
@@ -41,13 +41,13 @@
 }
 
 - (void)testDecodeEmptyOptions {
-    XCTAssertNoThrow(BSGConfigurationWithOptions(@{}));
+    XCTAssertNoThrow(RSCConfigurationWithOptions(@{}));
 }
 
 // MARK: - config loading
 
 - (void)testDecodeDefaultValues {
-    BugsnagConfiguration *config = BSGConfigurationWithOptions(@{@"apiKey": DUMMY_APIKEY_32CHAR_1});
+    RSCrashReporterConfiguration *config = RSCConfigurationWithOptions(@{@"apiKey": DUMMY_APIKEY_32CHAR_1});
     XCTAssertNotNil(config);
     XCTAssertEqualObjects(DUMMY_APIKEY_32CHAR_1, config.apiKey);
     XCTAssertNotNil(config.appType);
@@ -59,12 +59,12 @@
     XCTAssertEqual(config.maxBreadcrumbs, 100);
     XCTAssertTrue(config.persistUser);
     XCTAssertEqualObjects(@[@"password"], [config.redactedKeys allObjects]);
-    XCTAssertEqual(BSGEnabledBreadcrumbTypeAll, config.enabledBreadcrumbTypes);
+    XCTAssertEqual(RSCEnabledBreadcrumbTypeAll, config.enabledBreadcrumbTypes);
     XCTAssertEqualObjects(@"https://notify.bugsnag.com", config.endpoints.notify);
     XCTAssertEqualObjects(@"https://sessions.bugsnag.com", config.endpoints.sessions);
 #if !TARGET_OS_WATCH
     XCTAssertTrue(config.enabledErrorTypes.ooms);
-    XCTAssertEqual(BSGThreadSendPolicyAlways, config.sendThreads);
+    XCTAssertEqual(RSCThreadSendPolicyAlways, config.sendThreads);
 #endif
 
 #if DEBUG
@@ -84,8 +84,8 @@
 }
 
 - (void)testDecodeFullConfig {
-    BugsnagConfiguration *config =
-    BSGConfigurationWithOptions(@{
+    RSCrashReporterConfiguration *config =
+    RSCConfigurationWithOptions(@{
                     @"apiKey": DUMMY_APIKEY_32CHAR_1,
                     @"appType": @"cocoa-custom",
                     @"appVersion": @"5.2.33",
@@ -128,7 +128,7 @@
     XCTAssertTrue(config.enabledErrorTypes.unhandledRejections);
 
 #if !TARGET_OS_WATCH
-    XCTAssertEqual(BSGThreadSendPolicyNever, config.sendThreads);
+    XCTAssertEqual(RSCThreadSendPolicyNever, config.sendThreads);
     XCTAssertTrue(config.enabledErrorTypes.ooms);
     XCTAssertTrue(config.enabledErrorTypes.signals);
     XCTAssertTrue(config.enabledErrorTypes.machExceptions);
@@ -138,13 +138,13 @@
 // MARK: - individual values
 
 #define TEST_BOOL(key) ({ \
-    XCTAssertEqual(BSGConfigurationWithOptions(@{@#key: @YES}).key, YES); \
-    XCTAssertEqual(BSGConfigurationWithOptions(@{@#key: @NO}).key, NO); \
+    XCTAssertEqual(RSCConfigurationWithOptions(@{@#key: @YES}).key, YES); \
+    XCTAssertEqual(RSCConfigurationWithOptions(@{@#key: @NO}).key, NO); \
 })
 
 #define TEST_NUMBER(key, value1, value2) ({ \
-    XCTAssertEqual(BSGConfigurationWithOptions(@{@#key: @value1}).key, value1); \
-    XCTAssertEqual(BSGConfigurationWithOptions(@{@#key: @value2}).key, value2); \
+    XCTAssertEqual(RSCConfigurationWithOptions(@{@#key: @value1}).key, value1); \
+    XCTAssertEqual(RSCConfigurationWithOptions(@{@#key: @value2}).key, value2); \
 })
 
 #if !TARGET_OS_WATCH
@@ -158,7 +158,7 @@
 }
 
 - (void)testDiscardClasses {
-    XCTAssertEqualObjects(BSGConfigurationWithOptions(@{@"discardClasses": @[@"one", @"two"]})
+    XCTAssertEqualObjects(RSCConfigurationWithOptions(@{@"discardClasses": @[@"one", @"two"]})
                           .discardClasses, ([NSSet setWithObjects:@"one", @"two", nil]));
 }
 
@@ -183,8 +183,8 @@
 // MARK: - invalid config options
 
 - (void)testInvalidConfigOptions {
-    BugsnagConfiguration *config =
-    BSGConfigurationWithOptions(@{
+    RSCrashReporterConfiguration *config =
+    RSCConfigurationWithOptions(@{
                     @"apiKey": DUMMY_APIKEY_32CHAR_1,
                     @"appType": @[],
                     @"appVersion": @99,
@@ -206,21 +206,21 @@
 }
 
 - (void)testDecodeEnabledReleaseStagesInvalidTypes {
-    BugsnagConfiguration *config = BSGConfigurationWithOptions(@{
+    RSCrashReporterConfiguration *config = RSCConfigurationWithOptions(@{
             @"enabledReleaseStages": @[@"beta", @"prod", @300],
             @"apiKey": DUMMY_APIKEY_32CHAR_1
     });
     XCTAssertNotNil(config);
     XCTAssertNil(config.enabledReleaseStages);
 
-    config = BSGConfigurationWithOptions(@{
+    config = RSCConfigurationWithOptions(@{
             @"enabledReleaseStages": @{@"name": @"foo"},
             @"apiKey": DUMMY_APIKEY_32CHAR_1
     });
     XCTAssertNotNil(config);
     XCTAssertNil(config.enabledReleaseStages);
 
-    config = BSGConfigurationWithOptions(@{
+    config = RSCConfigurationWithOptions(@{
             @"enabledReleaseStages": @"fooo",
             @"apiKey": DUMMY_APIKEY_32CHAR_1
     });
@@ -229,7 +229,7 @@
 }
 
 - (void)testDecodeEndpointsInvalidTypes {
-    BugsnagConfiguration *config = BSGConfigurationWithOptions(@{
+    RSCrashReporterConfiguration *config = RSCConfigurationWithOptions(@{
             @"endpoints": @"foo",
             @"apiKey": DUMMY_APIKEY_32CHAR_1
     });
@@ -237,7 +237,7 @@
     XCTAssertEqualObjects(@"https://notify.bugsnag.com", config.endpoints.notify);
     XCTAssertEqualObjects(@"https://sessions.bugsnag.com", config.endpoints.sessions);
 
-    config = BSGConfigurationWithOptions(@{
+    config = RSCConfigurationWithOptions(@{
             @"endpoints": @[@"http://example.com", @"http://foo.example.com"],
             @"apiKey": DUMMY_APIKEY_32CHAR_1
     });
@@ -245,7 +245,7 @@
     XCTAssertEqualObjects(@"https://notify.bugsnag.com", config.endpoints.notify);
     XCTAssertEqualObjects(@"https://sessions.bugsnag.com", config.endpoints.sessions);
 
-    config = BSGConfigurationWithOptions(@{
+    config = RSCConfigurationWithOptions(@{
             @"endpoints": @{},
             @"apiKey": DUMMY_APIKEY_32CHAR_1
     });
@@ -255,7 +255,7 @@
 }
 
 - (void)testDecodeEndpointsOnlyNotifySet {
-    BugsnagConfiguration *config = BSGConfigurationWithOptions(@{
+    RSCrashReporterConfiguration *config = RSCConfigurationWithOptions(@{
             @"apiKey": DUMMY_APIKEY_32CHAR_1,
             @"endpoints": @{
                     @"notify": @"https://notify.example.com",
@@ -267,7 +267,7 @@
 }
 
 - (void)testDecodeEndpointsOnlySessionsSet {
-    BugsnagConfiguration *config = BSGConfigurationWithOptions(@{
+    RSCrashReporterConfiguration *config = RSCConfigurationWithOptions(@{
             @"apiKey": DUMMY_APIKEY_32CHAR_1,
             @"endpoints": @{@"sessions": @"https://sessions.example.com"},
     });
@@ -277,7 +277,7 @@
 }
 
 - (void)testDecodeReleaseStageInvalidType {
-    BugsnagConfiguration *config = BSGConfigurationWithOptions(@{
+    RSCrashReporterConfiguration *config = RSCConfigurationWithOptions(@{
             @"releaseStage": @NO,
             @"apiKey": DUMMY_APIKEY_32CHAR_1
     });

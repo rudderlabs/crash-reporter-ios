@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:Bugsnag.xcodeproj">
+      location = "self:RSCrashReporter.xcodeproj">
    </FileRef>
 </Workspace>

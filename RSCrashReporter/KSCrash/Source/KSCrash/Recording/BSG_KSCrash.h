@@ -1,5 +1,5 @@
 //
-//  BSG_KSCrash.h
+//  RSC_KSCrash.h
 //
 //  Created by Karl Stenerud on 2012-01-28.
 //
@@ -26,20 +26,20 @@
 
 #import <Foundation/Foundation.h>
 
-#import "BSGDefines.h"
-#import "BSG_KSCrashType.h"
+#import "RSCDefines.h"
+#import "RSC_KSCrashType.h"
 
 /**
  * Reports any crashes that occur in the application.
  *
  * The crash reports will be located in $APP_HOME/Library/Caches/KSCrashReports
  */
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSG_KSCrash : NSObject
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSC_KSCrash : NSObject
 
 /** Get the singleton instance of the crash reporter.
  */
-+ (BSG_KSCrash *)sharedInstance;
++ (RSC_KSCrash *)sharedInstance;
 
 /**
  * Install the crash reporter.
@@ -47,6 +47,6 @@ BSG_OBJC_DIRECT_MEMBERS
  * @return The crash types that are now behing handled, representing the crash
  *         sentries that were successfully installed.
  */
-- (BSG_KSCrashType)install:(BSG_KSCrashType)crashTypes directory:(NSString *)directory;
+- (RSC_KSCrashType)install:(RSC_KSCrashType)crashTypes directory:(NSString *)directory;
 
 @end

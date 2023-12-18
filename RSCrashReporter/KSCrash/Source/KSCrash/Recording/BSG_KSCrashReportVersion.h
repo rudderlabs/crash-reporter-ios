@@ -1,5 +1,5 @@
 //
-//  BSG_KSCrashReportVersion.h
+//  RSC_KSCrashReportVersion.h
 //
 //  Created by Karl Stenerud on 2016-03-10.
 //
@@ -24,9 +24,9 @@
 // THE SOFTWARE.
 //
 
-#ifndef HDR_BSG_KSCrashReportVersion_h
-#define HDR_BSG_KSCrashReportVersion_h
+#ifndef HDR_RSC_KSCrashReportVersion_h
+#define HDR_RSC_KSCrashReportVersion_h
 
-#define BSG_KSCRASH_REPORT_VERSION "3.1.0"
+#define RSC_KSCRASH_REPORT_VERSION "3.1.0"
 
 #endif /* HDR_KSCrashReportVersion_h */

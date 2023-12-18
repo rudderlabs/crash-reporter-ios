@@ -1,18 +1,18 @@
 //
-//  BugsnagDeviceWithState+Private.h
-//  Bugsnag
+//  RSCrashReporterDeviceWithState+Private.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 04/12/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BugsnagInternals.h"
+#import "RSCrashReporterInternals.h"
 
-struct BSGRunContext;
+struct RSCRunContext;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface BugsnagDeviceWithState ()
+@interface RSCrashReporterDeviceWithState ()
 
 #pragma mark Initializers
 
@@ -26,8 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-NSMutableDictionary *BSGParseDeviceMetadata(NSDictionary *event);
+NSMutableDictionary *RSCParseDeviceMetadata(NSDictionary *event);
 
-NSDictionary * BSGDeviceMetadataFromRunContext(const struct BSGRunContext *context);
+NSDictionary * RSCDeviceMetadataFromRunContext(const struct RSCRunContext *context);
 
 NS_ASSUME_NONNULL_END

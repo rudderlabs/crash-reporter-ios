@@ -1,41 +1,41 @@
 //
-//  BSGAppHangDetector.h
-//  Bugsnag
+//  RSCAppHangDetector.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 01/03/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGDefines.h"
+#import "RSCDefines.h"
 
-#if BSG_HAVE_APP_HANG_DETECTION
+#if RSC_HAVE_APP_HANG_DETECTION
 
 #import <Foundation/Foundation.h>
 
-@class BugsnagConfiguration;
-@class BugsnagEvent;
-@class BugsnagThread;
+@class RSCrashReporterConfiguration;
+@class RSCrashReporterEvent;
+@class RSCrashReporterThread;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol BSGAppHangDetectorDelegate;
+@protocol RSCAppHangDetectorDelegate;
 
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSGAppHangDetector : NSObject
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCAppHangDetector : NSObject
 
-- (void)startWithDelegate:(id<BSGAppHangDetectorDelegate>)delegate;
+- (void)startWithDelegate:(id<RSCAppHangDetectorDelegate>)delegate;
 
 - (void)stop;
 
 @end
 
 
-@protocol BSGAppHangDetectorDelegate <NSObject>
+@protocol RSCAppHangDetectorDelegate <NSObject>
 
-@property (readonly) BugsnagConfiguration *configuration;
+@property (readonly) RSCrashReporterConfiguration *configuration;
 
-- (void)appHangDetectedAtDate:(NSDate *)date withThreads:(NSArray<BugsnagThread *> *)threads systemInfo:(NSDictionary *)systemInfo;
+- (void)appHangDetectedAtDate:(NSDate *)date withThreads:(NSArray<RSCrashReporterThread *> *)threads systemInfo:(NSDictionary *)systemInfo;
 
 - (void)appHangEnded;
 

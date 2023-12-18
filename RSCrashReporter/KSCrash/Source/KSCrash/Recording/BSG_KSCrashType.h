@@ -1,5 +1,5 @@
 //
-//  BSG_KSCrashType.h
+//  RSC_KSCrashType.h
 //
 //  Copyright (c) 2012 Karl Stenerud. All rights reserved.
 //
@@ -22,8 +22,8 @@
 // THE SOFTWARE.
 //
 
-#ifndef HDR_BSG_KSCrashType_h
-#define HDR_BSG_KSCrashType_h
+#ifndef HDR_RSC_KSCrashType_h
+#define HDR_RSC_KSCrashType_h
 
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -35,32 +35,32 @@
  */
 
 
-typedef CF_ENUM(unsigned, BSG_KSCrashType) {
-    BSG_KSCrashTypeMachException = 0x01,
-    BSG_KSCrashTypeSignal = 0x02,
-    BSG_KSCrashTypeCPPException = 0x04,
-    BSG_KSCrashTypeNSException = 0x08,
+typedef CF_ENUM(unsigned, RSC_KSCrashType) {
+    RSC_KSCrashTypeMachException = 0x01,
+    RSC_KSCrashTypeSignal = 0x02,
+    RSC_KSCrashTypeCPPException = 0x04,
+    RSC_KSCrashTypeNSException = 0x08,
 };
 
-#define BSG_KSCrashTypeAll                                                     \
-    (BSG_KSCrashTypeMachException | BSG_KSCrashTypeSignal |                    \
-     BSG_KSCrashTypeCPPException | BSG_KSCrashTypeNSException)
+#define RSC_KSCrashTypeAll                                                     \
+    (RSC_KSCrashTypeMachException | RSC_KSCrashTypeSignal |                    \
+     RSC_KSCrashTypeCPPException | RSC_KSCrashTypeNSException)
 
-#define BSG_KSCrashTypeDebuggerUnsafe                                          \
-    (BSG_KSCrashTypeMachException | BSG_KSCrashTypeNSException)
+#define RSC_KSCrashTypeDebuggerUnsafe                                          \
+    (RSC_KSCrashTypeMachException | RSC_KSCrashTypeNSException)
 
-#define BSG_KSCrashTypeAsyncSafe                                               \
-    (BSG_KSCrashTypeMachException | BSG_KSCrashTypeSignal)
+#define RSC_KSCrashTypeAsyncSafe                                               \
+    (RSC_KSCrashTypeMachException | RSC_KSCrashTypeSignal)
 
 /** Crash types that are safe to enable in a debugger. */
-#define BSG_KSCrashTypeDebuggerSafe                                            \
-    (BSG_KSCrashTypeAll & (~BSG_KSCrashTypeDebuggerUnsafe))
+#define RSC_KSCrashTypeDebuggerSafe                                            \
+    (RSC_KSCrashTypeAll & (~RSC_KSCrashTypeDebuggerUnsafe))
 
 /** It is safe to catch these kinds of crashes in a production environment.
  * All other crash types should be considered experimental.
  */
-#define BSG_KSCrashTypeProductionSafe BSG_KSCrashTypeAll
+#define RSC_KSCrashTypeProductionSafe RSC_KSCrashTypeAll
 
-#define BSG_KSCrashTypeNone 0
+#define RSC_KSCrashTypeNone 0
 
 #endif // HDR_KSCrashType_h

@@ -1,22 +1,22 @@
 //
-//  BugsnagDevice.m
-//  Bugsnag
+//  RSCrashReporterDevice.m
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 01/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
-#import "BugsnagDevice.h"
+#import "RSCrashReporterDevice.h"
 
-#import "BSG_KSCrashReportFields.h"
-#import "BSG_KSSystemInfo.h"
-#import "BugsnagConfiguration.h"
-#import "BugsnagCollections.h"
+#import "RSC_KSCrashReportFields.h"
+#import "RSC_KSSystemInfo.h"
+#import "RSCrashReporterConfiguration.h"
+#import "RSCrashReporterCollections.h"
 
-@implementation BugsnagDevice
+@implementation RSCrashReporterDevice
 
-+ (BugsnagDevice *)deserializeFromJson:(NSDictionary *)json {
-    BugsnagDevice *device = [BugsnagDevice new];
++ (RSCrashReporterDevice *)deserializeFromJson:(NSDictionary *)json {
+    RSCrashReporterDevice *device = [RSCrashReporterDevice new];
     if (json != nil) {
         device.jailbroken = [json[@"jailbroken"] boolValue];
         device.id = nil; //json[@"id"];
@@ -32,28 +32,28 @@
     return device;
 }
 
-+ (BugsnagDevice *)deviceWithKSCrashReport:(NSDictionary *)event {
-    BugsnagDevice *device = [BugsnagDevice new];
++ (RSCrashReporterDevice *)deviceWithKSCrashReport:(NSDictionary *)event {
+    RSCrashReporterDevice *device = [RSCrashReporterDevice new];
     [self populateFields:device dictionary:event];
     return device;
 }
 
-+ (void)populateFields:(BugsnagDevice *)device
++ (void)populateFields:(RSCrashReporterDevice *)device
             dictionary:(NSDictionary *)event {
     NSDictionary *system = event[@"system"];
-    device.jailbroken = [system[@BSG_KSSystemField_Jailbroken] boolValue];
-    device.id = nil; //system[@BSG_KSSystemField_DeviceAppHash];
+    device.jailbroken = [system[@RSC_KSSystemField_Jailbroken] boolValue];
+    device.id = nil; //system[@RSC_KSSystemField_DeviceAppHash];
     device.locale = [[NSLocale currentLocale] localeIdentifier];
     device.manufacturer = @"Apple";
-    device.model = system[@BSG_KSSystemField_Machine];
-    device.modelNumber = system[@BSG_KSSystemField_Model];
-    device.osName = system[@BSG_KSSystemField_SystemName];
-    device.osVersion = system[@BSG_KSSystemField_SystemVersion];
-    device.totalMemory = system[@ BSG_KSSystemField_Memory][@ BSG_KSCrashField_Size];
+    device.model = system[@RSC_KSSystemField_Machine];
+    device.modelNumber = system[@RSC_KSSystemField_Model];
+    device.osName = system[@RSC_KSSystemField_SystemName];
+    device.osVersion = system[@RSC_KSSystemField_SystemVersion];
+    device.totalMemory = system[@ RSC_KSSystemField_Memory][@ RSC_KSCrashField_Size];
 
     NSMutableDictionary *runtimeVersions = [NSMutableDictionary new];
-    runtimeVersions[@"osBuild"] = system[@BSG_KSSystemField_OSVersion];
-    runtimeVersions[@"clangVersion"] = system[@BSG_KSSystemField_ClangVersion];
+    runtimeVersions[@"osBuild"] = system[@RSC_KSSystemField_OSVersion];
+    runtimeVersions[@"clangVersion"] = system[@RSC_KSSystemField_ClangVersion];
     device.runtimeVersions = runtimeVersions;
 }
 

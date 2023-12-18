@@ -1,12 +1,12 @@
 //
-//  BSG_KSMachHeadersTests.m
+//  RSC_KSMachHeadersTests.m
 //  Tests
 //
 //  Created by Robin Macharg on 04/05/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
-#import "BSG_KSMachHeaders.h"
+#import "RSC_KSMachHeaders.h"
 #import <RSCrashReporter/RSCrashReporter.h>
 #import <XCTest/XCTest.h>
 #import <dlfcn.h>
@@ -47,46 +47,46 @@ const struct segment_command command2 = {
     .vmsize = 10,
 };
 
-@interface BSG_KSMachHeadersTests : XCTestCase
+@interface RSC_KSMachHeadersTests : XCTestCase
 @end
 
-@implementation BSG_KSMachHeadersTests
+@implementation RSC_KSMachHeadersTests
 
 - (void)setUp {
-    bsg_mach_headers_initialize();
+    rsc_mach_headers_initialize();
 }
 
-static BSG_Mach_Header_Info *get_tail(BSG_Mach_Header_Info *head) {
-    BSG_Mach_Header_Info *current = head;
+static RSC_Mach_Header_Info *get_tail(RSC_Mach_Header_Info *head) {
+    RSC_Mach_Header_Info *current = head;
     for (; current->next != NULL; current = current->next) {
     }
     return current;
 }
 
 - (void)testAddRemove {
-    bsg_test_support_mach_headers_reset();
+    rsc_test_support_mach_headers_reset();
 
-    bsg_test_support_mach_headers_add_image(&header1, 0);
+    rsc_test_support_mach_headers_add_image(&header1, 0);
     
-    BSG_Mach_Header_Info *listTail = get_tail(bsg_mach_headers_get_images());
+    RSC_Mach_Header_Info *listTail = get_tail(rsc_mach_headers_get_images());
     XCTAssertEqual(listTail->imageVmAddr, command1.vmaddr);
     XCTAssert(listTail->unloaded == FALSE);
     
-    bsg_test_support_mach_headers_add_image(&header2, 0);
+    rsc_test_support_mach_headers_add_image(&header2, 0);
     
     XCTAssertEqual(listTail->imageVmAddr, command1.vmaddr);
     XCTAssert(listTail->unloaded == FALSE);
     XCTAssertEqual(listTail->next->imageVmAddr, command2.vmaddr);
     XCTAssert(listTail->next->unloaded == FALSE);
     
-    bsg_test_support_mach_headers_remove_image(&header1, 0);
+    rsc_test_support_mach_headers_remove_image(&header1, 0);
     
     XCTAssertEqual(listTail->imageVmAddr, command1.vmaddr);
     XCTAssert(listTail->unloaded == TRUE);
     XCTAssertEqual(listTail->next->imageVmAddr, command2.vmaddr);
     XCTAssert(listTail->next->unloaded == FALSE);
     
-    bsg_test_support_mach_headers_remove_image(&header2, 0);
+    rsc_test_support_mach_headers_remove_image(&header2, 0);
     
     XCTAssertEqual(listTail->imageVmAddr, command1.vmaddr);
     XCTAssert(listTail->unloaded == TRUE);
@@ -95,42 +95,42 @@ static BSG_Mach_Header_Info *get_tail(BSG_Mach_Header_Info *head) {
 }
 
 - (void)testFindImageAtAddress {
-    bsg_test_support_mach_headers_reset();
+    rsc_test_support_mach_headers_reset();
 
-    bsg_test_support_mach_headers_add_image(&header1, 0);
-    bsg_test_support_mach_headers_add_image(&header2, 0);
+    rsc_test_support_mach_headers_add_image(&header1, 0);
+    rsc_test_support_mach_headers_add_image(&header2, 0);
     
-    BSG_Mach_Header_Info *item;
-    item = bsg_mach_headers_image_at_address((uintptr_t)&header1);
+    RSC_Mach_Header_Info *item;
+    item = rsc_mach_headers_image_at_address((uintptr_t)&header1);
     XCTAssertEqual(item->imageVmAddr, command1.vmaddr);
     
-    item = bsg_mach_headers_image_at_address((uintptr_t)&header2);
+    item = rsc_mach_headers_image_at_address((uintptr_t)&header2);
     XCTAssertEqual(item->imageVmAddr, command2.vmaddr);
 }
 
 - (void) testGetImageNameNULL
 {
-    BSG_Mach_Header_Info *img = bsg_mach_headers_image_named(NULL, false);
+    RSC_Mach_Header_Info *img = rsc_mach_headers_image_named(NULL, false);
     XCTAssertTrue(img == NULL);
 }
 
 - (void)testGetSelfImage {
-    XCTAssertEqualObjects(@(bsg_mach_headers_get_self_image()->name),
+    XCTAssertEqualObjects(@(rsc_mach_headers_get_self_image()->name),
                           @(class_getImageName([RSCrashReporter class])));
 }
 
 - (void)testMainImage {
-    XCTAssertEqualObjects(@(bsg_mach_headers_get_main_image()->name),
+    XCTAssertEqualObjects(@(rsc_mach_headers_get_main_image()->name),
                           NSBundle.mainBundle.executablePath);
 }
 
 - (void)testImageAtAddress {
     for (NSNumber *number in NSThread.callStackReturnAddresses) {
         uintptr_t address = number.unsignedIntegerValue;
-        BSG_Mach_Header_Info *image = bsg_mach_headers_image_at_address(address);
+        RSC_Mach_Header_Info *image = rsc_mach_headers_image_at_address(address);
         struct dl_info dlinfo = {0};
         if (dladdr((const void*)address, &dlinfo) != 0) {
-            // If dladdr was able to locate the image, so should bsg_mach_headers_image_at_address
+            // If dladdr was able to locate the image, so should rsc_mach_headers_image_at_address
             XCTAssertEqual(image->header, dlinfo.dli_fbase);
             XCTAssertEqual(image->imageVmAddr + image->slide, (uint64_t)dlinfo.dli_fbase);
             XCTAssertEqual(image->name, dlinfo.dli_fname);
@@ -138,9 +138,9 @@ static BSG_Mach_Header_Info *get_tail(BSG_Mach_Header_Info *head) {
         }
     }
     
-    XCTAssertEqual(bsg_mach_headers_image_at_address(0x0000000000000000), NULL);
-    XCTAssertEqual(bsg_mach_headers_image_at_address(0x0000000000001000), NULL);
-    XCTAssertEqual(bsg_mach_headers_image_at_address(0x7FFFFFFFFFFFFFFF), NULL);
+    XCTAssertEqual(rsc_mach_headers_image_at_address(0x0000000000000000), NULL);
+    XCTAssertEqual(rsc_mach_headers_image_at_address(0x0000000000001000), NULL);
+    XCTAssertEqual(rsc_mach_headers_image_at_address(0x7FFFFFFFFFFFFFFF), NULL);
 }
 
 @end

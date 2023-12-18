@@ -1,30 +1,30 @@
 //
-//  BSGAppHangDetector.m
-//  Bugsnag
+//  RSCAppHangDetector.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 01/03/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGAppHangDetector.h"
+#import "RSCAppHangDetector.h"
 
-#if BSG_HAVE_APP_HANG_DETECTION
+#if RSC_HAVE_APP_HANG_DETECTION
 
-#import <RSCrashReporter/BugsnagConfiguration.h>
-#import <RSCrashReporter/BugsnagErrorTypes.h>
+#import <RSCrashReporter/RSCrashReporterConfiguration.h>
+#import <RSCrashReporter/RSCrashReporterErrorTypes.h>
 
-#import "BSGRunContext.h"
-#import "BSG_KSMach.h"
-#import "BSG_KSSystemInfo.h"
-#import "BugsnagCollections.h"
-#import "BugsnagLogger.h"
-#import "BugsnagThread+Private.h"
+#import "RSCRunContext.h"
+#import "RSC_KSMach.h"
+#import "RSC_KSSystemInfo.h"
+#import "RSCrashReporterCollections.h"
+#import "RSCrashReporterLogger.h"
+#import "RSCrashReporterThread+Private.h"
 
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSGAppHangDetector ()
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCAppHangDetector ()
 
-@property (weak, nonatomic) id<BSGAppHangDetectorDelegate> delegate;
+@property (weak, nonatomic) id<RSCAppHangDetectorDelegate> delegate;
 @property (nonatomic) CFRunLoopObserverRef observer;
 @property (atomic) dispatch_time_t processingDeadline;
 @property (nonatomic) dispatch_semaphore_t processingStarted;
@@ -36,21 +36,21 @@ BSG_OBJC_DIRECT_MEMBERS
 
 static void * DetectAppHangs(void *object);
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BSGAppHangDetector
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCAppHangDetector
 
-- (void)startWithDelegate:(id<BSGAppHangDetectorDelegate>)delegate {
+- (void)startWithDelegate:(id<RSCAppHangDetectorDelegate>)delegate {
     if (self.observer) {
-        bsg_log_err(@"Attempted to call %s more than once", __PRETTY_FUNCTION__);
+        rsc_log_err(@"Attempted to call %s more than once", __PRETTY_FUNCTION__);
         return;
     }
     
-    BugsnagConfiguration *configuration = delegate.configuration;
+    RSCrashReporterConfiguration *configuration = delegate.configuration;
     if (!configuration.enabledErrorTypes.appHangs) {
         return;
     }
     
-    if ([BSG_KSSystemInfo isRunningInAppExtension]) {
+    if ([RSC_KSSystemInfo isRunningInAppExtension]) {
         // App extensions have a different life cycle and environment that make the hang detection mechanism unsuitable.
         // * Depending on the type of extension, the run loop is not necessarily dedicated to UI.
         // * The host app or other extensions run by it may trigger false positives.
@@ -60,15 +60,15 @@ BSG_OBJC_DIRECT_MEMBERS
     
     if (NSProcessInfo.processInfo.environment[@"XCTestConfigurationFilePath"]) {
         // Disable functionality during unit testing to avoid crashes that can occur due to there
-        // being many leaked BugsnagClient instances and BSGAppHangDetectors running while global
+        // being many leaked RSCrashReporterClient instances and RSCAppHangDetectors running while global
         // shared data structures are being reinitialized.
         return;
     }
     
-    const BOOL fatalOnly = configuration.appHangThresholdMillis == BugsnagAppHangThresholdFatalOnly;
+    const BOOL fatalOnly = configuration.appHangThresholdMillis == RSCrashReporterAppHangThresholdFatalOnly;
     const NSTimeInterval threshold = fatalOnly ? 2.0 : (double)configuration.appHangThresholdMillis / 1000.0;
     
-    bsg_log_debug(@"Starting App Hang detector with threshold = %g seconds", threshold);
+    rsc_log_debug(@"Starting App Hang detector with threshold = %g seconds", threshold);
     
     self.delegate = delegate;
     self.processingStarted = dispatch_semaphore_create(0);
@@ -124,7 +124,7 @@ BSG_OBJC_DIRECT_MEMBERS
     while (!self.shouldStop) {
         @autoreleasepool {
             if (dispatch_semaphore_wait(self.processingStarted, DISPATCH_TIME_FOREVER) != 0) {
-                bsg_log_err(@"BSGAppHangDetector: dispatch_semaphore_wait failed unexpectedly");
+                rsc_log_err(@"RSCAppHangDetector: dispatch_semaphore_wait failed unexpectedly");
                 return;
             }
 
@@ -139,19 +139,19 @@ BSG_OBJC_DIRECT_MEMBERS
 
             if (dispatch_time(DISPATCH_TIME_NOW, 0) > dispatch_time(deadline, 1 * NSEC_PER_SEC)) {
                 // If this thread has woken up long after the deadline, the app may have been suspended.
-                bsg_log_debug(@"Ignoring potential false positive app hang");
+                rsc_log_debug(@"Ignoring potential false positive app hang");
                 shouldReportAppHang = NO;
             }
 
 #if defined(DEBUG) && DEBUG
-            if (shouldReportAppHang && bsg_ksmachisBeingTraced()) {
-                bsg_log_debug(@"Ignoring app hang because debugger is attached");
+            if (shouldReportAppHang && rsc_ksmachisBeingTraced()) {
+                rsc_log_debug(@"Ignoring app hang because debugger is attached");
                 shouldReportAppHang = NO;
             }
 #endif
 
-            if (shouldReportAppHang && !bsg_runContext->isForeground && !self.delegate.configuration.reportBackgroundAppHangs) {
-                bsg_log_debug(@"Ignoring app hang because app is in the background");
+            if (shouldReportAppHang && !rsc_runContext->isForeground && !self.delegate.configuration.reportBackgroundAppHangs) {
+                rsc_log_debug(@"Ignoring app hang because app is in the background");
                 shouldReportAppHang = NO;
             }
 
@@ -169,32 +169,32 @@ BSG_OBJC_DIRECT_MEMBERS
 }
 
 - (void)appHangDetected {
-    bsg_log_info(@"App hang detected");
+    rsc_log_info(@"App hang detected");
     
     // Record the date and state before performing any operations like symbolication or loading
     // breadcrumbs from disk that could introduce delays and lead to misleading event contents.
     
     NSDate *date = [NSDate date];
-    NSDictionary *systemInfo = [BSG_KSSystemInfo systemInfo];
-    id<BSGAppHangDetectorDelegate> delegate = self.delegate;
+    NSDictionary *systemInfo = [RSC_KSSystemInfo systemInfo];
+    id<RSCAppHangDetectorDelegate> delegate = self.delegate;
     
-    NSArray<BugsnagThread *> *threads = nil;
-    if (delegate.configuration.sendThreads == BSGThreadSendPolicyAlways) {
-        threads = [BugsnagThread allThreads:YES callStackReturnAddresses:NSThread.callStackReturnAddresses];
+    NSArray<RSCrashReporterThread *> *threads = nil;
+    if (delegate.configuration.sendThreads == RSCThreadSendPolicyAlways) {
+        threads = [RSCrashReporterThread allThreads:YES callStackReturnAddresses:NSThread.callStackReturnAddresses];
         // By default the calling thread is marked as "Error reported from this thread", which is not correct case for app hangs.
-        [threads enumerateObjectsUsingBlock:^(BugsnagThread * _Nonnull thread, NSUInteger idx,
+        [threads enumerateObjectsUsingBlock:^(RSCrashReporterThread * _Nonnull thread, NSUInteger idx,
                                               __unused BOOL * _Nonnull stop) {
             thread.errorReportingThread = idx == 0;
         }];
     } else {
-        threads = BSGArrayWithObject([BugsnagThread mainThread]);
+        threads = RSCArrayWithObject([RSCrashReporterThread mainThread]);
     }
     
     [delegate appHangDetectedAtDate:date withThreads:threads systemInfo:systemInfo];
 }
 
 - (void)appHangEnded {
-    bsg_log_info(@"App hang has ended");
+    rsc_log_info(@"App hang has ended");
     
     [self.delegate appHangEnded];
 }
@@ -213,7 +213,7 @@ BSG_OBJC_DIRECT_MEMBERS
 @end
 
 static void * DetectAppHangs(void *object) {
-    [(__bridge BSGAppHangDetector *)object detectAppHangs];
+    [(__bridge RSCAppHangDetector *)object detectAppHangs];
     return NULL;
 }
 

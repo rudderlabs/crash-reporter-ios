@@ -1,118 +1,118 @@
 //
-//  BugsnagHandledStateTest.m
-//  Bugsnag
+//  RSCrashReporterHandledStateTest.m
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 21/09/2017.
-//  Copyright © 2017 Bugsnag. All rights reserved.
+//  Copyright © 2017 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 #import <RSCrashReporter/RSCrashReporter.h>
-#import "BugsnagHandledState.h"
+#import "RSCrashReporterHandledState.h"
 
-@interface BugsnagHandledStateTest : XCTestCase
+@interface RSCrashReporterHandledStateTest : XCTestCase
 
 @end
 
-@implementation BugsnagHandledStateTest
+@implementation RSCrashReporterHandledStateTest
 
 - (void)testUnhandledException {
-    BugsnagHandledState *state =
-    [BugsnagHandledState handledStateWithSeverityReason:UnhandledException];
+    RSCrashReporterHandledState *state =
+    [RSCrashReporterHandledState handledStateWithSeverityReason:UnhandledException];
     XCTAssertNotNil(state);
     XCTAssertTrue(state.unhandled);
-    XCTAssertEqual(BSGSeverityError, state.currentSeverity);
+    XCTAssertEqual(RSCSeverityError, state.currentSeverity);
     XCTAssertNil(state.attrValue);
     XCTAssertNil(state.attrKey);
 }
 
 - (void)testLogMessage {
-    BugsnagHandledState *state =
-    [BugsnagHandledState handledStateWithSeverityReason:LogMessage
-                                               severity:BSGSeverityInfo
+    RSCrashReporterHandledState *state =
+    [RSCrashReporterHandledState handledStateWithSeverityReason:LogMessage
+                                               severity:RSCSeverityInfo
                                               attrValue:@"info"];
     XCTAssertNotNil(state);
     XCTAssertFalse(state.unhandled);
-    XCTAssertEqual(BSGSeverityInfo, state.currentSeverity);
+    XCTAssertEqual(RSCSeverityInfo, state.currentSeverity);
     XCTAssertEqualObjects(@"info", state.attrValue);
     XCTAssertEqualObjects(@"level", state.attrKey);
 }
 
 - (void)testHandledException {
-    BugsnagHandledState *state =
-    [BugsnagHandledState handledStateWithSeverityReason:HandledException];
+    RSCrashReporterHandledState *state =
+    [RSCrashReporterHandledState handledStateWithSeverityReason:HandledException];
     XCTAssertNotNil(state);
     XCTAssertFalse(state.unhandled);
-    XCTAssertEqual(BSGSeverityWarning, state.currentSeverity);
+    XCTAssertEqual(RSCSeverityWarning, state.currentSeverity);
     XCTAssertNil(state.attrValue);
     XCTAssertNil(state.attrKey);
 }
 
 - (void)testUserSpecified {
-    BugsnagHandledState *state = [BugsnagHandledState
+    RSCrashReporterHandledState *state = [RSCrashReporterHandledState
                                   handledStateWithSeverityReason:UserSpecifiedSeverity
-                                  severity:BSGSeverityInfo
+                                  severity:RSCSeverityInfo
                                   attrValue:nil];
     XCTAssertNotNil(state);
     XCTAssertFalse(state.unhandled);
-    XCTAssertEqual(BSGSeverityInfo, state.currentSeverity);
+    XCTAssertEqual(RSCSeverityInfo, state.currentSeverity);
     XCTAssertNil(state.attrValue);
     XCTAssertNil(state.attrKey);
 }
 
 - (void)testCallbackSpecified {
-    BugsnagHandledState *state =
-    [BugsnagHandledState handledStateWithSeverityReason:HandledException];
+    RSCrashReporterHandledState *state =
+    [RSCrashReporterHandledState handledStateWithSeverityReason:HandledException];
     XCTAssertEqual(HandledException, state.calculateSeverityReasonType);
     
-    state.currentSeverity = BSGSeverityInfo;
+    state.currentSeverity = RSCSeverityInfo;
     XCTAssertEqual(UserCallbackSetSeverity, state.calculateSeverityReasonType);
     XCTAssertNil(state.attrValue);
     XCTAssertNil(state.attrKey);
 }
 
 - (void)testHandledError {
-    BugsnagHandledState *state =
-    [BugsnagHandledState handledStateWithSeverityReason:HandledError
-                                               severity:BSGSeverityWarning
+    RSCrashReporterHandledState *state =
+    [RSCrashReporterHandledState handledStateWithSeverityReason:HandledError
+                                               severity:RSCSeverityWarning
                                               attrValue:@"Test"];
     XCTAssertNotNil(state);
     XCTAssertFalse(state.unhandled);
-    XCTAssertEqual(BSGSeverityWarning, state.currentSeverity);
+    XCTAssertEqual(RSCSeverityWarning, state.currentSeverity);
     XCTAssertNil(state.attrValue);
 }
 
 - (void)testSignal {
-    BugsnagHandledState *state =
-    [BugsnagHandledState handledStateWithSeverityReason:Signal
-                                               severity:BSGSeverityError
+    RSCrashReporterHandledState *state =
+    [RSCrashReporterHandledState handledStateWithSeverityReason:Signal
+                                               severity:RSCSeverityError
                                               attrValue:@"Test"];
     XCTAssertNotNil(state);
     XCTAssertTrue(state.unhandled);
-    XCTAssertEqual(BSGSeverityError, state.currentSeverity);
+    XCTAssertEqual(RSCSeverityError, state.currentSeverity);
     XCTAssertEqualObjects(@"Test", state.attrValue);
 }
 
 - (void)testPromiseRejection {
-    BugsnagHandledState *state =
-    [BugsnagHandledState handledStateWithSeverityReason:PromiseRejection];
+    RSCrashReporterHandledState *state =
+    [RSCrashReporterHandledState handledStateWithSeverityReason:PromiseRejection];
     XCTAssertNotNil(state);
     XCTAssertTrue(state.unhandled);
-    XCTAssertEqual(BSGSeverityError, state.currentSeverity);
+    XCTAssertEqual(RSCSeverityError, state.currentSeverity);
     XCTAssertNil(state.attrValue);
 }
 
 - (void)testOriginalUnhandled {
-    BugsnagHandledState *unhandledState =
-    [BugsnagHandledState handledStateWithSeverityReason:PromiseRejection];
+    RSCrashReporterHandledState *unhandledState =
+    [RSCrashReporterHandledState handledStateWithSeverityReason:PromiseRejection];
     XCTAssertTrue(unhandledState.originalUnhandledValue);
     
     unhandledState.unhandledOverridden = YES;
     XCTAssertFalse(unhandledState.originalUnhandledValue);
     
-    BugsnagHandledState *handledState =
-    [BugsnagHandledState handledStateWithSeverityReason:HandledError
-                                               severity:BSGSeverityWarning
+    RSCrashReporterHandledState *handledState =
+    [RSCrashReporterHandledState handledStateWithSeverityReason:HandledError
+                                               severity:RSCSeverityWarning
                                               attrValue:@"Test"];
     XCTAssertFalse(handledState.originalUnhandledValue);
     

@@ -1,23 +1,23 @@
 //
-//  BSGStorageMigratorV0V1.m
-//  Bugsnag
+//  RSCStorageMigratorV0V1.m
+//  RSCrashReporter
 //
 //  Created by Karl Stenerud on 04.01.21.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGStorageMigratorV0V1.h"
+#import "RSCStorageMigratorV0V1.h"
 
-#import "BSGFileLocations.h"
-#import "BugsnagLogger.h"
+#import "RSCFileLocations.h"
+#import "RSCrashReporterLogger.h"
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BSGStorageMigratorV0V1
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCStorageMigratorV0V1
 
 static void RemoveItem(NSFileManager *fileManager, NSString *path) {
     NSError *error = nil;
     if (![fileManager removeItemAtPath:path error:&error] && error.code != NSFileNoSuchFileError) {
-        bsg_log_err(@"%@", error);
+        rsc_log_err(@"%@", error);
     }
 }
 
@@ -25,10 +25,10 @@ static void RemoveItem(NSFileManager *fileManager, NSString *path) {
     NSString *bundleName = [[NSBundle mainBundle] infoDictionary][@"CFBundleName"];
     NSString *cachesDir = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
     if (!cachesDir.length) {
-        bsg_log_err(@"Could not migrate v0 data to v1.");
+        rsc_log_err(@"Could not migrate v0 data to v1.");
         return false;
     }
-    BSGFileLocations *files = [BSGFileLocations v1];
+    RSCFileLocations *files = [RSCFileLocations v1];
 
     NSDictionary *mappings = @{
         @"bugsnag_handled_crash.txt": files.flagHandledCrash,
@@ -51,21 +51,21 @@ static void RemoveItem(NSFileManager *fileManager, NSString *path) {
         if ([fm fileExistsAtPath:srcPath]) {
             RemoveItem(fm, dstPath);
             if(![fm moveItemAtPath:srcPath toPath:dstPath error:&err]) {
-                bsg_log_err(@"Could not move %@ to %@: %@", srcPath, dstPath, err);
+                rsc_log_err(@"Could not move %@ to %@: %@", srcPath, dstPath, err);
                 success = false;
             }
         }
     }
 
     for(NSString *path in @[
-        [cachesDir stringByAppendingPathComponent:@"bsg_kvstore"],
+        [cachesDir stringByAppendingPathComponent:@"rsc_kvstore"],
         [cachesDir stringByAppendingPathComponent:@"bugsnag"],
         [cachesDir stringByAppendingPathComponent:@"KSCrashReports"],
         [cachesDir stringByAppendingPathComponent:@"Sessions"],
                           ]) {
         if(![fm removeItemAtPath:path error:&err]) {
             if (!([err.domain isEqual:NSCocoaErrorDomain] && err.code == NSFileNoSuchFileError)) {
-                bsg_log_err(@"Could not remove %@: %@", path, err);
+                rsc_log_err(@"Could not remove %@: %@", path, err);
             }
         }
     }

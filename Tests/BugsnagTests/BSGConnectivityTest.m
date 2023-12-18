@@ -1,46 +1,46 @@
 #import <XCTest/XCTest.h>
 
-#import "BSGConnectivity.h"
-#import "BSGDefines.h"
+#import "RSCConnectivity.h"
+#import "RSCDefines.h"
 
-@interface BSGConnectivityTest : XCTestCase
+@interface RSCConnectivityTest : XCTestCase
 @end
 
-@implementation BSGConnectivityTest
+@implementation RSCConnectivityTest
 
 - (void)tearDown {
     // Reset connectivity state cache
-    BSGConnectivityShouldReportChange(0);
-    [BSGConnectivity stopMonitoring];
+    RSCConnectivityShouldReportChange(0);
+    [RSCConnectivity stopMonitoring];
 }
 
 - (void)testConnectivityRepresentations {
-    XCTAssertEqualObjects(@"none", BSGConnectivityFlagRepresentation(0));
-    XCTAssertEqualObjects(@"none", BSGConnectivityFlagRepresentation(kSCNetworkReachabilityFlagsIsDirect));
-    #if BSG_HAVE_REACHABILITY_WWAN
+    XCTAssertEqualObjects(@"none", RSCConnectivityFlagRepresentation(0));
+    XCTAssertEqualObjects(@"none", RSCConnectivityFlagRepresentation(kSCNetworkReachabilityFlagsIsDirect));
+    #if RSC_HAVE_REACHABILITY_WWAN
         // kSCNetworkReachabilityFlagsIsWWAN does not exist on macOS
-        XCTAssertEqualObjects(@"none", BSGConnectivityFlagRepresentation(kSCNetworkReachabilityFlagsIsWWAN));
-        XCTAssertEqualObjects(@"cellular", BSGConnectivityFlagRepresentation(kSCNetworkReachabilityFlagsIsWWAN | kSCNetworkReachabilityFlagsReachable));
+        XCTAssertEqualObjects(@"none", RSCConnectivityFlagRepresentation(kSCNetworkReachabilityFlagsIsWWAN));
+        XCTAssertEqualObjects(@"cellular", RSCConnectivityFlagRepresentation(kSCNetworkReachabilityFlagsIsWWAN | kSCNetworkReachabilityFlagsReachable));
     #endif
-    XCTAssertEqualObjects(@"wifi", BSGConnectivityFlagRepresentation(kSCNetworkReachabilityFlagsReachable));
-    XCTAssertEqualObjects(@"wifi", BSGConnectivityFlagRepresentation(kSCNetworkReachabilityFlagsReachable | kSCNetworkReachabilityFlagsIsDirect));
+    XCTAssertEqualObjects(@"wifi", RSCConnectivityFlagRepresentation(kSCNetworkReachabilityFlagsReachable));
+    XCTAssertEqualObjects(@"wifi", RSCConnectivityFlagRepresentation(kSCNetworkReachabilityFlagsReachable | kSCNetworkReachabilityFlagsIsDirect));
 }
 
 - (void)testValidHost {
-    XCTAssertTrue([BSGConnectivity isValidHostname:@"example.com"]);
+    XCTAssertTrue([RSCConnectivity isValidHostname:@"example.com"]);
     // Could be an internal network hostname
-    XCTAssertTrue([BSGConnectivity isValidHostname:@"foo"]);
+    XCTAssertTrue([RSCConnectivity isValidHostname:@"foo"]);
 
     // Definitely will not work as expected
-    XCTAssertFalse([BSGConnectivity isValidHostname:@""]);
-    XCTAssertFalse([BSGConnectivity isValidHostname:nil]);
-    XCTAssertFalse([BSGConnectivity isValidHostname:@"localhost"]);
-    XCTAssertFalse([BSGConnectivity isValidHostname:@"127.0.0.1"]);
-    XCTAssertFalse([BSGConnectivity isValidHostname:@"::1"]);
+    XCTAssertFalse([RSCConnectivity isValidHostname:@""]);
+    XCTAssertFalse([RSCConnectivity isValidHostname:nil]);
+    XCTAssertFalse([RSCConnectivity isValidHostname:@"localhost"]);
+    XCTAssertFalse([RSCConnectivity isValidHostname:@"127.0.0.1"]);
+    XCTAssertFalse([RSCConnectivity isValidHostname:@"::1"]);
 }
 
-- (void)mockMonitorURLWithCallback:(BSGConnectivityChangeBlock)block {
-    [BSGConnectivity monitorURL:[NSURL URLWithString:@""]
+- (void)mockMonitorURLWithCallback:(RSCConnectivityChangeBlock)block {
+    [RSCConnectivity monitorURL:[NSURL URLWithString:@""]
                   usingCallback:block];
 }
 

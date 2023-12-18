@@ -1,29 +1,29 @@
 //
-//  BugsnagOnCrashTest.m
+//  RSCrashReporterOnCrashTest.m
 //  Tests
 //
 //  Created by Jamie Lynch on 23/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
 #import <RSCrashReporter/RSCrashReporter.h>
-#import "BugsnagEvent+Private.h"
+#import "RSCrashReporterEvent+Private.h"
 
-@interface BugsnagOnCrashTest : XCTestCase
+@interface RSCrashReporterOnCrashTest : XCTestCase
 
 @end
 
-@implementation BugsnagOnCrashTest
+@implementation RSCrashReporterOnCrashTest
 
 - (void)testEmptyData {
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{}];
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{}];
     XCTAssertNil([event getMetadataFromSection:@"onCrash"]);
 }
 
 - (void)testOnCrashData {
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{
             @"user": @{
                     @"customer": @{
                             @"name": @"Joe Bloggs"
@@ -41,7 +41,7 @@
  * _not_ added to the metadata
  */
 - (void)testDisallowedUserKeys {
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{
             @"user": @{
                     @"foo": @"some value here",
                     @"customer": @{@"name": @"Joe Bloggs"},
@@ -78,7 +78,7 @@
  * that added to metadata (as it was added more recently)
  */
 - (void)testMergePrecedence {
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{
             @"user": @{
                     @"customer": @{
                             @"name": @"Joe Bloggs",

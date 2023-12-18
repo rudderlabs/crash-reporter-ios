@@ -9,9 +9,9 @@ NS_ASSUME_NONNULL_BEGIN
  @param input a dictionary
  @return a new dictionary
  */
-NSMutableDictionary *BSGSanitizeDict(NSDictionary * input);
+NSMutableDictionary *RSCSanitizeDict(NSDictionary * input);
 
-NSMutableDictionary *_Nullable BSGSanitizePossibleDict(NSDictionary *_Nullable input);
+NSMutableDictionary *_Nullable RSCSanitizePossibleDict(NSDictionary *_Nullable input);
 
 /**
  Cleans the object, including nested dictionary and array values
@@ -19,17 +19,17 @@ NSMutableDictionary *_Nullable BSGSanitizePossibleDict(NSDictionary *_Nullable i
  @param obj any object or nil
  @return a new object for serialization or nil if the obj was incompatible or NSNull
  */
-id _Nullable BSGSanitizeObject(id _Nullable obj);
+id _Nullable RSCSanitizeObject(id _Nullable obj);
 
-typedef struct _BSGTruncateContext {
+typedef struct _RSCTruncateContext {
     NSUInteger maxLength;
     NSUInteger strings;
     NSUInteger length;
-} BSGTruncateContext;
+} RSCTruncateContext;
 
-NSString * BSGTruncateString(BSGTruncateContext *context, NSString * string);
-NSString *_Nullable BSGTruncatePossibleString(BSGTruncateContext *context, NSString *_Nullable string);
+NSString * RSCTruncateString(RSCTruncateContext *context, NSString * string);
+NSString *_Nullable RSCTruncatePossibleString(RSCTruncateContext *context, NSString *_Nullable string);
 
-id BSGTruncateStrings(BSGTruncateContext *context, id object);
+id RSCTruncateStrings(RSCTruncateContext *context, id object);
 
 NS_ASSUME_NONNULL_END

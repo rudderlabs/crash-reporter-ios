@@ -1,19 +1,19 @@
 //
-//  BSG_KSCrashStringConversion.c
-//  Bugsnag
+//  RSC_KSCrashStringConversion.c
+//  RSCrashReporter
 //
 //  Created by Karl Stenerud on 31.05.22.
-//  Copyright © 2022 Bugsnag Inc. All rights reserved.
+//  Copyright © 2022 RSCrashReporter Inc. All rights reserved.
 //
 
-#include "BSG_KSCrashStringConversion.h"
+#include "RSC_KSCrashStringConversion.h"
 #include <memory.h>
 #include <math.h>
 
 // Max uint64 is 18446744073709551615
 #define MAX_UINT64_DIGITS 20
 
-size_t bsg_uint64_to_string(uint64_t value, char* dst) {
+size_t rsc_uint64_to_string(uint64_t value, char* dst) {
     if(value == 0) {
         dst[0] = '0';
         dst[1] = 0;
@@ -37,18 +37,18 @@ size_t bsg_uint64_to_string(uint64_t value, char* dst) {
     return length - 1;
 }
 
-size_t bsg_int64_to_string(int64_t value, char* dst) {
+size_t rsc_int64_to_string(int64_t value, char* dst) {
     if (value < 0) {
         dst[0] = '-';
-        return bsg_uint64_to_string((uint64_t)-value, dst+1) + 1;
+        return rsc_uint64_to_string((uint64_t)-value, dst+1) + 1;
     }
-    return bsg_uint64_to_string((uint64_t)value, dst);
+    return rsc_uint64_to_string((uint64_t)value, dst);
 }
 
 static char g_hexNybbles[] = {'0', '1', '2', '3', '4', '5', '6', '7',
                               '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
-size_t bsg_uint64_to_hex(uint64_t value, char* dst, int min_digits) {
+size_t rsc_uint64_to_hex(uint64_t value, char* dst, int min_digits) {
     if (min_digits < 1) {
         min_digits = 1;
     } else if (min_digits > 16) {
@@ -168,7 +168,7 @@ static size_t positive_double_to_string(const double value, char* dst, int max_s
         if (exponent >= 0) {
             *dst++ = '+';
         }
-        dst += bsg_int64_to_string(exponent, dst);
+        dst += rsc_int64_to_string(exponent, dst);
     } else {
         *dst = 0;
     }
@@ -176,7 +176,7 @@ static size_t positive_double_to_string(const double value, char* dst, int max_s
     return (size_t)(dst - orig_dst);
 }
 
-size_t bsg_double_to_string(double value, char* dst, int max_sig_digits) {
+size_t rsc_double_to_string(double value, char* dst, int max_sig_digits) {
     if (max_sig_digits < 1) {
         max_sig_digits = 1;
     }

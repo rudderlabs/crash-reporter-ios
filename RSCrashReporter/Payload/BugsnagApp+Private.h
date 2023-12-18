@@ -1,37 +1,37 @@
 //
-//  BugsnagApp+Private.h
-//  Bugsnag
+//  RSCrashReporterApp+Private.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 04/12/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
-#import <RSCrashReporter/BugsnagApp.h>
+#import <RSCrashReporter/RSCrashReporterApp.h>
 
-#import "BSGDefines.h"
+#import "RSCDefines.h"
 
-@class BugsnagConfiguration;
+@class RSCrashReporterConfiguration;
 
-struct BSGRunContext;
+struct RSCRunContext;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface BugsnagApp ()
+@interface RSCrashReporterApp ()
 
-+ (BugsnagApp *)appWithDictionary:(NSDictionary *)event config:(BugsnagConfiguration *)config codeBundleId:(NSString *)codeBundleId;
++ (RSCrashReporterApp *)appWithDictionary:(NSDictionary *)event config:(RSCrashReporterConfiguration *)config codeBundleId:(NSString *)codeBundleId;
 
-+ (BugsnagApp *)deserializeFromJson:(nullable NSDictionary *)json;
++ (RSCrashReporterApp *)deserializeFromJson:(nullable NSDictionary *)json;
 
-+ (void)populateFields:(BugsnagApp *)app dictionary:(NSDictionary *)event config:(BugsnagConfiguration *)config codeBundleId:(NSString *)codeBundleId;
++ (void)populateFields:(RSCrashReporterApp *)app dictionary:(NSDictionary *)event config:(RSCrashReporterConfiguration *)config codeBundleId:(NSString *)codeBundleId;
 
-- (void)setValuesFromConfiguration:(BugsnagConfiguration *)configuration;
+- (void)setValuesFromConfiguration:(RSCrashReporterConfiguration *)configuration;
 
 - (NSDictionary *)toDict;
 
 @end
 
-NSDictionary *BSGParseAppMetadata(NSDictionary *event);
+NSDictionary *RSCParseAppMetadata(NSDictionary *event);
 
-NSDictionary *BSGAppMetadataFromRunContext(const struct BSGRunContext *context);
+NSDictionary *RSCAppMetadataFromRunContext(const struct RSCRunContext *context);
 
 NS_ASSUME_NONNULL_END

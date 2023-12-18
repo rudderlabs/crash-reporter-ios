@@ -3,19 +3,19 @@
 //  Tests
 //
 //  Created by Paul Zabelin on 6/6/19.
-//  Copyright © 2019 Bugsnag. All rights reserved.
+//  Copyright © 2019 RSCrashReporter. All rights reserved.
 //
 
 @import XCTest;
 
-#import "Bugsnag+Private.h"
-#import "BugsnagEvent+Private.h"
+#import "RSCrashReporter+Private.h"
+#import "RSCrashReporterEvent+Private.h"
 
-@interface BugsnagEventFromKSCrashReportTest : XCTestCase
-@property BugsnagEvent *event;
+@interface RSCrashReporterEventFromKSCrashReportTest : XCTestCase
+@property RSCrashReporterEvent *event;
 @end
 
-@implementation BugsnagEventFromKSCrashReportTest
+@implementation RSCrashReporterEventFromKSCrashReportTest
 
 - (void)setUp {
     [super setUp];
@@ -28,9 +28,9 @@
                                 JSONObjectWithData:[contents dataUsingEncoding:NSUTF8StringEncoding]
                                 options:0
                                 error:nil];
-    // required due to BugsnagEvent using global singleton
+    // required due to RSCrashReporterEvent using global singleton
     RSCrashReporter.client.configuration.bundleVersion = @"3";
-    self.event = [[BugsnagEvent alloc] initWithKSReport:dictionary];
+    self.event = [[RSCrashReporterEvent alloc] initWithKSReport:dictionary];
 }
 
 - (void)tearDown {
@@ -114,7 +114,7 @@
 
 - (void)testThreadsPopulated {
     XCTAssertEqual(9, [self.event.threads count]);
-    BugsnagThread *thread = self.event.threads[0];
+    RSCrashReporterThread *thread = self.event.threads[0];
     XCTAssertEqualObjects(@"0", thread.id);
 }
 

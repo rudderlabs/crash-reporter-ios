@@ -24,10 +24,10 @@
 // THE SOFTWARE.
 //
 
-#include "BSG_KSSysCtl.h"
+#include "RSC_KSSysCtl.h"
 
-//#define BSG_KSLogger_LocalLevel TRACE
-#include "BSG_KSLogger.h"
+//#define RSC_KSLogger_LocalLevel TRACE
+#include "RSC_KSLogger.h"
 
 #include <errno.h>
 #include <net/if.h>
@@ -37,12 +37,12 @@
 
 #define CHECK_SYSCTL_NAME(TYPE, CALL)                                          \
     if (0 != (CALL)) {                                                         \
-        BSG_KSLOG_ERROR("Could not get %s value for %s: %s", #CALL, name,      \
+        RSC_KSLOG_ERROR("Could not get %s value for %s: %s", #CALL, name,      \
                         strerror(errno));                                      \
         return 0;                                                              \
     }
 
-int32_t bsg_kssysctl_int32ForName(const char *const name) {
+int32_t rsc_kssysctl_int32ForName(const char *const name) {
     int32_t value = 0;
     size_t size = sizeof(value);
 
@@ -51,7 +51,7 @@ int32_t bsg_kssysctl_int32ForName(const char *const name) {
     return value;
 }
 
-size_t bsg_kssysctl_stringForName(const char *const name, char *const value,
+size_t rsc_kssysctl_stringForName(const char *const name, char *const value,
                                   const size_t maxSize) {
     size_t size = value == NULL ? 0 : maxSize;
 
@@ -60,7 +60,7 @@ size_t bsg_kssysctl_stringForName(const char *const name, char *const value,
     return size;
 }
 
-bool bsg_kssysctl_getMacAddress(const char *const name,
+bool rsc_kssysctl_getMacAddress(const char *const name,
                                 char *const macAddressBuffer) {
     // Based off
     // http://iphonedevelopertips.com/device/determine-mac-address.html
@@ -68,26 +68,26 @@ bool bsg_kssysctl_getMacAddress(const char *const name,
     int mib[6] = {CTL_NET, AF_ROUTE,      0,
                   AF_LINK, NET_RT_IFLIST, (int)if_nametoindex(name)};
     if (mib[5] == 0) {
-        BSG_KSLOG_ERROR("Could not get interface index for %s: %s", name,
+        RSC_KSLOG_ERROR("Could not get interface index for %s: %s", name,
                         strerror(errno));
         return false;
     }
 
     size_t length;
     if (sysctl(mib, 6, NULL, &length, NULL, 0) != 0) {
-        BSG_KSLOG_ERROR("Could not get interface data for %s: %s", name,
+        RSC_KSLOG_ERROR("Could not get interface data for %s: %s", name,
                         strerror(errno));
         return false;
     }
 
     void *ifBuffer = malloc(length);
     if (ifBuffer == NULL) {
-        BSG_KSLOG_ERROR("Out of memory");
+        RSC_KSLOG_ERROR("Out of memory");
         return false;
     }
 
     if (sysctl(mib, 6, ifBuffer, &length, NULL, 0) != 0) {
-        BSG_KSLOG_ERROR("Could not get interface data for %s: %s", name,
+        RSC_KSLOG_ERROR("Could not get interface data for %s: %s", name,
                         strerror(errno));
         free(ifBuffer);
         return false;

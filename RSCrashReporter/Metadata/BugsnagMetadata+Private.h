@@ -1,25 +1,25 @@
 //
-//  BugsnagMetadata+Private.h
-//  Bugsnag
+//  RSCrashReporterMetadata+Private.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 04/12/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BugsnagInternals.h"
+#import "RSCrashReporterInternals.h"
 
-#import "BSGDefines.h"
+#import "RSCDefines.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void (^ BSGMetadataObserver)(BugsnagMetadata *);
+typedef void (^ RSCMetadataObserver)(RSCrashReporterMetadata *);
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BugsnagMetadata () <NSCopying>
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCrashReporterMetadata () <NSCopying>
 
 #pragma mark Properties
 
-@property (nullable, nonatomic) BSGMetadataObserver observer;
+@property (nullable, nonatomic) RSCMetadataObserver observer;
 
 @end
 

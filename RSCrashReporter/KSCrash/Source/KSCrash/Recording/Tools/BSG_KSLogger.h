@@ -1,5 +1,5 @@
 //
-//  BSG_KSLogger.h
+//  RSC_KSLogger.h
 //
 //  Created by Karl Stenerud on 11-06-25.
 //
@@ -24,28 +24,28 @@
 // THE SOFTWARE.
 //
 
-#ifndef HDR_BSG_KSLogger_h
-#define HDR_BSG_KSLogger_h
+#ifndef HDR_RSC_KSLogger_h
+#define HDR_RSC_KSLogger_h
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <RSCrashReporter/BugsnagDefines.h>
+#include <RSCrashReporter/RSCrashReporterDefines.h>
 
-#include "BugsnagLogger.h"
+#include "RSCrashReporterLogger.h"
 
 /**
  * Enables low-level logging.
  *
  * Keep this disabled in production as it increases the binary size.
  */
-#ifndef BSG_KSLOG_ENABLED
-#define BSG_KSLOG_ENABLED 0
+#ifndef RSC_KSLOG_ENABLED
+#define RSC_KSLOG_ENABLED 0
 #endif
 
 /**
- * BSG_KSLogger
+ * RSC_KSLogger
  * ========
  *
  * Prints log entries to the console consisting of:
@@ -65,31 +65,31 @@ extern "C" {
  * Set the log level in your "Preprocessor Macros" build setting. You may choose
  * TRACE, DEBUG, INFO, WARN, ERROR. If nothing is set, it defaults to INFO.
  *
- * Example: BSG_KSLogger_Level=WARN
+ * Example: RSC_KSLogger_Level=WARN
  *
- * Anything below the level specified for BSG_KSLogger_Level will not be
+ * Anything below the level specified for RSC_KSLogger_Level will not be
  * compiled or printed.
  *
  *
  * Next, include the header file:
  *
- * #include "BSG_KSLogger.h"
+ * #include "RSC_KSLogger.h"
  *
  *
  * Next, call the logger functions from your code:
  *
  * Code:
- *    BSG_KSLOG_ERROR("Some error message");
+ *    RSC_KSLOG_ERROR("Some error message");
  *
  * Prints:
  *    ERROR: some_file.c:21: some_function(): Some error message
  *
  *
  * The "BASIC" versions of the macros behave exactly like printf(), except they
- * respect the BSG_KSLogger_Level setting:
+ * respect the RSC_KSLogger_Level setting:
  *
  * Code:
- *    BSG_KSLOGBASIC_ERROR("A basic log entry");
+ *    RSC_KSLOGBASIC_ERROR("A basic log entry");
  *
  * Prints:
  *    A basic log entry
@@ -101,18 +101,18 @@ extern "C" {
  *
  * You can control logging messages at the local file level using the
  * "KSLogger_LocalLevel" define. Note that it must be defined BEFORE
- * including BSG_KSLogger.h
+ * including RSC_KSLogger.h
  *
- * The BSG_KSLOG_XX() and BSG_KSLOGBASIC_XX() macros will print out based on the
- * LOWER of BSG_KSLogger_Level and BSG_KSLogger_LocalLevel, so if
- * BSG_KSLogger_Level is DEBUG and BSG_KSLogger_LocalLevel is TRACE, it will
+ * The RSC_KSLOG_XX() and RSC_KSLOGBASIC_XX() macros will print out based on the
+ * LOWER of RSC_KSLogger_Level and RSC_KSLogger_LocalLevel, so if
+ * RSC_KSLogger_Level is DEBUG and RSC_KSLogger_LocalLevel is TRACE, it will
  * print all the way down to the trace level for the local file where
- * BSG_KSLogger_LocalLevel was defined, and to the debug level everywhere else.
+ * RSC_KSLogger_LocalLevel was defined, and to the debug level everywhere else.
  *
  * Example:
  *
- * // BSG_KSLogger_LocalLevel, if defined, MUST come BEFORE including
- * BSG_KSLogger.h #define BSG_KSLogger_LocalLevel TRACE #import "BSG_KSLogger.h"
+ * // RSC_KSLogger_LocalLevel, if defined, MUST come BEFORE including
+ * RSC_KSLogger.h #define RSC_KSLogger_LocalLevel TRACE #import "RSC_KSLogger.h"
  *
  *
  * ===============
@@ -120,16 +120,16 @@ extern "C" {
  * ===============
  *
  * The C logger changes its behavior depending on the value of the preprocessor
- * define BSG_KSLogger_CBufferSize.
+ * define RSC_KSLogger_CBufferSize.
  *
- * If BSG_KSLogger_CBufferSize is > 0, the C logger will behave in an async-safe
+ * If RSC_KSLogger_CBufferSize is > 0, the C logger will behave in an async-safe
  * manner, calling write() instead of printf(). Any log messages that exceed the
- * length specified by BSG_KSLogger_CBufferSize will be truncated.
+ * length specified by RSC_KSLogger_CBufferSize will be truncated.
  *
- * If BSG_KSLogger_CBufferSize == 0, the C logger will use printf(), and there
+ * If RSC_KSLogger_CBufferSize == 0, the C logger will use printf(), and there
  * will be no limit on the log message length.
  *
- * BSG_KSLogger_CBufferSize can only be set as a preprocessor define, and will
+ * RSC_KSLogger_CBufferSize can only be set as a preprocessor define, and will
  * default to 1024 if not specified during compilation.
  */
 
@@ -140,65 +140,65 @@ extern "C" {
 #include <stdbool.h>
 #include <sys/cdefs.h>
 
-void bsg_i_kslog_logC(const char *level, const char *file, int line,
+void rsc_i_kslog_logC(const char *level, const char *file, int line,
                       const char *function, const char *fmt, ...)
                                                 __printflike(5, 6);
 
-BUGSNAG_EXTERN
-void bsg_i_kslog_logCBasic(const char *fmt, ...) __printflike(1, 2);
+RSCRASHREPORTER_EXTERN
+void rsc_i_kslog_logCBasic(const char *fmt, ...) __printflike(1, 2);
 
-#define i_KSLOG_FULL bsg_i_kslog_logC
-#define i_KSLOG_BASIC bsg_i_kslog_logCBasic
+#define i_KSLOG_FULL rsc_i_kslog_logC
+#define i_KSLOG_BASIC rsc_i_kslog_logCBasic
 
 /* Back up any existing defines by the same name */
 #ifdef NONE
-#define BSG_KSLOG_BAK_NONE NONE
+#define RSC_KSLOG_BAK_NONE NONE
 #undef NONE
 #endif
 #ifdef ERROR
-#define BSG_KSLOG_BAK_ERROR ERROR
+#define RSC_KSLOG_BAK_ERROR ERROR
 #undef ERROR
 #endif
 #ifdef WARN
-#define BSG_KSLOG_BAK_WARN WARN
+#define RSC_KSLOG_BAK_WARN WARN
 #undef WARN
 #endif
 #ifdef INFO
-#define BSG_KSLOG_BAK_INFO INFO
+#define RSC_KSLOG_BAK_INFO INFO
 #undef INFO
 #endif
 #ifdef DEBUG
-#define BSG_KSLOG_BAK_DEBUG DEBUG
+#define RSC_KSLOG_BAK_DEBUG DEBUG
 #undef DEBUG
 #endif
 #ifdef TRACE
-#define BSG_KSLOG_BAK_TRACE TRACE
+#define RSC_KSLOG_BAK_TRACE TRACE
 #undef TRACE
 #endif
 
-#define BSG_KSLogger_Level_None 0
-#define BSG_KSLogger_Level_Error 10
-#define BSG_KSLogger_Level_Warn 20
-#define BSG_KSLogger_Level_Info 30
-#define BSG_KSLogger_Level_Debug 40
-#define BSG_KSLogger_Level_Trace 50
+#define RSC_KSLogger_Level_None 0
+#define RSC_KSLogger_Level_Error 10
+#define RSC_KSLogger_Level_Warn 20
+#define RSC_KSLogger_Level_Info 30
+#define RSC_KSLogger_Level_Debug 40
+#define RSC_KSLogger_Level_Trace 50
 
-#define NONE BSG_KSLogger_Level_None
-#define ERROR BSG_KSLogger_Level_Error
-#define WARN BSG_KSLogger_Level_Warn
-#define INFO BSG_KSLogger_Level_Info
-#define DEBUG BSG_KSLogger_Level_Debug
-#define TRACE BSG_KSLogger_Level_Trace
+#define NONE RSC_KSLogger_Level_None
+#define ERROR RSC_KSLogger_Level_Error
+#define WARN RSC_KSLogger_Level_Warn
+#define INFO RSC_KSLogger_Level_Info
+#define DEBUG RSC_KSLogger_Level_Debug
+#define TRACE RSC_KSLogger_Level_Trace
 
-#ifndef BSG_KSLogger_LocalLevel
-#define BSG_KSLogger_LocalLevel BSG_KSLogger_Level_None
+#ifndef RSC_KSLogger_LocalLevel
+#define RSC_KSLogger_LocalLevel RSC_KSLogger_Level_None
 #endif
 
-#if !BSG_KSLOG_ENABLED
-#undef BSG_LOG_LEVEL
-#define BSG_LOG_LEVEL BSG_KSLogger_Level_None
-#undef BSG_KSLogger_LocalLevel
-#define BSG_KSLogger_LocalLevel BSG_KSLogger_Level_None
+#if !RSC_KSLOG_ENABLED
+#undef RSC_LOG_LEVEL
+#define RSC_LOG_LEVEL RSC_KSLogger_Level_None
+#undef RSC_KSLogger_LocalLevel
+#define RSC_KSLogger_LocalLevel RSC_KSLogger_Level_None
 #endif
 
 #define a_KSLOG_FULL(LEVEL, FMT, ...)                                          \
@@ -214,42 +214,42 @@ void bsg_i_kslog_logCBasic(const char *fmt, ...) __printflike(1, 2);
  *
  * @param overwrite If true, overwrite the log file.
  */
-BUGSNAG_EXTERN
-bool bsg_kslog_setLogFilename(const char *filename, bool overwrite);
+RSCRASHREPORTER_EXTERN
+bool rsc_kslog_setLogFilename(const char *filename, bool overwrite);
 
 /** Tests if the logger would print at the specified level.
  *
  * @param LEVEL The level to test for. One of:
- *            BSG_KSLogger_Level_Error,
- *            BSG_KSLogger_Level_Warn,
- *            BSG_KSLogger_Level_Info,
- *            BSG_KSLogger_Level_Debug,
- *            BSG_KSLogger_Level_Trace,
+ *            RSC_KSLogger_Level_Error,
+ *            RSC_KSLogger_Level_Warn,
+ *            RSC_KSLogger_Level_Info,
+ *            RSC_KSLogger_Level_Debug,
+ *            RSC_KSLogger_Level_Trace,
  *
  * @return TRUE if the logger would print at the specified level.
  */
-#define BSG_KSLOG_PRINTS_AT_LEVEL(LEVEL)                                       \
-    (BSG_LOG_LEVEL >= LEVEL || BSG_KSLogger_LocalLevel >= LEVEL)
+#define RSC_KSLOG_PRINTS_AT_LEVEL(LEVEL)                                       \
+    (RSC_LOG_LEVEL >= LEVEL || RSC_KSLogger_LocalLevel >= LEVEL)
 
 /** Log a message regardless of the log settings.
  * Normal version prints out full context. Basic version prints directly.
  *
  * @param FMT The format specifier, followed by its arguments.
  */
-#define BSG_KSLOG_ALWAYS(FMT, ...) a_KSLOG_FULL("FORCE", FMT, ##__VA_ARGS__)
-#define BSG_KSLOGBASIC_ALWAYS(FMT, ...) i_KSLOG_BASIC(FMT, ##__VA_ARGS__)
+#define RSC_KSLOG_ALWAYS(FMT, ...) a_KSLOG_FULL("FORCE", FMT, ##__VA_ARGS__)
+#define RSC_KSLOGBASIC_ALWAYS(FMT, ...) i_KSLOG_BASIC(FMT, ##__VA_ARGS__)
 
 /** Log an error.
  * Normal version prints out full context. Basic version prints directly.
  *
  * @param FMT The format specifier, followed by its arguments.
  */
-#if BSG_KSLOG_PRINTS_AT_LEVEL(BSG_KSLogger_Level_Error)
-#define BSG_KSLOG_ERROR(FMT, ...) a_KSLOG_FULL("ERROR", FMT, ##__VA_ARGS__)
-#define BSG_KSLOGBASIC_ERROR(FMT, ...) i_KSLOG_BASIC(FMT, ##__VA_ARGS__)
+#if RSC_KSLOG_PRINTS_AT_LEVEL(RSC_KSLogger_Level_Error)
+#define RSC_KSLOG_ERROR(FMT, ...) a_KSLOG_FULL("ERROR", FMT, ##__VA_ARGS__)
+#define RSC_KSLOGBASIC_ERROR(FMT, ...) i_KSLOG_BASIC(FMT, ##__VA_ARGS__)
 #else
-#define BSG_KSLOG_ERROR(FMT, ...)
-#define BSG_KSLOGBASIC_ERROR(FMT, ...)
+#define RSC_KSLOG_ERROR(FMT, ...)
+#define RSC_KSLOGBASIC_ERROR(FMT, ...)
 #endif
 
 /** Log a warning.
@@ -257,12 +257,12 @@ bool bsg_kslog_setLogFilename(const char *filename, bool overwrite);
  *
  * @param FMT The format specifier, followed by its arguments.
  */
-#if BSG_KSLOG_PRINTS_AT_LEVEL(BSG_KSLogger_Level_Warn)
-#define BSG_KSLOG_WARN(FMT, ...) a_KSLOG_FULL("WARN ", FMT, ##__VA_ARGS__)
-#define BSG_KSLOGBASIC_WARN(FMT, ...) i_KSLOG_BASIC(FMT, ##__VA_ARGS__)
+#if RSC_KSLOG_PRINTS_AT_LEVEL(RSC_KSLogger_Level_Warn)
+#define RSC_KSLOG_WARN(FMT, ...) a_KSLOG_FULL("WARN ", FMT, ##__VA_ARGS__)
+#define RSC_KSLOGBASIC_WARN(FMT, ...) i_KSLOG_BASIC(FMT, ##__VA_ARGS__)
 #else
-#define BSG_KSLOG_WARN(FMT, ...)
-#define BSG_KSLOGBASIC_WARN(FMT, ...)
+#define RSC_KSLOG_WARN(FMT, ...)
+#define RSC_KSLOGBASIC_WARN(FMT, ...)
 #endif
 
 /** Log an info message.
@@ -270,12 +270,12 @@ bool bsg_kslog_setLogFilename(const char *filename, bool overwrite);
  *
  * @param FMT The format specifier, followed by its arguments.
  */
-#if BSG_KSLOG_PRINTS_AT_LEVEL(BSG_KSLogger_Level_Info)
-#define BSG_KSLOG_INFO(FMT, ...) a_KSLOG_FULL("INFO ", FMT, ##__VA_ARGS__)
-#define BSG_KSLOGBASIC_INFO(FMT, ...) i_KSLOG_BASIC(FMT, ##__VA_ARGS__)
+#if RSC_KSLOG_PRINTS_AT_LEVEL(RSC_KSLogger_Level_Info)
+#define RSC_KSLOG_INFO(FMT, ...) a_KSLOG_FULL("INFO ", FMT, ##__VA_ARGS__)
+#define RSC_KSLOGBASIC_INFO(FMT, ...) i_KSLOG_BASIC(FMT, ##__VA_ARGS__)
 #else
-#define BSG_KSLOG_INFO(FMT, ...)
-#define BSG_KSLOGBASIC_INFO(FMT, ...)
+#define RSC_KSLOG_INFO(FMT, ...)
+#define RSC_KSLOGBASIC_INFO(FMT, ...)
 #endif
 
 /** Log a debug message.
@@ -283,12 +283,12 @@ bool bsg_kslog_setLogFilename(const char *filename, bool overwrite);
  *
  * @param FMT The format specifier, followed by its arguments.
  */
-#if BSG_KSLOG_PRINTS_AT_LEVEL(BSG_KSLogger_Level_Debug)
-#define BSG_KSLOG_DEBUG(FMT, ...) a_KSLOG_FULL("DEBUG", FMT, ##__VA_ARGS__)
-#define BSG_KSLOGBASIC_DEBUG(FMT, ...) i_KSLOG_BASIC(FMT, ##__VA_ARGS__)
+#if RSC_KSLOG_PRINTS_AT_LEVEL(RSC_KSLogger_Level_Debug)
+#define RSC_KSLOG_DEBUG(FMT, ...) a_KSLOG_FULL("DEBUG", FMT, ##__VA_ARGS__)
+#define RSC_KSLOGBASIC_DEBUG(FMT, ...) i_KSLOG_BASIC(FMT, ##__VA_ARGS__)
 #else
-#define BSG_KSLOG_DEBUG(FMT, ...)
-#define BSG_KSLOGBASIC_DEBUG(FMT, ...)
+#define RSC_KSLOG_DEBUG(FMT, ...)
+#define RSC_KSLOGBASIC_DEBUG(FMT, ...)
 #endif
 
 /** Log a trace message.
@@ -296,12 +296,12 @@ bool bsg_kslog_setLogFilename(const char *filename, bool overwrite);
  *
  * @param FMT The format specifier, followed by its arguments.
  */
-#if BSG_KSLOG_PRINTS_AT_LEVEL(BSG_KSLogger_Level_Trace)
-#define BSG_KSLOG_TRACE(FMT, ...) a_KSLOG_FULL("TRACE", FMT, ##__VA_ARGS__)
-#define BSG_KSLOGBASIC_TRACE(FMT, ...) i_KSLOG_BASIC(FMT, ##__VA_ARGS__)
+#if RSC_KSLOG_PRINTS_AT_LEVEL(RSC_KSLogger_Level_Trace)
+#define RSC_KSLOG_TRACE(FMT, ...) a_KSLOG_FULL("TRACE", FMT, ##__VA_ARGS__)
+#define RSC_KSLOGBASIC_TRACE(FMT, ...) i_KSLOG_BASIC(FMT, ##__VA_ARGS__)
 #else
-#define BSG_KSLOG_TRACE(FMT, ...)
-#define BSG_KSLOGBASIC_TRACE(FMT, ...)
+#define RSC_KSLOG_TRACE(FMT, ...)
+#define RSC_KSLOGBASIC_TRACE(FMT, ...)
 #endif
 
 // ============================================================================
@@ -310,29 +310,29 @@ bool bsg_kslog_setLogFilename(const char *filename, bool overwrite);
 
 /* Put everything back to the way we found it. */
 #undef ERROR
-#ifdef BSG_KSLOG_BAK_ERROR
-#define ERROR BSG_KSLOG_BAK_ERROR
-#undef BSG_KSLOG_BAK_ERROR
+#ifdef RSC_KSLOG_BAK_ERROR
+#define ERROR RSC_KSLOG_BAK_ERROR
+#undef RSC_KSLOG_BAK_ERROR
 #endif
 #undef WARNING
-#ifdef BSG_KSLOG_BAK_WARN
-#define WARNING BSG_KSLOG_BAK_WARN
-#undef BSG_KSLOG_BAK_WARN
+#ifdef RSC_KSLOG_BAK_WARN
+#define WARNING RSC_KSLOG_BAK_WARN
+#undef RSC_KSLOG_BAK_WARN
 #endif
 #undef INFO
-#ifdef BSG_KSLOG_BAK_INFO
-#define INFO BSG_KSLOG_BAK_INFO
-#undef BSG_KSLOG_BAK_INFO
+#ifdef RSC_KSLOG_BAK_INFO
+#define INFO RSC_KSLOG_BAK_INFO
+#undef RSC_KSLOG_BAK_INFO
 #endif
 #undef DEBUG
-#ifdef BSG_KSLOG_BAK_DEBUG
-#define DEBUG BSG_KSLOG_BAK_DEBUG
-#undef BSG_KSLOG_BAK_DEBUG
+#ifdef RSC_KSLOG_BAK_DEBUG
+#define DEBUG RSC_KSLOG_BAK_DEBUG
+#undef RSC_KSLOG_BAK_DEBUG
 #endif
 #undef TRACE
-#ifdef BSG_KSLOG_BAK_TRACE
-#define TRACE BSG_KSLOG_BAK_TRACE
-#undef BSG_KSLOG_BAK_TRACE
+#ifdef RSC_KSLOG_BAK_TRACE
+#define TRACE RSC_KSLOG_BAK_TRACE
+#undef RSC_KSLOG_BAK_TRACE
 #endif
 
 #ifdef __cplusplus

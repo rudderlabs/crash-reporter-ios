@@ -1,46 +1,46 @@
 //
-//  BSGSerializationTests.m
-//  Bugsnag
+//  RSCSerializationTests.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 28/07/2022.
-//  Copyright © 2022 Bugsnag Inc. All rights reserved.
+//  Copyright © 2022 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BSGSerialization.h"
+#import "RSCSerialization.h"
 
-@interface BSGSerializationTests : XCTestCase
+@interface RSCSerializationTests : XCTestCase
 
 @end
 
-@implementation BSGSerializationTests
+@implementation RSCSerializationTests
 
 - (void)testSanitizeObject {
-    XCTAssertEqualObjects(BSGSanitizeObject(@""), @"");
-    XCTAssertEqualObjects(BSGSanitizeObject(@42), @42);
-    XCTAssertEqualObjects(BSGSanitizeObject(@[@42]), @[@42]);
-    XCTAssertEqualObjects(BSGSanitizeObject(@[self]), @[]);
-    XCTAssertEqualObjects(BSGSanitizeObject(@{@"a": @"b"}), @{@"a": @"b"});
-    XCTAssertEqualObjects(BSGSanitizeObject(@{@"self": self}), @{});
-    XCTAssertNil(BSGSanitizeObject(@(INFINITY)));
-    XCTAssertNil(BSGSanitizeObject(@(NAN)));
-    XCTAssertNil(BSGSanitizeObject([NSDate date]));
-    XCTAssertNil(BSGSanitizeObject([NSDecimalNumber notANumber]));
-    XCTAssertNil(BSGSanitizeObject([NSNull null]));
-    XCTAssertNil(BSGSanitizeObject(self));
+    XCTAssertEqualObjects(RSCSanitizeObject(@""), @"");
+    XCTAssertEqualObjects(RSCSanitizeObject(@42), @42);
+    XCTAssertEqualObjects(RSCSanitizeObject(@[@42]), @[@42]);
+    XCTAssertEqualObjects(RSCSanitizeObject(@[self]), @[]);
+    XCTAssertEqualObjects(RSCSanitizeObject(@{@"a": @"b"}), @{@"a": @"b"});
+    XCTAssertEqualObjects(RSCSanitizeObject(@{@"self": self}), @{});
+    XCTAssertNil(RSCSanitizeObject(@(INFINITY)));
+    XCTAssertNil(RSCSanitizeObject(@(NAN)));
+    XCTAssertNil(RSCSanitizeObject([NSDate date]));
+    XCTAssertNil(RSCSanitizeObject([NSDecimalNumber notANumber]));
+    XCTAssertNil(RSCSanitizeObject([NSNull null]));
+    XCTAssertNil(RSCSanitizeObject(self));
 }
 
 - (void)testTruncateString {
-    BSGTruncateContext context = {0};
+    RSCTruncateContext context = {0};
     
     context.maxLength = NSUIntegerMax;
-    XCTAssertEqualObjects(BSGTruncateString(&context, @"Hello, world!"), @"Hello, world!");
+    XCTAssertEqualObjects(RSCTruncateString(&context, @"Hello, world!"), @"Hello, world!");
     XCTAssertEqual(context.strings, 0);
     XCTAssertEqual(context.length, 0);
     
     context.maxLength = 5;
-    XCTAssertEqualObjects(BSGTruncateString(&context, @"Hello, world!"), @"Hello"
+    XCTAssertEqualObjects(RSCTruncateString(&context, @"Hello, world!"), @"Hello"
                           "\n***8 CHARS TRUNCATED***");
     XCTAssertEqual(context.strings, 1);
     XCTAssertEqual(context.length, 8);
@@ -50,23 +50,23 @@
     // added emoji like 🏴󠁧󠁢󠁥󠁮󠁧󠁿 and 👩🏾‍🚀 and therefore won't be able to avoid slicing them.
     
     context.maxLength = 10;
-    XCTAssertEqualObjects(BSGTruncateString(&context, @"Emoji: 👍🏾"), @"Emoji: "
+    XCTAssertEqualObjects(RSCTruncateString(&context, @"Emoji: 👍🏾"), @"Emoji: "
                           "\n***4 CHARS TRUNCATED***");
     XCTAssertEqual(context.strings, 2);
     XCTAssertEqual(context.length, 12);
 }
 
 - (void)testTruncateStringsWithString {
-    BSGTruncateContext context = (BSGTruncateContext){.maxLength = 3};
-    XCTAssertEqualObjects(BSGTruncateStrings(&context, @"foo bar"), @"foo"
+    RSCTruncateContext context = (RSCTruncateContext){.maxLength = 3};
+    XCTAssertEqualObjects(RSCTruncateStrings(&context, @"foo bar"), @"foo"
                           "\n***4 CHARS TRUNCATED***");
     XCTAssertEqual(context.strings, 1);
     XCTAssertEqual(context.length, 4);
 }
 
 - (void)testTruncateStringsWithArray {
-    BSGTruncateContext context = (BSGTruncateContext){.maxLength = 3};
-    XCTAssertEqualObjects(BSGTruncateStrings(&context, @[@"foo bar"]),
+    RSCTruncateContext context = (RSCTruncateContext){.maxLength = 3};
+    XCTAssertEqualObjects(RSCTruncateStrings(&context, @[@"foo bar"]),
                           @[@"foo"
                             "\n***4 CHARS TRUNCATED***"]);
     XCTAssertEqual(context.strings, 1);
@@ -74,8 +74,8 @@
 }
 
 - (void)testTruncateStringsWithObject {
-    BSGTruncateContext context = (BSGTruncateContext){.maxLength = 3};
-    XCTAssertEqualObjects(BSGTruncateStrings(&context, @{@"name": @"foo bar"}),
+    RSCTruncateContext context = (RSCTruncateContext){.maxLength = 3};
+    XCTAssertEqualObjects(RSCTruncateStrings(&context, @{@"name": @"foo bar"}),
                           @{@"name": @"foo"
                             "\n***4 CHARS TRUNCATED***"});
     XCTAssertEqual(context.strings, 1);
@@ -83,8 +83,8 @@
 }
 
 - (void)testTruncateStringsWithNestedObjects {
-    BSGTruncateContext context = (BSGTruncateContext){.maxLength = 3};
-    XCTAssertEqualObjects(BSGTruncateStrings(&context, (@{@"one": @{@"key": @"foo bar"},
+    RSCTruncateContext context = (RSCTruncateContext){.maxLength = 3};
+    XCTAssertEqualObjects(RSCTruncateStrings(&context, (@{@"one": @{@"key": @"foo bar"},
                                                           @"two": @{@"foo": @"Baa, Baa, Black Sheep"}})),
                           (@{@"one": @{@"key": @"foo"
                                        "\n***4 CHARS TRUNCATED***"},

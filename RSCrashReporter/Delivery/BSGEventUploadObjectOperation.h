@@ -1,14 +1,14 @@
 //
-//  BSGEventUploadObjectOperation.h
-//  Bugsnag
+//  RSCEventUploadObjectOperation.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 17/02/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGEventUploadOperation.h"
+#import "RSCEventUploadOperation.h"
 
-#import "BSGDefines.h"
+#import "RSCDefines.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -17,12 +17,12 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * If the upload needs to be retried, the event will be persisted to disk.
  */
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSGEventUploadObjectOperation : BSGEventUploadOperation
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCEventUploadObjectOperation : RSCEventUploadOperation
 
-- (instancetype)initWithEvent:(BugsnagEvent *)event delegate:(id<BSGEventUploadOperationDelegate>)delegate;
+- (instancetype)initWithEvent:(RSCrashReporterEvent *)event delegate:(id<RSCEventUploadOperationDelegate>)delegate;
 
-@property (nonatomic) BugsnagEvent *event;
+@property (nonatomic) RSCrashReporterEvent *event;
 
 @end
 

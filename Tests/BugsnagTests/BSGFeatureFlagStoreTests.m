@@ -1,38 +1,38 @@
 //
-//  BSGFeatureFlagStoreTests.m
-//  Bugsnag
+//  RSCFeatureFlagStoreTests.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 11/11/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGFeatureFlagStore.h"
+#import "RSCFeatureFlagStore.h"
 
 #import <XCTest/XCTest.h>
 
-@interface BSGFeatureFlagStoreTests : XCTestCase
+@interface RSCFeatureFlagStoreTests : XCTestCase
 
 @end
 
-@implementation BSGFeatureFlagStoreTests
+@implementation RSCFeatureFlagStoreTests
 
 - (void)test {
-    BSGFeatureFlagStore *store = [[BSGFeatureFlagStore alloc] init];
-    XCTAssertEqualObjects(BSGFeatureFlagStoreToJSON(store), @[]);
+    RSCFeatureFlagStore *store = [[RSCFeatureFlagStore alloc] init];
+    XCTAssertEqualObjects(RSCFeatureFlagStoreToJSON(store), @[]);
 
-    BSGFeatureFlagStoreAddFeatureFlag(store, @"featureC", @"checked");
-    XCTAssertEqualObjects(BSGFeatureFlagStoreToJSON(store),
+    RSCFeatureFlagStoreAddFeatureFlag(store, @"featureC", @"checked");
+    XCTAssertEqualObjects(RSCFeatureFlagStoreToJSON(store),
                           (@[@{@"featureFlag": @"featureC", @"variant": @"checked"}]));
     
-    BSGFeatureFlagStoreAddFeatureFlag(store, @"featureA", @"enabled");
-    XCTAssertEqualObjects(BSGFeatureFlagStoreToJSON(store),
+    RSCFeatureFlagStoreAddFeatureFlag(store, @"featureA", @"enabled");
+    XCTAssertEqualObjects(RSCFeatureFlagStoreToJSON(store),
                           (@[
                             @{@"featureFlag": @"featureC", @"variant": @"checked"},
                             @{@"featureFlag": @"featureA", @"variant": @"enabled"}
                           ]));
 
-    BSGFeatureFlagStoreAddFeatureFlag(store, @"featureB", nil);
-    XCTAssertEqualObjects(BSGFeatureFlagStoreToJSON(store),
+    RSCFeatureFlagStoreAddFeatureFlag(store, @"featureB", nil);
+    XCTAssertEqualObjects(RSCFeatureFlagStoreToJSON(store),
                           (@[
                             @{@"featureFlag": @"featureC", @"variant": @"checked"},
                             @{@"featureFlag": @"featureA", @"variant": @"enabled"},
@@ -40,45 +40,45 @@
                           ]));
 
 
-    BSGFeatureFlagStoreAddFeatureFlags(store, @[[BugsnagFeatureFlag flagWithName:@"featureA"]]);
-    XCTAssertEqualObjects(BSGFeatureFlagStoreToJSON(store),
+    RSCFeatureFlagStoreAddFeatureFlags(store, @[[RSCrashReporterFeatureFlag flagWithName:@"featureA"]]);
+    XCTAssertEqualObjects(RSCFeatureFlagStoreToJSON(store),
                           (@[
                             @{@"featureFlag": @"featureC", @"variant": @"checked"},
                             @{@"featureFlag": @"featureA"},
                             @{@"featureFlag": @"featureB"},
                           ]));
 
-    XCTAssertEqualObjects(BSGFeatureFlagStoreToJSON(BSGFeatureFlagStoreFromJSON(BSGFeatureFlagStoreToJSON(store))),
-                          BSGFeatureFlagStoreToJSON(store));
+    XCTAssertEqualObjects(RSCFeatureFlagStoreToJSON(RSCFeatureFlagStoreFromJSON(RSCFeatureFlagStoreToJSON(store))),
+                          RSCFeatureFlagStoreToJSON(store));
     
-    BSGFeatureFlagStoreClear(store, @"featureB");
-    XCTAssertEqualObjects(BSGFeatureFlagStoreToJSON(store),
+    RSCFeatureFlagStoreClear(store, @"featureB");
+    XCTAssertEqualObjects(RSCFeatureFlagStoreToJSON(store),
                           (@[
                             @{@"featureFlag": @"featureC", @"variant": @"checked"},
                             @{@"featureFlag": @"featureA"}
                           ]));
 
-    BSGFeatureFlagStoreClear(store, nil);
-    XCTAssertEqualObjects(BSGFeatureFlagStoreToJSON(store), @[]);
+    RSCFeatureFlagStoreClear(store, nil);
+    XCTAssertEqualObjects(RSCFeatureFlagStoreToJSON(store), @[]);
 }
 
 - (void)testAddRemoveMany {
     // Tests that rebuildIfTooManyHoles works as expected
 
-    BSGFeatureFlagStore *store = [[BSGFeatureFlagStore alloc] init];
+    RSCFeatureFlagStore *store = [[RSCFeatureFlagStore alloc] init];
 
-    BSGFeatureFlagStoreAddFeatureFlag(store, @"blah", @"testing");
+    RSCFeatureFlagStoreAddFeatureFlag(store, @"blah", @"testing");
     for (int j = 0; j < 10; j++) {
         for (int i = 0; i < 1000; i++) {
             NSString *name = [NSString stringWithFormat:@"%d-%d", j, i];
-            BSGFeatureFlagStoreAddFeatureFlag(store, name, nil);
+            RSCFeatureFlagStoreAddFeatureFlag(store, name, nil);
             if (i < 999) {
-                BSGFeatureFlagStoreClear(store, name);
+                RSCFeatureFlagStoreClear(store, name);
             }
         }
     }
 
-    XCTAssertEqualObjects(BSGFeatureFlagStoreToJSON(store),
+    XCTAssertEqualObjects(RSCFeatureFlagStoreToJSON(store),
                           (@[
                             @{@"featureFlag": @"blah", @"variant": @"testing"},
                             @{@"featureFlag": @"0-999"},
@@ -95,12 +95,12 @@
 }
 
 - (void)testAddFeatureFlagPerformance {
-    BSGFeatureFlagStore *store = [[BSGFeatureFlagStore alloc] init];
+    RSCFeatureFlagStore *store = [[RSCFeatureFlagStore alloc] init];
 
     __auto_type block = ^{
         for (int i = 0; i < 1000; i++) {
             NSString *name = [NSString stringWithFormat:@"%d", i];
-            BSGFeatureFlagStoreAddFeatureFlag(store, name, nil);
+            RSCFeatureFlagStoreAddFeatureFlag(store, name, nil);
         }
     };
 

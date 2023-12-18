@@ -1,9 +1,9 @@
 //
-//  BSGJSONSerialization.h
-//  Bugsnag
+//  RSCJSONSerialization.h
+//  RSCrashReporter
 //
 //  Created by Karl Stenerud on 03.09.20.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -17,14 +17,14 @@ NS_ASSUME_NONNULL_BEGIN
  * This wrapper catches all exceptions and forces everything to be returned as an error.
  */
 
-BOOL BSGJSONDictionaryIsValid(NSDictionary *dictionary, NSError **error);
+BOOL RSCJSONDictionaryIsValid(NSDictionary *dictionary, NSError **error);
 
-NSData *_Nullable BSGJSONDataFromDictionary(NSDictionary *dictionary, NSError **error);
+NSData *_Nullable RSCJSONDataFromDictionary(NSDictionary *dictionary, NSError **error);
 
-NSDictionary *_Nullable BSGJSONDictionaryFromData(NSData *data, NSJSONReadingOptions options, NSError **error);
+NSDictionary *_Nullable RSCJSONDictionaryFromData(NSData *data, NSJSONReadingOptions options, NSError **error);
 
-BOOL BSGJSONWriteToFileAtomically(NSDictionary *dictionary, NSString *file, NSError **error);
+BOOL RSCJSONWriteToFileAtomically(NSDictionary *dictionary, NSString *file, NSError **error);
 
-NSDictionary *_Nullable BSGJSONDictionaryFromFile(NSString *file, NSJSONReadingOptions options, NSError **error);
+NSDictionary *_Nullable RSCJSONDictionaryFromFile(NSString *file, NSJSONReadingOptions options, NSError **error);
 
 NS_ASSUME_NONNULL_END

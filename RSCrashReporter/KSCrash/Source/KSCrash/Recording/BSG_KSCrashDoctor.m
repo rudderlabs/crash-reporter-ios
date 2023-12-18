@@ -1,48 +1,48 @@
 //
-//  BSG_KSCrashDoctor.m
-//  BSG_KSCrash
+//  RSC_KSCrashDoctor.m
+//  RSC_KSCrash
 //
 //  Created by Karl Stenerud on 2012-11-10.
 //  Copyright (c) 2012 Karl Stenerud. All rights reserved.
 //
 
-#import "BSG_KSCrashDoctor.h"
+#import "RSC_KSCrashDoctor.h"
 
-#import "BSG_KSCrashReportFields.h"
-#import "BSG_KSSystemInfo.h"
-#import "BugsnagLogger.h"
+#import "RSC_KSCrashReportFields.h"
+#import "RSC_KSSystemInfo.h"
+#import "RSCrashReporterLogger.h"
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BSG_KSCrashDoctor
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSC_KSCrashDoctor
 
 - (NSDictionary *)crashReport:(NSDictionary *)report {
-    return report[@BSG_KSCrashField_Crash];
+    return report[@RSC_KSCrashField_Crash];
 }
 
 - (NSDictionary *)infoReport:(NSDictionary *)report {
-    return report[@BSG_KSCrashField_Report];
+    return report[@RSC_KSCrashField_Report];
 }
 
 - (NSDictionary *)errorReport:(NSDictionary *)report {
-    return [self crashReport:report][@BSG_KSCrashField_Error];
+    return [self crashReport:report][@RSC_KSCrashField_Error];
 }
 
 - (NSString *)mainExecutableNameForReport:(NSDictionary *)report {
     NSDictionary *info = [self infoReport:report];
-    return info[@BSG_KSCrashField_ProcessName];
+    return info[@RSC_KSCrashField_ProcessName];
 }
 
 - (NSDictionary *)crashedThreadReport:(NSDictionary *)report {
     NSDictionary *crashReport = [self crashReport:report];
     NSDictionary *crashedThread =
-            crashReport[@BSG_KSCrashField_CrashedThread];
+            crashReport[@RSC_KSCrashField_CrashedThread];
     if (crashedThread != nil) {
         return crashedThread;
     }
 
     for (NSDictionary *thread in
-            crashReport[@BSG_KSCrashField_Threads]) {
-        if ([thread[@BSG_KSCrashField_Crashed] boolValue]) {
+            crashReport[@RSC_KSCrashField_Threads]) {
+        if ([thread[@RSC_KSCrashField_Crashed] boolValue]) {
             return thread;
         }
     }
@@ -51,8 +51,8 @@ BSG_OBJC_DIRECT_MEMBERS
 
 - (NSArray *)backtraceFromThreadReport:(NSDictionary *)threadReport {
     NSDictionary *backtrace =
-            threadReport[@BSG_KSCrashField_Backtrace];
-    return backtrace[@BSG_KSCrashField_Contents];
+            threadReport[@RSC_KSCrashField_Backtrace];
+    return backtrace[@RSC_KSCrashField_Contents];
 }
 
 - (NSDictionary *)lastInAppStackEntry:(NSDictionary *)report {
@@ -61,7 +61,7 @@ BSG_OBJC_DIRECT_MEMBERS
     NSArray *backtrace = [self backtraceFromThreadReport:crashedThread];
     for (NSDictionary *entry in backtrace) {
         NSString *objectName =
-                entry[@BSG_KSCrashField_ObjectName];
+                entry[@RSC_KSCrashField_ObjectName];
         if ([objectName isEqualToString:executableName]) {
             return entry;
         }
@@ -70,26 +70,26 @@ BSG_OBJC_DIRECT_MEMBERS
 }
 
 - (BOOL)isInvalidAddress:(NSDictionary *)errorReport {
-    NSDictionary *machError = errorReport[@BSG_KSCrashField_Mach];
+    NSDictionary *machError = errorReport[@RSC_KSCrashField_Mach];
     if (machError != nil) {
         NSString *exceptionName =
-                machError[@BSG_KSCrashField_ExceptionName];
+                machError[@RSC_KSCrashField_ExceptionName];
         return [exceptionName isEqualToString:@"EXC_BAD_ACCESS"];
     }
-    NSDictionary *signal = errorReport[@BSG_KSCrashField_Signal];
-    NSString *sigName = signal[@BSG_KSCrashField_Name];
+    NSDictionary *signal = errorReport[@RSC_KSCrashField_Signal];
+    NSString *sigName = signal[@RSC_KSCrashField_Name];
     return [sigName isEqualToString:@"SIGSEGV"];
 }
 
 - (BOOL)isMathError:(NSDictionary *)errorReport {
-    NSDictionary *machError = errorReport[@BSG_KSCrashField_Mach];
+    NSDictionary *machError = errorReport[@RSC_KSCrashField_Mach];
     if (machError != nil) {
         NSString *exceptionName =
-                machError[@BSG_KSCrashField_ExceptionName];
+                machError[@RSC_KSCrashField_ExceptionName];
         return [exceptionName isEqualToString:@"EXC_ARITHMETIC"];
     }
-    NSDictionary *signal = errorReport[@BSG_KSCrashField_Signal];
-    NSString *sigName = signal[@BSG_KSCrashField_Name];
+    NSDictionary *signal = errorReport[@RSC_KSCrashField_Signal];
+    NSString *sigName = signal[@RSC_KSCrashField_Name];
     return [sigName isEqualToString:@"SIGFPE"];
 }
 
@@ -98,9 +98,9 @@ BSG_OBJC_DIRECT_MEMBERS
     NSArray *backtrace = [self backtraceFromThreadReport:crashedThread];
     for (NSDictionary *entry in backtrace) {
         NSString *objectName =
-                entry[@BSG_KSCrashField_ObjectName];
+                entry[@RSC_KSCrashField_ObjectName];
         NSString *symbolName =
-                entry[@BSG_KSCrashField_SymbolName];
+                entry[@RSC_KSCrashField_SymbolName];
         if ([symbolName isEqualToString:@"objc_autoreleasePoolPush"]) {
             return YES;
         }
@@ -121,13 +121,13 @@ BSG_OBJC_DIRECT_MEMBERS
 
 - (BOOL)isStackOverflow:(NSDictionary *)crashedThreadReport {
     NSDictionary *stack =
-            crashedThreadReport[@BSG_KSCrashField_Stack];
-    return [stack[@BSG_KSCrashField_Overflow] boolValue];
+            crashedThreadReport[@RSC_KSCrashField_Stack];
+    return [stack[@RSC_KSCrashField_Overflow] boolValue];
 }
 
 - (NSString *)diagnoseCrash:(NSDictionary *)report {
     @try {
-        NSString *lastFunctionName = [self lastInAppStackEntry:report][@BSG_KSCrashField_SymbolName];
+        NSString *lastFunctionName = [self lastInAppStackEntry:report][@RSC_KSCrashField_SymbolName];
         NSDictionary *crashedThreadReport = [self crashedThreadReport:report];
         NSDictionary *errorReport = [self errorReport:report];
 
@@ -145,7 +145,7 @@ BSG_OBJC_DIRECT_MEMBERS
         }
 
         if ([self isInvalidAddress:errorReport]) {
-            uintptr_t address = (uintptr_t)[errorReport[@BSG_KSCrashField_Address] unsignedLongLongValue];
+            uintptr_t address = (uintptr_t)[errorReport[@RSC_KSCrashField_Address] unsignedLongLongValue];
             if (address == 0) {
                 return @"Attempted to dereference null pointer.";
             }
@@ -156,7 +156,7 @@ BSG_OBJC_DIRECT_MEMBERS
 
         return nil;
     } @catch (NSException *e) {
-        bsg_log_debug(@"%@", e);
+        rsc_log_debug(@"%@", e);
         return nil;
     }
 }

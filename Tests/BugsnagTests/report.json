@@ -69,21 +69,21 @@
                             "object_addr": 4490747904
                         },
                         {
-                            "symbol_name": "-[BSG_KSCrash reportUserException:reason:lineOfCode:stackTrace:terminateProgram:]",
+                            "symbol_name": "-[RSC_KSCrash reportUserException:reason:lineOfCode:stackTrace:terminateProgram:]",
                             "symbol_addr": 4490972466,
                             "instruction_addr": 4490972815,
                             "object_name": "CrashProbeiOS",
                             "object_addr": 4490747904
                         },
                         {
-                            "symbol_name": "-[BugsnagNotifier notify:withData:atSeverity:atDepth:]",
+                            "symbol_name": "-[RSCrashReporterNotifier notify:withData:atSeverity:atDepth:]",
                             "symbol_addr": 4490976721,
                             "instruction_addr": 4490977379,
                             "object_name": "CrashProbeiOS",
                             "object_addr": 4490747904
                         },
                         {
-                            "symbol_name": "+[Bugsnag notify:]",
+                            "symbol_name": "+[RSCrashReporter notify:]",
                             "symbol_addr": 4490990708,
                             "instruction_addr": 4490990799,
                             "object_name": "CrashProbeiOS",
@@ -637,14 +637,14 @@
                             "object_addr": 4490747904
                         },
                         {
-                            "symbol_name": "-[BSG_KSCrash sendAllReportsWithCompletion:]",
+                            "symbol_name": "-[RSC_KSCrash sendAllReportsWithCompletion:]",
                             "symbol_addr": 4490971768,
                             "instruction_addr": 4490971856,
                             "object_name": "CrashProbeiOS",
                             "object_addr": 4490747904
                         },
                         {
-                            "symbol_name": "-[BugsnagNotifier sendPendingReports]",
+                            "symbol_name": "-[RSCrashReporterNotifier sendPendingReports]",
                             "symbol_addr": 4490977578,
                             "instruction_addr": 4490977647,
                             "object_name": "CrashProbeiOS",

@@ -1,9 +1,9 @@
 //
-//  BugsnagConfiguration.h
+//  RSCrashReporterConfiguration.h
 //
 //  Created by Conrad Irwin on 2014-10-01.
 //
-//  Copyright (c) 2014 Bugsnag, Inc. All rights reserved.
+//  Copyright (c) 2014 RSCrashReporter, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,79 +26,79 @@
 
 #import <Foundation/Foundation.h>
 
-#import <RSCrashReporter/BSG_KSCrashReportWriter.h>
-#import <RSCrashReporter/BugsnagBreadcrumb.h>
-#import <RSCrashReporter/BugsnagDefines.h>
-#import <RSCrashReporter/BugsnagEvent.h>
-#import <RSCrashReporter/BugsnagFeatureFlagStore.h>
-#import <RSCrashReporter/BugsnagMetadata.h>
-#import <RSCrashReporter/BugsnagMetadataStore.h>
-#import <RSCrashReporter/BugsnagPlugin.h>
+#import <RSCrashReporter/RSC_KSCrashReportWriter.h>
+#import <RSCrashReporter/RSCrashReporterBreadcrumb.h>
+#import <RSCrashReporter/RSCrashReporterDefines.h>
+#import <RSCrashReporter/RSCrashReporterEvent.h>
+#import <RSCrashReporter/RSCrashReporterFeatureFlagStore.h>
+#import <RSCrashReporter/RSCrashReporterMetadata.h>
+#import <RSCrashReporter/RSCrashReporterMetadataStore.h>
+#import <RSCrashReporter/RSCrashReporterPlugin.h>
 
-@class BugsnagUser;
-@class BugsnagEndpointConfiguration;
-@class BugsnagErrorTypes;
+@class RSCrashReporterUser;
+@class RSCrashReporterEndpointConfiguration;
+@class RSCrashReporterErrorTypes;
 
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * Controls whether Bugsnag should capture and serialize the state of all threads at the time
+ * Controls whether RSCrashReporter should capture and serialize the state of all threads at the time
  * of an error.
  */
-typedef NS_ENUM(NSInteger, BSGThreadSendPolicy) {
+typedef NS_ENUM(NSInteger, RSCThreadSendPolicy) {
 
     /**
      * Threads should be captured for all events.
      */
-    BSGThreadSendPolicyAlways = 0,
+    RSCThreadSendPolicyAlways = 0,
 
     /**
      * Threads should be captured for unhandled events only.
      */
-    BSGThreadSendPolicyUnhandledOnly = 1,
+    RSCThreadSendPolicyUnhandledOnly = 1,
 
     /**
      * Threads should never be captured.
      */
-    BSGThreadSendPolicyNever = 2
+    RSCThreadSendPolicyNever = 2
 };
 
 /**
- * Types of telemetry that may be sent to Bugsnag for product improvement purposes.
+ * Types of telemetry that may be sent to RSCrashReporter for product improvement purposes.
  */
-typedef NS_OPTIONS(NSUInteger, BSGTelemetryOptions) {
+typedef NS_OPTIONS(NSUInteger, RSCTelemetryOptions) {
 
     /**
-     * Errors within the Bugsnag SDK.
+     * Errors within the RSCrashReporter SDK.
      */
-    BSGTelemetryInternalErrors = (1UL << 0),
+    RSCTelemetryInternalErrors = (1UL << 0),
 
     /**
-     * Information about how Bugsnag has been configured.
+     * Information about how RSCrashReporter has been configured.
      */
-    BSGTelemetryUsage = (1UL << 1),
+    RSCTelemetryUsage = (1UL << 1),
 
     /**
      * All types of telemetry are enabled by default.
      */
-    BSGTelemetryAll = (BSGTelemetryInternalErrors | BSGTelemetryUsage)
+    RSCTelemetryAll = (RSCTelemetryInternalErrors | RSCTelemetryUsage)
 };
 
 /**
- * Setting `BugsnagConfiguration.appHangThresholdMillis` to this value disables the reporting of
+ * Setting `RSCrashReporterConfiguration.appHangThresholdMillis` to this value disables the reporting of
  * app hangs that ended before the app was terminated.
  */
-BUGSNAG_EXTERN const NSUInteger BugsnagAppHangThresholdFatalOnly API_UNAVAILABLE(watchos);
+RSCRASHREPORTER_EXTERN const NSUInteger RSCrashReporterAppHangThresholdFatalOnly API_UNAVAILABLE(watchos);
 
 /**
  *  A configuration block for modifying an error report
  *
  *  @param event the error report to be modified
  */
-typedef BOOL (^BugsnagOnErrorBlock)(BugsnagEvent *_Nonnull event);
+typedef BOOL (^RSCrashReporterOnErrorBlock)(RSCrashReporterEvent *_Nonnull event);
 
 /**
- *  A handler for modifying data before sending it to Bugsnag.
+ *  A handler for modifying data before sending it to RSCrashReporter.
  *
  * onSendErrorBlocks will be invoked on a dedicated
  * background queue, which will be different from the queue where the block was originally added.
@@ -107,52 +107,52 @@ typedef BOOL (^BugsnagOnErrorBlock)(BugsnagEvent *_Nonnull event);
  *
  *  @return YES if the event should be sent
  */
-typedef BOOL (^BugsnagOnSendErrorBlock)(BugsnagEvent *_Nonnull event);
+typedef BOOL (^RSCrashReporterOnSendErrorBlock)(RSCrashReporterEvent *_Nonnull event);
 
 /**
- * An opaque object that identifies and allows the removal of a BugsnagOnSendErrorBlock.
+ * An opaque object that identifies and allows the removal of a RSCrashReporterOnSendErrorBlock.
  */
-typedef id<NSObject> BugsnagOnSendErrorRef;
+typedef id<NSObject> RSCrashReporterOnSendErrorRef;
 
 /**
  *  A configuration block for modifying a captured breadcrumb
  *
  *  @param breadcrumb The breadcrumb
  */
-typedef BOOL (^BugsnagOnBreadcrumbBlock)(BugsnagBreadcrumb *_Nonnull breadcrumb);
+typedef BOOL (^RSCrashReporterOnBreadcrumbBlock)(RSCrashReporterBreadcrumb *_Nonnull breadcrumb);
 
 /**
- * An opaque object that identifies and allows the removal of a BugsnagOnBreadcrumbBlock.
+ * An opaque object that identifies and allows the removal of a RSCrashReporterOnBreadcrumbBlock.
  */
-typedef id<NSObject> BugsnagOnBreadcrumbRef;
+typedef id<NSObject> RSCrashReporterOnBreadcrumbRef;
 
 /**
  * A configuration block for modifying a session. Intended for internal usage only.
  *
  * @param session The session about to be delivered
  */
-typedef BOOL (^BugsnagOnSessionBlock)(BugsnagSession *_Nonnull session);
+typedef BOOL (^RSCrashReporterOnSessionBlock)(RSCrashReporterSession *_Nonnull session);
 
 /**
- * An opaque object that identifies and allows the removal of a BugsnagOnSessionBlock.
+ * An opaque object that identifies and allows the removal of a RSCrashReporterOnSessionBlock.
  */
-typedef id<NSObject> BugsnagOnSessionRef;
+typedef id<NSObject> RSCrashReporterOnSessionRef;
 
 // =============================================================================
-// MARK: - BugsnagConfiguration
+// MARK: - RSCrashReporterConfiguration
 // =============================================================================
 
 /**
  * Contains user-provided configuration, including API key and endpoints.
  */
-BUGSNAG_EXTERN
-@interface BugsnagConfiguration : NSObject <BugsnagFeatureFlagStore, BugsnagMetadataStore>
+RSCRASHREPORTER_EXTERN
+@interface RSCrashReporterConfiguration : NSObject <RSCrashReporterFeatureFlagStore, RSCrashReporterMetadataStore>
 
 /**
  * Create a new configuration from the main bundle's infoDictionary, using keys nested under
  * the "bugsnag" key.
  *
- * @return a BugsnagConfiguration containing the options set in the plist file
+ * @return a RSCrashReporterConfiguration containing the options set in the plist file
  */
 + (instancetype)loadConfig;
 
@@ -171,7 +171,7 @@ BUGSNAG_EXTERN
 // -----------------------------------------------------------------------------
 
 /**
- *  The API key of a Bugsnag project
+ *  The API key of a RSCrashReporter project
  */
 @property (copy, nonatomic) NSString *apiKey;
 
@@ -182,13 +182,13 @@ BUGSNAG_EXTERN
 @property (copy, nullable, nonatomic) NSString *releaseStage;
 
 /**
- *  Release stages which are allowed to notify Bugsnag
+ *  Release stages which are allowed to notify RSCrashReporter
  */
 @property (copy, nullable, nonatomic) NSSet<NSString *> *enabledReleaseStages;
 
 /**
  * Sets which values should be removed from any Metadata objects before
- * sending them to Bugsnag. Use this if you want to ensure you don't send
+ * sending them to RSCrashReporter. Use this if you want to ensure you don't send
  * sensitive data such as passwords, and credit card numbers to our
  * servers. Any keys which contain a match will be filtered.
  *
@@ -222,24 +222,24 @@ BUGSNAG_EXTERN
 @property (copy, nullable, nonatomic) NSString *appVersion;
 
 /**
- *  The URL session used to send requests to Bugsnag.
+ *  The URL session used to send requests to RSCrashReporter.
  */
 @property (readwrite, strong, nonnull, nonatomic) NSURLSession *session;
 
 /**
- * Controls whether Bugsnag should capture and serialize the state of all threads at the time
+ * Controls whether RSCrashReporter should capture and serialize the state of all threads at the time
  * of an error.
  *
- * By default sendThreads is set to BSGThreadSendPolicyAlways. This can be set to
- * BSGThreadSendPolicyNever to disable or BSGThreadSendPolicyUnhandledOnly
+ * By default sendThreads is set to RSCThreadSendPolicyAlways. This can be set to
+ * RSCThreadSendPolicyNever to disable or RSCThreadSendPolicyUnhandledOnly
  * to only do so for unhandled errors.
  */
-@property (nonatomic) BSGThreadSendPolicy sendThreads API_UNAVAILABLE(watchos);
+@property (nonatomic) RSCThreadSendPolicy sendThreads API_UNAVAILABLE(watchos);
 
 /**
  *  Optional handler invoked when an error or crash occurs
  */
-@property (nullable, nonatomic) void (* onCrashHandler)(const BSG_KSCrashReportWriter *);
+@property (nullable, nonatomic) void (* onCrashHandler)(const RSC_KSCrashReportWriter *);
 
 /**
  *  YES if uncaught exceptions and other crashes should be reported automatically
@@ -250,16 +250,16 @@ BUGSNAG_EXTERN
  * The minimum number of milliseconds of main thread unresponsiveness that will trigger the
  * detection and reporting of an app hang.
  *
- * Set to `BugsnagAppHangThresholdFatalOnly` to disable reporting of app hangs that did not
+ * Set to `RSCrashReporterAppHangThresholdFatalOnly` to disable reporting of app hangs that did not
  * end with the app being force quit by the user or terminated by the system watchdog.
  *
- * By default this is `BugsnagAppHangThresholdFatalOnly`, and can be set to a minimum of 250
+ * By default this is `RSCrashReporterAppHangThresholdFatalOnly`, and can be set to a minimum of 250
  * milliseconds.
  */
 @property (nonatomic) NSUInteger appHangThresholdMillis API_UNAVAILABLE(watchos);
 
 /**
- * Whether Bugsnag should report app hangs that occur while the app is in the background.
+ * Whether RSCrashReporter should report app hangs that occur while the app is in the background.
  *
  * By default this is false.
  */
@@ -267,7 +267,7 @@ BUGSNAG_EXTERN
 
 /**
  * Determines whether app sessions should be tracked automatically. By default this value is true.
- * If this value is updated after +[Bugsnag start] is called, only subsequent automatic sessions
+ * If this value is updated after +[RSCrashReporter start] is called, only subsequent automatic sessions
  * will be captured.
  *
  * Note: automatic session tracking is not available in App Extensions.
@@ -275,23 +275,23 @@ BUGSNAG_EXTERN
 @property (nonatomic) BOOL autoTrackSessions;
 
 /**
- * The amount of time (in milliseconds) after starting Bugsnag that should be considered part of
+ * The amount of time (in milliseconds) after starting RSCrashReporter that should be considered part of
  * the app's launch.
  *
- * Events that occur during app launch will have the `BugsnagAppWithState.isLaunching` property
+ * Events that occur during app launch will have the `RSCrashReporterAppWithState.isLaunching` property
  * set to true.
  *
  * By default this value is 5000 milliseconds.
  *
- * Setting this to `0` will cause Bugsnag to consider the app to be launching until
- * `+[Bugsnag markLaunchCompleted]` or `-[BugsnagClient markLaunchCompleted]` has been called.
+ * Setting this to `0` will cause RSCrashReporter to consider the app to be launching until
+ * `+[RSCrashReporter markLaunchCompleted]` or `-[RSCrashReporterClient markLaunchCompleted]` has been called.
  */
 @property (nonatomic) NSUInteger launchDurationMillis;
 
 /**
- * Determines whether launch crashes should be sent synchronously during `+[Bugsnag start]`.
+ * Determines whether launch crashes should be sent synchronously during `+[RSCrashReporter start]`.
  *
- * If true and the previous run terminated due to a crash during app launch, `+[Bugsnag start]`
+ * If true and the previous run terminated due to a crash during app launch, `+[RSCrashReporter start]`
  * will block the calling thread for up to 2 seconds while the crash report is sent.
  *
  * By default this value is true.
@@ -299,7 +299,7 @@ BUGSNAG_EXTERN
 @property (nonatomic) BOOL sendLaunchCrashesSynchronously;
 
 /**
- * Whether Bugsnag should try to send crashing errors prior to app termination.
+ * Whether RSCrashReporter should try to send crashing errors prior to app termination.
  *
  * Delivery will only be attempted for uncaught Objective-C exceptions and Mach
  * exceptions, and while in progress will block the crashing thread for up to 3
@@ -325,7 +325,7 @@ BUGSNAG_EXTERN
 /**
  * The types of breadcrumbs which will be captured. By default, this is all types.
  */
-@property (nonatomic) BSGEnabledBreadcrumbType enabledBreadcrumbTypes;
+@property (nonatomic) RSCEnabledBreadcrumbType enabledBreadcrumbTypes;
 
 /**
  * The app's bundleVersion, set from the CFBundleVersion.  Equivalent to `versionCode` on Android.
@@ -377,18 +377,18 @@ BUGSNAG_EXTERN
  * A class defining the types of error that are reported. By default,
  * all properties are true.
  */
-@property (strong, nonatomic) BugsnagErrorTypes *enabledErrorTypes;
+@property (strong, nonatomic) RSCrashReporterErrorTypes *enabledErrorTypes;
 
 /**
  * Set the endpoints to send data to. By default we'll send error reports to
  * https://notify.bugsnag.com, and sessions to https://sessions.bugsnag.com, but you can
- * override this if you are using Bugsnag Enterprise to point to your own Bugsnag endpoint.
+ * override this if you are using RSCrashReporter Enterprise to point to your own RSCrashReporter endpoint.
  *
  * Please note that it is recommended that you set both endpoints. If the notify endpoint is
  * missing, an assertion will be thrown. If the session endpoint is missing, a warning will be
  * logged and sessions will not be sent automatically.
  */
-@property (copy, nonatomic) BugsnagEndpointConfiguration *endpoints;
+@property (copy, nonatomic) RSCrashReporterEndpointConfiguration *endpoints;
 
 // =============================================================================
 // MARK: - User
@@ -397,7 +397,7 @@ BUGSNAG_EXTERN
 /**
  * The current user
  */
-@property(readonly, retain, nonnull, nonatomic) BugsnagUser *user;
+@property(readonly, retain, nonnull, nonatomic) RSCrashReporterUser *user;
 
 /**
  *  Set user metadata
@@ -406,7 +406,7 @@ BUGSNAG_EXTERN
  *  @param name   Name of the user
  *  @param email  Email address of the user
  *
- *  If user ID is nil, a Bugsnag-generated Device ID is used for the `user.id` property of events and sessions.
+ *  If user ID is nil, a RSCrashReporter-generated Device ID is used for the `user.id` property of events and sessions.
  */
 - (void)setUser:(NSString *_Nullable)userId
       withEmail:(NSString *_Nullable)email
@@ -417,28 +417,28 @@ BUGSNAG_EXTERN
 // =============================================================================
 
 /**
- *  Add a callback to be invoked before a session is sent to Bugsnag.
+ *  Add a callback to be invoked before a session is sent to RSCrashReporter.
  *
  *  @param block A block which can modify the session
  *
  *  @returns An opaque reference to the callback which can be passed to `removeOnSession:`
  */
-- (BugsnagOnSessionRef)addOnSessionBlock:(BugsnagOnSessionBlock)block
+- (RSCrashReporterOnSessionRef)addOnSessionBlock:(RSCrashReporterOnSessionBlock)block
     NS_SWIFT_NAME(addOnSession(block:));
 
 /**
- * Remove a callback that would be invoked before a session is sent to Bugsnag.
+ * Remove a callback that would be invoked before a session is sent to RSCrashReporter.
  *
  * @param callback The opaque reference of the callback, returned by `addOnSessionBlock:`
  */
-- (void)removeOnSession:(BugsnagOnSessionRef)callback
+- (void)removeOnSession:(RSCrashReporterOnSessionRef)callback
     NS_SWIFT_NAME(removeOnSession(_:));
 
 /**
  * Deprecated
  */
-- (void)removeOnSessionBlock:(BugsnagOnSessionBlock)block
-    BUGSNAG_DEPRECATED_WITH_REPLACEMENT("removeOnSession:")
+- (void)removeOnSessionBlock:(RSCrashReporterOnSessionBlock)block
+    RSCRASHREPORTER_DEPRECATED_WITH_REPLACEMENT("removeOnSession:")
     NS_SWIFT_NAME(removeOnSession(block:));
 
 // =============================================================================
@@ -446,14 +446,14 @@ BUGSNAG_EXTERN
 // =============================================================================
 
 /**
- *  Add a callback to be invoked before a report is sent to Bugsnag, to
+ *  Add a callback to be invoked before a report is sent to RSCrashReporter, to
  *  change the report contents as needed
  *
  *  @param block A block which returns YES if the report should be sent
  *
  *  @returns An opaque reference to the callback which can be passed to `removeOnSendError:`
  */
-- (BugsnagOnSendErrorRef)addOnSendErrorBlock:(BugsnagOnSendErrorBlock)block
+- (RSCrashReporterOnSendErrorRef)addOnSendErrorBlock:(RSCrashReporterOnSendErrorBlock)block
     NS_SWIFT_NAME(addOnSendError(block:));
 
 /**
@@ -461,14 +461,14 @@ BUGSNAG_EXTERN
  *
  * @param callback The opaque reference of the callback, returned by `addOnSendErrorBlock:`
  */
-- (void)removeOnSendError:(BugsnagOnSendErrorRef)callback
+- (void)removeOnSendError:(RSCrashReporterOnSendErrorRef)callback
     NS_SWIFT_NAME(removeOnSendError(_:));
 
 /**
  * Deprecated
  */
-- (void)removeOnSendErrorBlock:(BugsnagOnSendErrorBlock)block
-    BUGSNAG_DEPRECATED_WITH_REPLACEMENT("removeOnSendError:")
+- (void)removeOnSendErrorBlock:(RSCrashReporterOnSendErrorBlock)block
+    RSCRASHREPORTER_DEPRECATED_WITH_REPLACEMENT("removeOnSendError:")
     NS_SWIFT_NAME(removeOnSendError(block:));
 
 // =============================================================================
@@ -476,14 +476,14 @@ BUGSNAG_EXTERN
 // =============================================================================
 
 /**
- *  Add a callback to be invoked when a breadcrumb is captured by Bugsnag, to
+ *  Add a callback to be invoked when a breadcrumb is captured by RSCrashReporter, to
  *  change the breadcrumb contents as needed
  *
  *  @param block A block which returns YES if the breadcrumb should be captured
  *
  *  @returns An opaque reference to the callback which can be passed to `removeOnBreadcrumb:`
  */
-- (BugsnagOnBreadcrumbRef)addOnBreadcrumbBlock:(BugsnagOnBreadcrumbBlock)block
+- (RSCrashReporterOnBreadcrumbRef)addOnBreadcrumbBlock:(RSCrashReporterOnBreadcrumbBlock)block
     NS_SWIFT_NAME(addOnBreadcrumb(block:));
 
 /**
@@ -491,14 +491,14 @@ BUGSNAG_EXTERN
  *
  * @param callback The opaque reference of the callback, returned by `addOnBreadcrumbBlock:`
  */
-- (void)removeOnBreadcrumb:(BugsnagOnBreadcrumbRef)callback
+- (void)removeOnBreadcrumb:(RSCrashReporterOnBreadcrumbRef)callback
     NS_SWIFT_NAME(removeOnBreadcrumb(_:));
 
 /**
  * Deprecated
  */
-- (void)removeOnBreadcrumbBlock:(BugsnagOnBreadcrumbBlock)block
-    BUGSNAG_DEPRECATED_WITH_REPLACEMENT("removeOnBreadcrumb:")
+- (void)removeOnBreadcrumbBlock:(RSCrashReporterOnBreadcrumbBlock)block
+    RSCRASHREPORTER_DEPRECATED_WITH_REPLACEMENT("removeOnBreadcrumb:")
     NS_SWIFT_NAME(removeOnBreadcrumb(block:));
 
 // =============================================================================
@@ -506,11 +506,11 @@ BUGSNAG_EXTERN
 // =============================================================================
 
 /**
- * The types of telemetry that may be sent to Bugsnag for product improvement purposes.
+ * The types of telemetry that may be sent to RSCrashReporter for product improvement purposes.
  *
  * By default all types of telemetry are enabled.
  */
-@property (nonatomic) BSGTelemetryOptions telemetry;
+@property (nonatomic) RSCTelemetryOptions telemetry;
 
 // =============================================================================
 // MARK: - Plugins
@@ -519,7 +519,7 @@ BUGSNAG_EXTERN
 /**
  * Internal interface for adding custom behavior :nodoc:
  */
-- (void)addPlugin:(id<BugsnagPlugin> _Nonnull)plugin;
+- (void)addPlugin:(id<RSCrashReporterPlugin> _Nonnull)plugin;
 
 @end
 

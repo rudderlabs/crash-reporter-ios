@@ -1,27 +1,27 @@
 //
-//  BugsnagBreadcrumbsTest.m
-//  Bugsnag
+//  RSCrashReporterBreadcrumbsTest.m
+//  RSCrashReporter
 //
 //  Created by Delisa Mason on 9/16/15.
 //
 //
 
-#import "BSGUtils.h"
-#import "BSG_KSJSONCodec.h"
+#import "RSCUtils.h"
+#import "RSC_KSJSONCodec.h"
 #import "RSCrashReporter.h"
-#import "BugsnagBreadcrumb+Private.h"
-#import "BugsnagBreadcrumbs.h"
-#import "BugsnagClient+Private.h"
-#import "BugsnagTestConstants.h"
-#import "BSGDefines.h"
+#import "RSCrashReporterBreadcrumb+Private.h"
+#import "RSCrashReporterBreadcrumbs.h"
+#import "RSCrashReporterClient+Private.h"
+#import "RSCrashReporterTestConstants.h"
+#import "RSCDefines.h"
 
 #import <XCTest/XCTest.h>
 #import <mach/mach_init.h>
 #import <mach/thread_act.h>
 #import <pthread.h>
 
-// Defined in BSG_KSCrashReport.c
-void bsg_kscrw_i_prepareReportWriter(BSG_KSCrashReportWriter *const writer, BSG_KSJSONEncodeContext *const context);
+// Defined in RSC_KSCrashReport.c
+void rsc_kscrw_i_prepareReportWriter(RSC_KSCrashReportWriter *const writer, RSC_KSJSONEncodeContext *const context);
 
 struct json_buffer {
     size_t length;
@@ -31,56 +31,56 @@ struct json_buffer {
 static int json_buffer_append(const char *data, size_t length, struct json_buffer *buffer) {
     memcpy(buffer->buffer + buffer->length, data, length);
     buffer->length += length;
-    return BSG_KSJSON_OK;
+    return RSC_KSJSON_OK;
 }
 
 static int addJSONData(const char *data, size_t length, NSMutableData *userData) {
     [userData appendBytes:data length:length];
-    return BSG_KSJSON_OK;
+    return RSC_KSJSON_OK;
 }
 
-static id JSONObject(void (^ block)(BSG_KSCrashReportWriter *writer)) {
+static id JSONObject(void (^ block)(RSC_KSCrashReportWriter *writer)) {
     NSMutableData *data = [NSMutableData data];
-    BSG_KSJSONEncodeContext encodeContext;
-    BSG_KSCrashReportWriter reportWriter;
-    bsg_kscrw_i_prepareReportWriter(&reportWriter, &encodeContext);
-    bsg_ksjsonbeginEncode(&encodeContext, false, (BSG_KSJSONAddDataFunc)addJSONData, (__bridge void *)data);
+    RSC_KSJSONEncodeContext encodeContext;
+    RSC_KSCrashReportWriter reportWriter;
+    rsc_kscrw_i_prepareReportWriter(&reportWriter, &encodeContext);
+    rsc_ksjsonbeginEncode(&encodeContext, false, (RSC_KSJSONAddDataFunc)addJSONData, (__bridge void *)data);
     block(&reportWriter);
     return [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
 }
 
-static BugsnagBreadcrumb * WithBlock(void (^ block)(BugsnagBreadcrumb *breadcrumb)) {
-    BugsnagBreadcrumb *breadcrumb = [BugsnagBreadcrumb new];
+static RSCrashReporterBreadcrumb * WithBlock(void (^ block)(RSCrashReporterBreadcrumb *breadcrumb)) {
+    RSCrashReporterBreadcrumb *breadcrumb = [RSCrashReporterBreadcrumb new];
     block(breadcrumb);
     return breadcrumb;
 }
 
-static BugsnagBreadcrumb * WithMessage(NSString *message) {
-    return WithBlock(^(BugsnagBreadcrumb *breadcrumb) {
+static RSCrashReporterBreadcrumb * WithMessage(NSString *message) {
+    return WithBlock(^(RSCrashReporterBreadcrumb *breadcrumb) {
         breadcrumb.message = message;
     });
 }
 
-@interface BugsnagBreadcrumbsTest : XCTestCase
-@property(nonatomic, strong) BugsnagBreadcrumbs *crumbs;
+@interface RSCrashReporterBreadcrumbsTest : XCTestCase
+@property(nonatomic, strong) RSCrashReporterBreadcrumbs *crumbs;
 @end
 
-@interface BugsnagBreadcrumbs (Testing)
+@interface RSCrashReporterBreadcrumbs (Testing)
 - (NSArray<NSDictionary *> *)arrayValue;
 @end
 
-void awaitBreadcrumbSync(BugsnagBreadcrumbs *crumbs) {
-    dispatch_sync(BSGGetFileSystemQueue(), ^{});
+void awaitBreadcrumbSync(RSCrashReporterBreadcrumbs *crumbs) {
+    dispatch_sync(RSCGetFileSystemQueue(), ^{});
 }
 
-BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
+RSCBreadcrumbType RSCBreadcrumbTypeFromString(NSString *value);
 
-@implementation BugsnagBreadcrumbsTest
+@implementation RSCrashReporterBreadcrumbsTest
 
 - (void)setUp {
     [super setUp];
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagBreadcrumbs *crumbs = [[BugsnagBreadcrumbs alloc] initWithConfiguration:config];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterBreadcrumbs *crumbs = [[RSCrashReporterBreadcrumbs alloc] initWithConfiguration:config];
     [crumbs removeAllBreadcrumbs];
     [crumbs addBreadcrumb:WithMessage(@"Launch app")];
     [crumbs addBreadcrumb:WithMessage(@"Tap button")];
@@ -93,23 +93,23 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
 }
 
 - (void)testDefaultCount {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagBreadcrumbs *crumbs = [[BugsnagBreadcrumbs alloc] initWithConfiguration:config];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterBreadcrumbs *crumbs = [[RSCrashReporterBreadcrumbs alloc] initWithConfiguration:config];
     [crumbs removeAllBreadcrumbs];
     XCTAssertTrue(crumbs.breadcrumbs.count == 0);
 }
 
 - (void)testMaxBreadcrumbs {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     config.maxBreadcrumbs = 3;
-    self.crumbs = [[BugsnagBreadcrumbs alloc] initWithConfiguration:config];
+    self.crumbs = [[RSCrashReporterBreadcrumbs alloc] initWithConfiguration:config];
     [self.crumbs removeAllBreadcrumbs];
     [self.crumbs addBreadcrumb:WithMessage(@"Crumb 1")];
     [self.crumbs addBreadcrumb:WithMessage(@"Crumb 2")];
     [self.crumbs addBreadcrumb:WithMessage(@"Crumb 3")];
     [self.crumbs addBreadcrumb:WithMessage(@"Clear notifications")];
     awaitBreadcrumbSync(self.crumbs);
-    NSArray<BugsnagBreadcrumb *> *breadcrumbs = self.crumbs.breadcrumbs;
+    NSArray<RSCrashReporterBreadcrumb *> *breadcrumbs = self.crumbs.breadcrumbs;
     XCTAssertEqual(breadcrumbs.count, 3);
     XCTAssertEqualObjects(breadcrumbs[0].message, @"Crumb 2");
     XCTAssertEqualObjects(breadcrumbs[1].message, @"Crumb 3");
@@ -117,15 +117,15 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
 }
 
 - (void)testBreadcrumbsInvalidKey {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagOnBreadcrumbBlock crumbBlock = ^(BugsnagBreadcrumb * _Nonnull crumb) {
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterOnBreadcrumbBlock crumbBlock = ^(RSCrashReporterBreadcrumb * _Nonnull crumb) {
         return YES;
     };
     [config addOnBreadcrumbBlock:crumbBlock];
 
-    self.crumbs = [[BugsnagBreadcrumbs alloc] initWithConfiguration:config];
-    [self.crumbs addBreadcrumb:WithBlock(^(BugsnagBreadcrumb *_Nonnull crumb) {
-        crumb.type = BSGBreadcrumbTypeState;
+    self.crumbs = [[RSCrashReporterBreadcrumbs alloc] initWithConfiguration:config];
+    [self.crumbs addBreadcrumb:WithBlock(^(RSCrashReporterBreadcrumb *_Nonnull crumb) {
+        crumb.type = RSCBreadcrumbTypeState;
         crumb.message = @"message";
         crumb.metadata = @{@123 : @"would raise exception"};
     })];
@@ -133,9 +133,9 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
 }
 
 - (void)testEmptyCapacity {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     config.maxBreadcrumbs = 0;
-    self.crumbs = [[BugsnagBreadcrumbs alloc] initWithConfiguration:config];
+    self.crumbs = [[RSCrashReporterBreadcrumbs alloc] initWithConfiguration:config];
     [self.crumbs removeAllBreadcrumbs];
     [self.crumbs addBreadcrumb:WithMessage(@"Clear notifications")];
     XCTAssertEqual(self.crumbs.breadcrumbs.count, 0);
@@ -161,11 +161,11 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
 }
 
 - (void)testStateType {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagBreadcrumbs *crumbs = [[BugsnagBreadcrumbs alloc] initWithConfiguration:config];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterBreadcrumbs *crumbs = [[RSCrashReporterBreadcrumbs alloc] initWithConfiguration:config];
     [crumbs removeAllBreadcrumbs];
-    [crumbs addBreadcrumb:WithBlock(^(BugsnagBreadcrumb *_Nonnull crumb) {
-        crumb.type = BSGBreadcrumbTypeState;
+    [crumbs addBreadcrumb:WithBlock(^(RSCrashReporterBreadcrumb *_Nonnull crumb) {
+        crumb.type = RSCBreadcrumbTypeState;
         crumb.message = @"Rotated Menu";
         crumb.metadata = @{@"direction" : @"right"};
     })];
@@ -179,29 +179,29 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
 #if !TARGET_OS_WATCH
 - (void)testPersistentCrumbManual {
     awaitBreadcrumbSync(self.crumbs);
-    NSArray<BugsnagBreadcrumb *> *breadcrumbs = [self.crumbs cachedBreadcrumbs];
+    NSArray<RSCrashReporterBreadcrumb *> *breadcrumbs = [self.crumbs cachedBreadcrumbs];
     XCTAssertEqual(breadcrumbs.count, 3);
-    XCTAssertEqual(breadcrumbs[0].type, BSGBreadcrumbTypeManual);
+    XCTAssertEqual(breadcrumbs[0].type, RSCBreadcrumbTypeManual);
     XCTAssertEqualObjects(breadcrumbs[0].message, @"Launch app");
     XCTAssertNotNil(breadcrumbs[0].timestamp);
-    XCTAssertEqual(breadcrumbs[1].type, BSGBreadcrumbTypeManual);
+    XCTAssertEqual(breadcrumbs[1].type, RSCBreadcrumbTypeManual);
     XCTAssertEqualObjects(breadcrumbs[1].message, @"Tap button");
     XCTAssertNotNil(breadcrumbs[1].timestamp);
-    XCTAssertEqual(breadcrumbs[2].type, BSGBreadcrumbTypeManual);
+    XCTAssertEqual(breadcrumbs[2].type, RSCBreadcrumbTypeManual);
     XCTAssertEqualObjects(breadcrumbs[2].message, @"Close tutorial");
     XCTAssertNotNil(breadcrumbs[2].timestamp);
 }
 
 - (void)testPersistentCrumbCustom {
-    [self.crumbs addBreadcrumb:WithBlock(^(BugsnagBreadcrumb *crumb) {
+    [self.crumbs addBreadcrumb:WithBlock(^(RSCrashReporterBreadcrumb *crumb) {
         crumb.message = @"Initiate sequence";
         crumb.metadata = @{ @"captain": @"Bob"};
-        crumb.type = BSGBreadcrumbTypeState;
+        crumb.type = RSCBreadcrumbTypeState;
     })];
     awaitBreadcrumbSync(self.crumbs);
-    NSArray<BugsnagBreadcrumb *> *breadcrumbs = [self.crumbs cachedBreadcrumbs];
+    NSArray<RSCrashReporterBreadcrumb *> *breadcrumbs = [self.crumbs cachedBreadcrumbs];
     XCTAssertEqual(breadcrumbs.count, 4);
-    XCTAssertEqual(breadcrumbs[3].type, BSGBreadcrumbTypeState);
+    XCTAssertEqual(breadcrumbs[3].type, RSCBreadcrumbTypeState);
     XCTAssertEqualObjects(breadcrumbs[3].message, @"Initiate sequence");
     XCTAssertEqualObjects(breadcrumbs[3].metadata[@"captain"], @"Bob");
     XCTAssertNotNil(breadcrumbs[3].timestamp);
@@ -209,38 +209,38 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
 #endif
 
 - (void)testDefaultDiscardByType {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    self.crumbs = [[BugsnagBreadcrumbs alloc] initWithConfiguration:config];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    self.crumbs = [[RSCrashReporterBreadcrumbs alloc] initWithConfiguration:config];
     [self.crumbs removeAllBreadcrumbs];
-    [self.crumbs addBreadcrumb:WithBlock(^(BugsnagBreadcrumb *_Nonnull crumb) {
-        crumb.type = BSGBreadcrumbTypeState;
+    [self.crumbs addBreadcrumb:WithBlock(^(RSCrashReporterBreadcrumb *_Nonnull crumb) {
+        crumb.type = RSCBreadcrumbTypeState;
         crumb.message = @"state";
     })];
-    [self.crumbs addBreadcrumb:WithBlock(^(BugsnagBreadcrumb *_Nonnull crumb) {
-        crumb.type = BSGBreadcrumbTypeUser;
+    [self.crumbs addBreadcrumb:WithBlock(^(RSCrashReporterBreadcrumb *_Nonnull crumb) {
+        crumb.type = RSCBreadcrumbTypeUser;
         crumb.message = @"user";
     })];
-    [self.crumbs addBreadcrumb:WithBlock(^(BugsnagBreadcrumb *_Nonnull crumb) {
-        crumb.type = BSGBreadcrumbTypeLog;
+    [self.crumbs addBreadcrumb:WithBlock(^(RSCrashReporterBreadcrumb *_Nonnull crumb) {
+        crumb.type = RSCBreadcrumbTypeLog;
         crumb.message = @"log";
     })];
-    [self.crumbs addBreadcrumb:WithBlock(^(BugsnagBreadcrumb *_Nonnull crumb) {
-        crumb.type = BSGBreadcrumbTypeError;
+    [self.crumbs addBreadcrumb:WithBlock(^(RSCrashReporterBreadcrumb *_Nonnull crumb) {
+        crumb.type = RSCBreadcrumbTypeError;
         crumb.message = @"error";
     })];
-    [self.crumbs addBreadcrumb:WithBlock(^(BugsnagBreadcrumb *_Nonnull crumb) {
-        crumb.type = BSGBreadcrumbTypeProcess;
+    [self.crumbs addBreadcrumb:WithBlock(^(RSCrashReporterBreadcrumb *_Nonnull crumb) {
+        crumb.type = RSCBreadcrumbTypeProcess;
         crumb.message = @"process";
     })];
-    [self.crumbs addBreadcrumb:WithBlock(^(BugsnagBreadcrumb *_Nonnull crumb) {
-        crumb.type = BSGBreadcrumbTypeRequest;
+    [self.crumbs addBreadcrumb:WithBlock(^(RSCrashReporterBreadcrumb *_Nonnull crumb) {
+        crumb.type = RSCBreadcrumbTypeRequest;
         crumb.message = @"request";
     })];
-    [self.crumbs addBreadcrumb:WithBlock(^(BugsnagBreadcrumb *_Nonnull crumb) {
-        crumb.type = BSGBreadcrumbTypeNavigation;
+    [self.crumbs addBreadcrumb:WithBlock(^(RSCrashReporterBreadcrumb *_Nonnull crumb) {
+        crumb.type = RSCBreadcrumbTypeNavigation;
         crumb.message = @"navigation";
     })];
-    [self.crumbs addBreadcrumb:WithBlock(^(BugsnagBreadcrumb *_Nonnull crumb) {
+    [self.crumbs addBreadcrumb:WithBlock(^(RSCrashReporterBreadcrumb *_Nonnull crumb) {
         crumb.message = @"manual";
     })];
     awaitBreadcrumbSync(self.crumbs);
@@ -257,8 +257,8 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
 }
 
 - (void)testAlwaysAllowManual {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    self.crumbs = [[BugsnagBreadcrumbs alloc] initWithConfiguration:config];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    self.crumbs = [[RSCrashReporterBreadcrumbs alloc] initWithConfiguration:config];
     [self.crumbs removeAllBreadcrumbs];
     [self.crumbs addBreadcrumb:WithMessage(@"this is a test")];
     awaitBreadcrumbSync(self.crumbs);
@@ -269,16 +269,16 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
 }
 
 /**
- * enabledBreadcrumbTypes filtering only happens on the client.  The BugsnagBreadcrumbs container is
+ * enabledBreadcrumbTypes filtering only happens on the client.  The RSCrashReporterBreadcrumbs container is
  * private and assumes filtering is already configured.
  */
 - (void)testDiscardByTypeDoesNotApply {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    self.crumbs = [[BugsnagBreadcrumbs alloc] initWithConfiguration:config];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    self.crumbs = [[RSCrashReporterBreadcrumbs alloc] initWithConfiguration:config];
     [self.crumbs removeAllBreadcrumbs];
     // Don't discard this
-    [self.crumbs addBreadcrumb:WithBlock(^(BugsnagBreadcrumb *_Nonnull crumb) {
-        crumb.type = BSGBreadcrumbTypeState;
+    [self.crumbs addBreadcrumb:WithBlock(^(RSCrashReporterBreadcrumb *_Nonnull crumb) {
+        crumb.type = RSCBreadcrumbTypeState;
         crumb.message = @"state";
     })];
     awaitBreadcrumbSync(self.crumbs);
@@ -287,17 +287,17 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
 }
 
 - (void)testConvertBreadcrumbTypeFromString {
-    XCTAssertEqual(BSGBreadcrumbTypeState, BSGBreadcrumbTypeFromString(@"state"));
-    XCTAssertEqual(BSGBreadcrumbTypeUser, BSGBreadcrumbTypeFromString(@"user"));
-    XCTAssertEqual(BSGBreadcrumbTypeManual, BSGBreadcrumbTypeFromString(@"manual"));
-    XCTAssertEqual(BSGBreadcrumbTypeNavigation, BSGBreadcrumbTypeFromString(@"navigation"));
-    XCTAssertEqual(BSGBreadcrumbTypeProcess, BSGBreadcrumbTypeFromString(@"process"));
-    XCTAssertEqual(BSGBreadcrumbTypeLog, BSGBreadcrumbTypeFromString(@"log"));
-    XCTAssertEqual(BSGBreadcrumbTypeRequest, BSGBreadcrumbTypeFromString(@"request"));
-    XCTAssertEqual(BSGBreadcrumbTypeError, BSGBreadcrumbTypeFromString(@"error"));
+    XCTAssertEqual(RSCBreadcrumbTypeState, RSCBreadcrumbTypeFromString(@"state"));
+    XCTAssertEqual(RSCBreadcrumbTypeUser, RSCBreadcrumbTypeFromString(@"user"));
+    XCTAssertEqual(RSCBreadcrumbTypeManual, RSCBreadcrumbTypeFromString(@"manual"));
+    XCTAssertEqual(RSCBreadcrumbTypeNavigation, RSCBreadcrumbTypeFromString(@"navigation"));
+    XCTAssertEqual(RSCBreadcrumbTypeProcess, RSCBreadcrumbTypeFromString(@"process"));
+    XCTAssertEqual(RSCBreadcrumbTypeLog, RSCBreadcrumbTypeFromString(@"log"));
+    XCTAssertEqual(RSCBreadcrumbTypeRequest, RSCBreadcrumbTypeFromString(@"request"));
+    XCTAssertEqual(RSCBreadcrumbTypeError, RSCBreadcrumbTypeFromString(@"error"));
 
-    XCTAssertEqual(BSGBreadcrumbTypeManual, BSGBreadcrumbTypeFromString(@"random"));
-    XCTAssertEqual(BSGBreadcrumbTypeManual, BSGBreadcrumbTypeFromString(@"4"));
+    XCTAssertEqual(RSCBreadcrumbTypeManual, RSCBreadcrumbTypeFromString(@"random"));
+    XCTAssertEqual(RSCBreadcrumbTypeManual, RSCBreadcrumbTypeFromString(@"4"));
 }
 
 - (void)testBreadcrumbsBeforeDate {
@@ -310,24 +310,24 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
 }
 
 - (void)testBreadcrumbFromDict {
-    XCTAssertNil([BugsnagBreadcrumb breadcrumbFromDict:@{}]);
-    XCTAssertNil([BugsnagBreadcrumb breadcrumbFromDict:@{@"metadata": @{}}]);
-    XCTAssertNil([BugsnagBreadcrumb breadcrumbFromDict:@{@"timestamp": @""}]);
-    BugsnagBreadcrumb *crumb = [BugsnagBreadcrumb breadcrumbFromDict:@{
+    XCTAssertNil([RSCrashReporterBreadcrumb breadcrumbFromDict:@{}]);
+    XCTAssertNil([RSCrashReporterBreadcrumb breadcrumbFromDict:@{@"metadata": @{}}]);
+    XCTAssertNil([RSCrashReporterBreadcrumb breadcrumbFromDict:@{@"timestamp": @""}]);
+    RSCrashReporterBreadcrumb *crumb = [RSCrashReporterBreadcrumb breadcrumbFromDict:@{
         @"timestamp": @"0",
         @"metaData": @{},
         @"message":@"cache break",
         @"type":@"process"}];
     XCTAssertNil(crumb);
 
-    crumb = [BugsnagBreadcrumb breadcrumbFromDict:@{
+    crumb = [RSCrashReporterBreadcrumb breadcrumbFromDict:@{
         @"timestamp": @"2020-02-14T16:12:22+001",
         @"metaData": @{},
         @"message":@"",
         @"type":@"process"}];
     XCTAssertNil(crumb);
 
-    crumb = [BugsnagBreadcrumb breadcrumbFromDict:@{
+    crumb = [RSCrashReporterBreadcrumb breadcrumbFromDict:@{
         @"timestamp": @"2020-02-14T16:12:23+001",
         @"metaData": @{},
         @"message":@"cache break",
@@ -335,9 +335,9 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
     XCTAssertNotNil(crumb);
     XCTAssertEqualObjects(@{}, crumb.metadata);
     XCTAssertEqualObjects(@"cache break", crumb.message);
-    XCTAssertEqual(BSGBreadcrumbTypeProcess, crumb.type);
+    XCTAssertEqual(RSCBreadcrumbTypeProcess, crumb.type);
 
-    crumb = [BugsnagBreadcrumb breadcrumbFromDict:@{
+    crumb = [RSCrashReporterBreadcrumb breadcrumbFromDict:@{
         @"timestamp": @"2020-02-14T16:14:23+001",
         @"metaData": @{@"foo": @"bar"},
         @"message":@"cache break",
@@ -345,7 +345,7 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
     XCTAssertNotNil(crumb);
     XCTAssertEqualObjects(@"cache break", crumb.message);
     XCTAssertEqualObjects(@{@"foo": @"bar"}, crumb.metadata);
-    XCTAssertEqual(BSGBreadcrumbTypeLog, crumb.type);
+    XCTAssertEqual(RSCBreadcrumbTypeLog, crumb.type);
 }
 
 /**
@@ -353,24 +353,24 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
  */
 - (void)testCallbackFreeConstructors2 {
     // Prevent sending events
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    [configuration addOnSendErrorBlock:^BOOL(BugsnagEvent *_Nonnull event) {
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    [configuration addOnSendErrorBlock:^BOOL(RSCrashReporterEvent *_Nonnull event) {
         return false;
     }];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
 
     NSDictionary *md1 = @{ @"x" : @"y"};
     NSDictionary *md2 = @{ @"a" : @"b",
                            @"c" : @42};
 
-    [client leaveBreadcrumbWithMessage:@"manual message" metadata:md1 andType:BSGBreadcrumbTypeManual];
-    [client leaveBreadcrumbWithMessage:@"log message" metadata:md2 andType:BSGBreadcrumbTypeLog];
-    [client leaveBreadcrumbWithMessage:@"navigation message" metadata:md1 andType:BSGBreadcrumbTypeNavigation];
-    [client leaveBreadcrumbWithMessage:@"process message" metadata:md2 andType:BSGBreadcrumbTypeProcess];
-    [client leaveBreadcrumbWithMessage:@"request message" metadata:md1 andType:BSGBreadcrumbTypeRequest];
-    [client leaveBreadcrumbWithMessage:@"state message" metadata:md2 andType:BSGBreadcrumbTypeState];
-    [client leaveBreadcrumbWithMessage:@"user message" metadata:md1 andType:BSGBreadcrumbTypeUser];
+    [client leaveBreadcrumbWithMessage:@"manual message" metadata:md1 andType:RSCBreadcrumbTypeManual];
+    [client leaveBreadcrumbWithMessage:@"log message" metadata:md2 andType:RSCBreadcrumbTypeLog];
+    [client leaveBreadcrumbWithMessage:@"navigation message" metadata:md1 andType:RSCBreadcrumbTypeNavigation];
+    [client leaveBreadcrumbWithMessage:@"process message" metadata:md2 andType:RSCBreadcrumbTypeProcess];
+    [client leaveBreadcrumbWithMessage:@"request message" metadata:md1 andType:RSCBreadcrumbTypeRequest];
+    [client leaveBreadcrumbWithMessage:@"state message" metadata:md2 andType:RSCBreadcrumbTypeState];
+    [client leaveBreadcrumbWithMessage:@"user message" metadata:md1 andType:RSCBreadcrumbTypeUser];
 
     NSDictionary *bc0 = [client.breadcrumbs[0] objectValue];
     NSDictionary *bc1 = [client.breadcrumbs[1] objectValue];
@@ -417,7 +417,7 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
     XCTAssertEqualObjects(bc7[@"name"], @"user message");
     XCTAssertEqualObjects(bc7[@"type"], @"user");
 
-    [client leaveBreadcrumbWithMessage:@"Invalid metadata" metadata:@{@"date": [NSDate distantFuture]} andType:BSGBreadcrumbTypeUser];
+    [client leaveBreadcrumbWithMessage:@"Invalid metadata" metadata:@{@"date": [NSDate distantFuture]} andType:RSCBreadcrumbTypeUser];
     XCTAssertEqual(client.breadcrumbs.count, 9, @"Invalid metadata should not prevent a breadcrumb being left");
     XCTAssertEqualObjects(client.breadcrumbs[8].message, @"Invalid metadata");
     XCTAssertEqualObjects(client.breadcrumbs[8].metadata.allKeys, @[@"date"]);
@@ -428,15 +428,15 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
  */
 - (void)testCallbackFreeConstructors3 {
     // Prevent sending events
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    [configuration addOnSendErrorBlock:^BOOL(BugsnagEvent *_Nonnull event) {
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    [configuration addOnSendErrorBlock:^BOOL(RSCrashReporterEvent *_Nonnull event) {
         return false;
     }];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
     
     [client leaveBreadcrumbWithMessage:@"message1"];
-    [client leaveBreadcrumbWithMessage:@"message2" metadata:nil andType:BSGBreadcrumbTypeUser];
+    [client leaveBreadcrumbWithMessage:@"message2" metadata:nil andType:RSCBreadcrumbTypeUser];
     
     NSDictionary *bc1 = [client.breadcrumbs[1] objectValue];
     NSDictionary *bc2 = [client.breadcrumbs[2] objectValue];
@@ -449,9 +449,9 @@ BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString *value);
 }
 
 - (void)testCrashReportWriter {
-    NSDictionary<NSString *, id> *object = JSONObject(^(BSG_KSCrashReportWriter *writer) {
+    NSDictionary<NSString *, id> *object = JSONObject(^(RSC_KSCrashReportWriter *writer) {
         writer->beginObject(writer, "");
-        BugsnagBreadcrumbsWriteCrashReport(writer);
+        RSCrashReporterBreadcrumbsWriteCrashReport(writer);
         writer->endContainer(writer);
     });
     
@@ -483,14 +483,14 @@ static void * executeBlock(void *ptr) {
     return;
 #endif
     //
-    // The aim of this test is to ensure that BugsnagBreadcrumbsWriteCrashReport will insert only valid JSON
+    // The aim of this test is to ensure that RSCrashReporterBreadcrumbsWriteCrashReport will insert only valid JSON
     // into a crash report when other threads are updating the breadcrumbs linked list.
     //
     // So that the test spends less time serialising breadcrumbs and more time updating the linked list, the
     // breadcrumb data is precomputed and not written to disk.
     //
     NSData *breadcrumbData = [NSJSONSerialization dataWithJSONObject:
-                              [WithBlock(^(BugsnagBreadcrumb *breadcrumb) {
+                              [WithBlock(^(RSCrashReporterBreadcrumb *breadcrumb) {
         breadcrumb.message = @"Lorem ipsum";
     }) objectValue] options:0 error:nil];
     
@@ -521,12 +521,12 @@ static void * executeBlock(void *ptr) {
     for (int i = 0; i < 5000; i++) {
         buffer.length = 0;
         
-        BSG_KSJSONEncodeContext context;
-        BSG_KSCrashReportWriter writer;
-        bsg_kscrw_i_prepareReportWriter(&writer, &context);
-        bsg_ksjsonbeginEncode(&context, false, (BSG_KSJSONAddDataFunc)json_buffer_append, &buffer);
+        RSC_KSJSONEncodeContext context;
+        RSC_KSCrashReportWriter writer;
+        rsc_kscrw_i_prepareReportWriter(&writer, &context);
+        rsc_ksjsonbeginEncode(&context, false, (RSC_KSJSONAddDataFunc)json_buffer_append, &buffer);
         writer.beginObject(&writer, "");
-        BugsnagBreadcrumbsWriteCrashReport(&writer);
+        RSCrashReporterBreadcrumbsWriteCrashReport(&writer);
         writer.endContainer(&writer);
         
         NSError *error = nil;
@@ -551,17 +551,17 @@ static void * executeBlock(void *ptr) {
 - (void)testPerformance {
     NSInteger maxBreadcrumbs = 100;
     
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     configuration.maxBreadcrumbs = maxBreadcrumbs;
-    [configuration addOnSendErrorBlock:^BOOL(BugsnagEvent *event) { return NO; }];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
+    [configuration addOnSendErrorBlock:^BOOL(RSCrashReporterEvent *event) { return NO; }];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
     
     [self measureBlock:^{
         for (int i=0; i<maxBreadcrumbs; i++) {
             [client leaveBreadcrumbWithMessage:[NSString stringWithFormat:@"%s %@", __PRETTY_FUNCTION__, [NSDate date]]
                                       metadata:[[NSBundle mainBundle] infoDictionary]
-                                       andType:BSGBreadcrumbTypeLog];
+                                       andType:RSCBreadcrumbTypeLog];
         }
     }];
 }
@@ -569,8 +569,8 @@ static void * executeBlock(void *ptr) {
 #if TARGET_OS_WATCH
 
 - (void)testShouldNotCacheBreadcrumbsOnWatchOs {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    self.crumbs = [[BugsnagBreadcrumbs alloc] initWithConfiguration:config];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    self.crumbs = [[RSCrashReporterBreadcrumbs alloc] initWithConfiguration:config];
     [self.crumbs removeAllBreadcrumbs];
     [self.crumbs addBreadcrumb:WithMessage(@"this is a test")];
     awaitBreadcrumbSync(self.crumbs);
@@ -581,10 +581,10 @@ static void * executeBlock(void *ptr) {
 #else
 
 - (void)testShouldCacheBreadcrumbsIfOOMErrorsAreSupported {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     config.enabledErrorTypes.thermalKills = NO;
     config.enabledErrorTypes.ooms = YES;
-    self.crumbs = [[BugsnagBreadcrumbs alloc] initWithConfiguration:config];
+    self.crumbs = [[RSCrashReporterBreadcrumbs alloc] initWithConfiguration:config];
     [self.crumbs removeAllBreadcrumbs];
     [self.crumbs addBreadcrumb:WithMessage(@"this is a test")];
     awaitBreadcrumbSync(self.crumbs);
@@ -593,10 +593,10 @@ static void * executeBlock(void *ptr) {
 }
 
 - (void)testShouldCacheBreadcrumbsIfThermalKillsAreSupported {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     config.enabledErrorTypes.ooms = NO;
     config.enabledErrorTypes.thermalKills = YES;
-    self.crumbs = [[BugsnagBreadcrumbs alloc] initWithConfiguration:config];
+    self.crumbs = [[RSCrashReporterBreadcrumbs alloc] initWithConfiguration:config];
     [self.crumbs removeAllBreadcrumbs];
     [self.crumbs addBreadcrumb:WithMessage(@"this is a test")];
     awaitBreadcrumbSync(self.crumbs);
@@ -605,10 +605,10 @@ static void * executeBlock(void *ptr) {
 }
 
 - (void)testShouldNotCacheBreadcrumbsIfOOMsAndThermalKillsAreNotSupported {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     config.enabledErrorTypes.thermalKills = NO;
     config.enabledErrorTypes.ooms = NO;
-    self.crumbs = [[BugsnagBreadcrumbs alloc] initWithConfiguration:config];
+    self.crumbs = [[RSCrashReporterBreadcrumbs alloc] initWithConfiguration:config];
     [self.crumbs removeAllBreadcrumbs];
     [self.crumbs addBreadcrumb:WithMessage(@"this is a test")];
     awaitBreadcrumbSync(self.crumbs);
@@ -622,7 +622,7 @@ static void * executeBlock(void *ptr) {
 
 #pragma mark -
 
-@implementation BugsnagBreadcrumbs (Testing)
+@implementation RSCrashReporterBreadcrumbs (Testing)
 
 - (NSArray<NSDictionary *> *)arrayValue {
     return [self.breadcrumbs valueForKey:@"objectValue"];

@@ -1,36 +1,36 @@
 //
-//  BSGNotificationBreadcrumbs.h
-//  Bugsnag
+//  RSCNotificationBreadcrumbs.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 10/12/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
-#import <RSCrashReporter/BugsnagBreadcrumb.h>
+#import <RSCrashReporter/RSCrashReporterBreadcrumb.h>
 
-#import "BSGDefines.h"
+#import "RSCDefines.h"
 
-@class BugsnagConfiguration;
+@class RSCrashReporterConfiguration;
 
 NS_ASSUME_NONNULL_BEGIN
 
-static NSString * const BSGNotificationBreadcrumbsMessageAppWillTerminate = @"App Will Terminate";
+static NSString * const RSCNotificationBreadcrumbsMessageAppWillTerminate = @"App Will Terminate";
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSGNotificationBreadcrumbs : NSObject
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCNotificationBreadcrumbs : NSObject
 
 #pragma mark Initializers
 
-- (instancetype)initWithConfiguration:(BugsnagConfiguration *)configuration
-                       breadcrumbSink:(id<BSGBreadcrumbSink>)breadcrumbSink NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithConfiguration:(RSCrashReporterConfiguration *)configuration
+                       breadcrumbSink:(id<RSCBreadcrumbSink>)breadcrumbSink NS_DESIGNATED_INITIALIZER;
 
 - (instancetype)init UNAVAILABLE_ATTRIBUTE;
 
 #pragma mark Properties
 
-@property (nonatomic) BugsnagConfiguration *configuration;
+@property (nonatomic) RSCrashReporterConfiguration *configuration;
 
-@property (weak, nonatomic) id<BSGBreadcrumbSink> breadcrumbSink;
+@property (weak, nonatomic) id<RSCBreadcrumbSink> breadcrumbSink;
 
 @property (nonatomic) NSNotificationCenter *notificationCenter;
 

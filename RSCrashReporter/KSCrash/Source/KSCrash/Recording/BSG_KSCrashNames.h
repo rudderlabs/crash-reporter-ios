@@ -1,13 +1,13 @@
 //
-//  BSG_KSCrashNames.h
-//  Bugsnag
+//  RSC_KSCrashNames.h
+//  RSCrashReporter
 //
 //  Created by Karl Stenerud on 28.09.21.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#ifndef BSG_KSCrashNames_h
-#define BSG_KSCrashNames_h
+#ifndef RSC_KSCrashNames_h
+#define RSC_KSCrashNames_h
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,10 +15,10 @@ extern "C" {
 
 #include <mach/machine/vm_types.h>
 
-const char *bsg_kscrashthread_state_name(integer_t state);
+const char *rsc_kscrashthread_state_name(integer_t state);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* BSG_KSCrashNames_h */
+#endif /* RSC_KSCrashNames_h */

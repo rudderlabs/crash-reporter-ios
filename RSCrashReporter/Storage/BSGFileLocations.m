@@ -1,27 +1,27 @@
 //
-//  BSGFileLocations.m
-//  Bugsnag
+//  RSCFileLocations.m
+//  RSCrashReporter
 //
 //  Created by Karl Stenerud on 05.01.21.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGFileLocations.h"
+#import "RSCFileLocations.h"
 
-#import "BSGInternalErrorReporter.h"
-#import "BugsnagLogger.h"
+#import "RSCInternalErrorReporter.h"
+#import "RSCrashReporterLogger.h"
 
 static BOOL ensureDirExists(NSString *path) {
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSError *error = nil;
     if(![fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&error]) {
-        bsg_log_err(@"Could not create directory %@: %@", path, error);
+        rsc_log_err(@"Could not create directory %@: %@", path, error);
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
-            [BSGInternalErrorReporter performBlock:^(BSGInternalErrorReporter *reporter) {
+            [RSCInternalErrorReporter performBlock:^(RSCInternalErrorReporter *reporter) {
                 [reporter reportErrorWithClass:@"Could not create directory"
                                        context:path.lastPathComponent
-                                       message:BSGErrorDescription(error)
+                                       message:RSCErrorDescription(error)
                                    diagnostics:error.userInfo];
             }];
         });
@@ -46,7 +46,7 @@ static NSString *rootDirectory(NSString *fsVersion) {
         NSError *error = nil;
         NSURL *url = [NSFileManager.defaultManager URLForDirectory:directory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:&error];
         if (!url) {
-            bsg_log_err(@"Could not locate directory for storage: %@", error);
+            rsc_log_err(@"Could not locate directory for storage: %@", error);
             return;
         }
 
@@ -68,20 +68,20 @@ static NSString *getAndCreateSubdir(NSString *rootPath, NSString *relativePath) 
     return subdirPath;
 }
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BSGFileLocations
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCFileLocations
 
 + (instancetype) current {
-    static BSGFileLocations *current = nil;
+    static RSCFileLocations *current = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        current = [BSGFileLocations v1];
+        current = [RSCFileLocations v1];
     });
     return current;
 }
 
 + (instancetype) v1 {
-    return [[BSGFileLocations alloc] initWithVersion1];
+    return [[RSCFileLocations alloc] initWithVersion1];
 }
 
 - (instancetype)initWithVersion1 {

@@ -1,32 +1,32 @@
 //
-//  BSGUtilsTests.m
-//  Bugsnag
+//  RSCUtilsTests.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 19/08/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BSGUtils.h"
+#import "RSCUtils.h"
 
-@interface BSGUtilsTests : XCTestCase
+@interface RSCUtilsTests : XCTestCase
 @end
 
-@implementation BSGUtilsTests
+@implementation RSCUtilsTests
 
 #if TARGET_OS_IOS
 
-- (void)testBSGStringFromDeviceOrientation {
-    XCTAssertEqualObjects(BSGStringFromDeviceOrientation(UIDeviceOrientationPortraitUpsideDown), @"portraitupsidedown");
-    XCTAssertEqualObjects(BSGStringFromDeviceOrientation(UIDeviceOrientationPortrait), @"portrait");
-    XCTAssertEqualObjects(BSGStringFromDeviceOrientation(UIDeviceOrientationLandscapeRight), @"landscaperight");
-    XCTAssertEqualObjects(BSGStringFromDeviceOrientation(UIDeviceOrientationLandscapeLeft), @"landscapeleft");
-    XCTAssertEqualObjects(BSGStringFromDeviceOrientation(UIDeviceOrientationFaceUp), @"faceup");
-    XCTAssertEqualObjects(BSGStringFromDeviceOrientation(UIDeviceOrientationFaceDown), @"facedown");
-    XCTAssertNil(BSGStringFromDeviceOrientation(UIDeviceOrientationUnknown));
-    XCTAssertNil(BSGStringFromDeviceOrientation(-1));
-    XCTAssertNil(BSGStringFromDeviceOrientation(99));
+- (void)testRSCStringFromDeviceOrientation {
+    XCTAssertEqualObjects(RSCStringFromDeviceOrientation(UIDeviceOrientationPortraitUpsideDown), @"portraitupsidedown");
+    XCTAssertEqualObjects(RSCStringFromDeviceOrientation(UIDeviceOrientationPortrait), @"portrait");
+    XCTAssertEqualObjects(RSCStringFromDeviceOrientation(UIDeviceOrientationLandscapeRight), @"landscaperight");
+    XCTAssertEqualObjects(RSCStringFromDeviceOrientation(UIDeviceOrientationLandscapeLeft), @"landscapeleft");
+    XCTAssertEqualObjects(RSCStringFromDeviceOrientation(UIDeviceOrientationFaceUp), @"faceup");
+    XCTAssertEqualObjects(RSCStringFromDeviceOrientation(UIDeviceOrientationFaceDown), @"facedown");
+    XCTAssertNil(RSCStringFromDeviceOrientation(UIDeviceOrientationUnknown));
+    XCTAssertNil(RSCStringFromDeviceOrientation(-1));
+    XCTAssertNil(RSCStringFromDeviceOrientation(99));
 }
 
 #endif

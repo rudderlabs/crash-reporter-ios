@@ -1,8 +1,8 @@
 //
-//  BSGRunContext.h
-//  Bugsnag
+//  RSCRunContext.h
+//  RSCrashReporter
 //
-//  Copyright © 2022 Bugsnag Inc. All rights reserved.
+//  Copyright © 2022 RSCrashReporter Inc. All rights reserved.
 //
 
 #include <dispatch/dispatch.h>
@@ -10,18 +10,18 @@
 #include <stdint.h>
 #include <uuid/uuid.h>
 
-#include "BSGDefines.h"
+#include "RSCDefines.h"
 
 //
 // The struct version should be incremented prior to a release if changes have
-// been made to BSGRunContext.
+// been made to RSCRunContext.
 //
 // During development this is not strictly necessary since last run's data will
 // not be loaded if the struct's size has changed.
 //
-#define BSGRUNCONTEXT_VERSION 4
+#define RSCRUNCONTEXT_VERSION 4
 
-struct BSGRunContext {
+struct RSCRunContext {
     long structVersion;
     bool isDebuggerAttached;
     bool isLaunching;
@@ -35,14 +35,14 @@ struct BSGRunContext {
     double sessionStartTime;
     unsigned long handledCount;
     unsigned long unhandledCount;
-#if BSG_HAVE_BATTERY
+#if RSC_HAVE_BATTERY
     float batteryLevel;
     long batteryState;
 #endif
 #if TARGET_OS_IOS
     long lastKnownOrientation;
 #endif
-#if BSG_HAVE_OOM_DETECTION
+#if RSC_HAVE_OOM_DETECTION
     dispatch_source_memorypressure_flags_t memoryPressure;
 #endif
     double timestamp __attribute__((aligned(8)));
@@ -56,51 +56,51 @@ struct BSGRunContext {
 ///
 /// This structure is mapped to a file so that changes will be persisted by the OS.
 ///
-/// Guaranteed to be non-null once BSGRunContextInit() is called.
-extern struct BSGRunContext *_Nonnull bsg_runContext;
+/// Guaranteed to be non-null once RSCRunContextInit() is called.
+extern struct RSCRunContext *_Nonnull rsc_runContext;
 
 /// Information about the last run of the app / process, if it could be loaded.
-extern const struct BSGRunContext *_Nullable bsg_lastRunContext;
+extern const struct RSCRunContext *_Nullable rsc_lastRunContext;
 
 #pragma mark -
 
 #ifdef FOUNDATION_EXTERN
-void BSGRunContextInit(NSString *_Nonnull path);
+void RSCRunContextInit(NSString *_Nonnull path);
 #endif
 
 #pragma mark -
 
-size_t bsg_getHostMemory(void);
+size_t rsc_getHostMemory(void);
 
-void BSGRunContextUpdateMemory(void);
+void RSCRunContextUpdateMemory(void);
 
-void BSGRunContextUpdateTimestamp(void);
+void RSCRunContextUpdateTimestamp(void);
 
 #pragma mark -
 
 #ifdef FOUNDATION_EXTERN
-static inline bool BSGRunContextWasCriticalThermalState(void) {
+static inline bool RSCRunContextWasCriticalThermalState(void) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
-    return bsg_lastRunContext && bsg_lastRunContext->thermalState == NSProcessInfoThermalStateCritical;
+    return rsc_lastRunContext && rsc_lastRunContext->thermalState == NSProcessInfoThermalStateCritical;
 #pragma clang diagnostic pop
 }
 #endif
 
 #if !TARGET_OS_WATCH
-bool BSGRunContextWasKilled(void);
+bool RSCRunContextWasKilled(void);
 #endif
 
-static inline bool BSGRunContextWasLaunching(void) {
-    return bsg_lastRunContext && bsg_lastRunContext->isLaunching;
+static inline bool RSCRunContextWasLaunching(void) {
+    return rsc_lastRunContext && rsc_lastRunContext->isLaunching;
 }
 
-#if BSG_HAVE_OOM_DETECTION
-static inline bool BSGRunContextWasMemoryWarning(void) {
-    return bsg_lastRunContext && bsg_lastRunContext->memoryPressure > DISPATCH_MEMORYPRESSURE_NORMAL;
+#if RSC_HAVE_OOM_DETECTION
+static inline bool RSCRunContextWasMemoryWarning(void) {
+    return rsc_lastRunContext && rsc_lastRunContext->memoryPressure > DISPATCH_MEMORYPRESSURE_NORMAL;
 }
 #endif
 
-static inline bool BSGRunContextWasTerminating(void) {
-    return bsg_lastRunContext && bsg_lastRunContext->isTerminating;
+static inline bool RSCRunContextWasTerminating(void) {
+    return rsc_lastRunContext && rsc_lastRunContext->isTerminating;
 }

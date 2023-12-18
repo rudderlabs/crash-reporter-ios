@@ -1,22 +1,22 @@
 //
-//  BugsnagDeviceTest.m
+//  RSCrashReporterDeviceTest.m
 //  Tests
 //
 //  Created by Jamie Lynch on 02/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BSG_KSSystemInfo.h"
-#import "BugsnagDevice+Private.h"
-#import "BugsnagDeviceWithState+Private.h"
+#import "RSC_KSSystemInfo.h"
+#import "RSCrashReporterDevice+Private.h"
+#import "RSCrashReporterDeviceWithState+Private.h"
 
-@interface BugsnagDeviceTest : XCTestCase
+@interface RSCrashReporterDeviceTest : XCTestCase
 @property NSDictionary *data;
 @end
 
-@implementation BugsnagDeviceTest
+@implementation RSCrashReporterDeviceTest
 
 - (void)setUp {
     [super setUp];
@@ -52,7 +52,7 @@
 }
 
 - (void)testDevice {
-    BugsnagDevice *device = [BugsnagDevice deviceWithKSCrashReport:self.data];
+    RSCrashReporterDevice *device = [RSCrashReporterDevice deviceWithKSCrashReport:self.data];
 
     // verify stateless fields
     XCTAssertTrue(device.jailbroken);
@@ -72,7 +72,7 @@
 }
 
 - (void)testDeviceWithState {
-    BugsnagDeviceWithState *device = [BugsnagDeviceWithState deviceWithKSCrashReport:self.data];
+    RSCrashReporterDeviceWithState *device = [RSCrashReporterDeviceWithState deviceWithKSCrashReport:self.data];
 
     // verify stateless fields
     XCTAssertTrue(device.jailbroken);
@@ -102,13 +102,13 @@
 }
 
 - (void)testDeviceWithRealSystemInfo {
-    NSDictionary *systemInfo = [BSG_KSSystemInfo systemInfo];
-    BugsnagDeviceWithState *device = [BugsnagDeviceWithState deviceWithKSCrashReport:@{@"system": systemInfo}];
+    NSDictionary *systemInfo = [RSC_KSSystemInfo systemInfo];
+    RSCrashReporterDeviceWithState *device = [RSCrashReporterDeviceWithState deviceWithKSCrashReport:@{@"system": systemInfo}];
     XCTAssertLessThan(device.freeMemory.unsignedLongLongValue, device.totalMemory.unsignedLongLongValue);
 }
 
 - (void)testDeviceToDict {
-    BugsnagDevice *device = [BugsnagDevice deviceWithKSCrashReport:self.data];
+    RSCrashReporterDevice *device = [RSCrashReporterDevice deviceWithKSCrashReport:self.data];
     device.locale = @"en-US";
     NSDictionary *dict = [device toDictionary];
 
@@ -131,7 +131,7 @@
 }
 
 - (void)testDeviceWithStateToDict {
-    BugsnagDeviceWithState *device = [BugsnagDeviceWithState deviceWithKSCrashReport:self.data];
+    RSCrashReporterDeviceWithState *device = [RSCrashReporterDeviceWithState deviceWithKSCrashReport:self.data];
     device.locale = @"en-US";
     NSDictionary *dict = [device toDictionary];
 
@@ -163,7 +163,7 @@
 }
 
 - (void)testDeviceRuntimeInfoAppended {
-    BugsnagDevice *device = [BugsnagDevice deviceWithKSCrashReport:self.data];
+    RSCrashReporterDevice *device = [RSCrashReporterDevice deviceWithKSCrashReport:self.data];
     XCTAssertEqual(2, [device.runtimeVersions count]);
     XCTAssertEqualObjects(@"14B25", device.runtimeVersions[@"osBuild"]);
     XCTAssertEqualObjects(@"10.0.0 (clang-1000.11.45.5)", device.runtimeVersions[@"clangVersion"]);
@@ -195,7 +195,7 @@
             @"orientation": @"portrait",
             @"time": @"2014-12-02T01:56:13Z"
     };
-    BugsnagDeviceWithState *device = [BugsnagDeviceWithState deviceFromJson:json];
+    RSCrashReporterDeviceWithState *device = [RSCrashReporterDeviceWithState deviceFromJson:json];
     XCTAssertNotNil(device);
 
     // verify stateless fields

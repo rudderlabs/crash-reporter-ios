@@ -1,28 +1,28 @@
 //
-//  BugsnagOnBreadcrumbTest.m
+//  RSCrashReporterOnBreadcrumbTest.m
 //  Tests
 //
 //  Created by Jamie Lynch on 19/03/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
 #import "RSCrashReporter.h"
-#import "BugsnagBreadcrumb+Private.h"
-#import "BugsnagClient+Private.h"
-#import "BugsnagConfiguration+Private.h"
-#import "BugsnagTestConstants.h"
-#import "BugsnagBreadcrumbs.h"
+#import "RSCrashReporterBreadcrumb+Private.h"
+#import "RSCrashReporterClient+Private.h"
+#import "RSCrashReporterConfiguration+Private.h"
+#import "RSCrashReporterTestConstants.h"
+#import "RSCrashReporterBreadcrumbs.h"
 
-@interface BugsnagOnBreadcrumbTest : XCTestCase
+@interface RSCrashReporterOnBreadcrumbTest : XCTestCase
 @end
 
-@implementation BugsnagOnBreadcrumbTest
+@implementation RSCrashReporterOnBreadcrumbTest
 
 - (void)setUp {
     [super setUp];
-    [[[BugsnagBreadcrumbs alloc] initWithConfiguration:[[BugsnagConfiguration alloc] initWithApiKey:nil]] removeAllBreadcrumbs];
+    [[[RSCrashReporterBreadcrumbs alloc] initWithConfiguration:[[RSCrashReporterConfiguration alloc] initWithApiKey:nil]] removeAllBreadcrumbs];
 }
 
 /**
@@ -32,11 +32,11 @@
 
     // Setup
     __block XCTestExpectation *expectation = [self expectationWithDescription:@"Remove On Breadcrumb Block"];
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    config.endpoints = [[BugsnagEndpointConfiguration alloc] initWithNotify:@"http://notreal.bugsnag.com"
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    config.endpoints = [[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@"http://notreal.bugsnag.com"
                                                                    sessions:@"http://notreal.bugsnag.com"];
     XCTAssertEqual([[config onBreadcrumbBlocks] count], 0);
-    BugsnagOnBreadcrumbBlock crumbBlock = ^(BugsnagBreadcrumb * _Nonnull crumb) {
+    RSCrashReporterOnBreadcrumbBlock crumbBlock = ^(RSCrashReporterBreadcrumb * _Nonnull crumb) {
         // We expect the breadcrumb block to be called
         [expectation fulfill];
         return YES;
@@ -45,7 +45,7 @@
     XCTAssertEqual([[config onBreadcrumbBlocks] count], 1);
 
     // Call onbreadcrumb blocks
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     [client leaveBreadcrumbWithMessage:@"Hello"];
     [self waitForExpectationsWithTimeout:5.0 handler:nil];
@@ -60,22 +60,22 @@
     __block XCTestExpectation *calledExpectation = [self expectationWithDescription:@"Remove On Breadcrumb Block"];
     calledExpectation.inverted = YES;
 
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    config.endpoints = [[BugsnagEndpointConfiguration alloc] initWithNotify:@"http://notreal.bugsnag.com"
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    config.endpoints = [[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@"http://notreal.bugsnag.com"
                                                                    sessions:@"http://notreal.bugsnag.com"];
     XCTAssertEqual([[config onBreadcrumbBlocks] count], 0);
-    BugsnagOnBreadcrumbBlock crumbBlock = ^(BugsnagBreadcrumb * _Nonnull crumb) {
+    RSCrashReporterOnBreadcrumbBlock crumbBlock = ^(RSCrashReporterBreadcrumb * _Nonnull crumb) {
         [calledExpectation fulfill];
         return YES;
     };
 
     // It's there (and from other tests we know it gets called) and then it's not there
-    BugsnagOnBreadcrumbRef callback = [config addOnBreadcrumbBlock:crumbBlock];
+    RSCrashReporterOnBreadcrumbRef callback = [config addOnBreadcrumbBlock:crumbBlock];
     XCTAssertEqual([[config onBreadcrumbBlocks] count], 1);
     [config removeOnBreadcrumb:callback];
     XCTAssertEqual([[config onBreadcrumbBlocks] count], 0);
 
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     [client leaveBreadcrumbWithMessage:@"Hello"];
 
@@ -95,12 +95,12 @@
     __block XCTestExpectation *expectation2 = [self expectationWithDescription:@"Remove On Breadcrumb Block 2"];
     expectation2.inverted = YES;
 
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    config.endpoints = [[BugsnagEndpointConfiguration alloc] initWithNotify:@"http://notreal.bugsnag.com"
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    config.endpoints = [[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@"http://notreal.bugsnag.com"
                                                                    sessions:@"http://notreal.bugsnag.com"];
     XCTAssertEqual([[config onBreadcrumbBlocks] count], 0);
 
-    BugsnagOnBreadcrumbBlock crumbBlock = ^(BugsnagBreadcrumb * _Nonnull crumb) {
+    RSCrashReporterOnBreadcrumbBlock crumbBlock = ^(RSCrashReporterBreadcrumb * _Nonnull crumb) {
         switch (called) {
         case 0:
             [expectation1 fulfill];
@@ -112,11 +112,11 @@
         return YES;
     };
 
-    BugsnagOnBreadcrumbRef callback = [config addOnBreadcrumbBlock:crumbBlock];
+    RSCrashReporterOnBreadcrumbRef callback = [config addOnBreadcrumbBlock:crumbBlock];
     XCTAssertEqual([[config onBreadcrumbBlocks] count], 1);
 
     // Call onbreadcrumb blocks
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     [client leaveBreadcrumbWithMessage:@"Hello"];
     [self waitForExpectations:@[expectation1] timeout:1.0];
@@ -133,16 +133,16 @@
  * Make sure slightly invalid removals and duplicate additions don't break things
  */
 - (void)testRemoveNonexistentOnBreadcrumbBlocks {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     XCTAssertEqual([[config onBreadcrumbBlocks] count], 0);
-    BugsnagOnBreadcrumbBlock crumbBlock1 = ^(BugsnagBreadcrumb * _Nonnull crumb) {
+    RSCrashReporterOnBreadcrumbBlock crumbBlock1 = ^(RSCrashReporterBreadcrumb * _Nonnull crumb) {
         return YES;
     };
-    BugsnagOnBreadcrumbBlock crumbBlock2 = ^(BugsnagBreadcrumb * _Nonnull crumb) {
+    RSCrashReporterOnBreadcrumbBlock crumbBlock2 = ^(RSCrashReporterBreadcrumb * _Nonnull crumb) {
         return YES;
     };
 
-    BugsnagOnBreadcrumbRef callback1 = [config addOnBreadcrumbBlock:crumbBlock1];
+    RSCrashReporterOnBreadcrumbRef callback1 = [config addOnBreadcrumbBlock:crumbBlock1];
     XCTAssertEqual([[config onBreadcrumbBlocks] count], 1);
     [config removeOnBreadcrumb:crumbBlock2];
     XCTAssertEqual([[config onBreadcrumbBlocks] count], 1);
@@ -165,16 +165,16 @@
  * Test that onBreadcrumb blocks mutate a crumb
  */
 - (void)testAddOnBreadcrumbMutation {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    config.endpoints = [[BugsnagEndpointConfiguration alloc] initWithNotify:@"http://notreal.bugsnag.com"
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    config.endpoints = [[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@"http://notreal.bugsnag.com"
                                                                    sessions:@"http://notreal.bugsnag.com"];
-    [config addOnBreadcrumbBlock:^(BugsnagBreadcrumb * _Nonnull crumb) {
+    [config addOnBreadcrumbBlock:^(RSCrashReporterBreadcrumb * _Nonnull crumb) {
         crumb.message = @"Foo";
         return YES;
     }];
 
     // Call onbreadcrumb blocks
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     XCTAssertEqual([[config onBreadcrumbBlocks] count], 1);
     NSDictionary *crumb = [client.breadcrumbs.firstObject objectValue];
@@ -185,13 +185,13 @@
  * Test that onBreadcrumb blocks can discard crumbs
  */
 - (void)testAddOnBreadcrumbRejection {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    config.endpoints = [[BugsnagEndpointConfiguration alloc] initWithNotify:@"http://notreal.bugsnag.com"
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    config.endpoints = [[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@"http://notreal.bugsnag.com"
                                                                    sessions:@"http://notreal.bugsnag.com"];
-    [config addOnBreadcrumbBlock:^(BugsnagBreadcrumb * _Nonnull crumb) {
+    [config addOnBreadcrumbBlock:^(RSCrashReporterBreadcrumb * _Nonnull crumb) {
         return NO;
     }];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
     // Not always zero - breadcrumbs from previous tests can appear due to async behaviour

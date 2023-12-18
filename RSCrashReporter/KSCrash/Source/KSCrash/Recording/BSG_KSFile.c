@@ -1,30 +1,30 @@
 //
-//  BSG_KSFile.c
-//  Bugsnag
+//  RSC_KSFile.c
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 12/01/2022.
-//  Copyright © 2022 Bugsnag Inc. All rights reserved.
+//  Copyright © 2022 RSCrashReporter Inc. All rights reserved.
 //
 
-#include "BSG_KSFile.h"
+#include "RSC_KSFile.h"
 
-#include "BSG_KSFileUtils.h"
+#include "RSC_KSFileUtils.h"
 
 #include <string.h>
 #include <sys/param.h>
 
-static inline bool bsg_write(const int fd, const char *bytes, size_t length) {
-    return bsg_ksfuwriteBytesToFD(fd, bytes, (ssize_t)length);
+static inline bool rsc_write(const int fd, const char *bytes, size_t length) {
+    return rsc_ksfuwriteBytesToFD(fd, bytes, (ssize_t)length);
 }
 
-void BSG_KSFileInit(BSG_KSFile *file, int fd, char *buffer, size_t length) {
+void RSC_KSFileInit(RSC_KSFile *file, int fd, char *buffer, size_t length) {
     file->fd = fd;
     file->buffer = buffer;
     file->bufferSize = length;
     file->bufferUsed = 0;
 }
 
-bool BSG_KSFileWrite(BSG_KSFile *file, const char *data, size_t length) {
+bool RSC_KSFileWrite(RSC_KSFile *file, const char *data, size_t length) {
     const size_t bytesCopied = MIN(file->bufferSize - file->bufferUsed, length);
     memcpy(file->buffer + file->bufferUsed, data, bytesCopied);
     file->bufferUsed += bytesCopied;
@@ -32,7 +32,7 @@ bool BSG_KSFileWrite(BSG_KSFile *file, const char *data, size_t length) {
     length -= bytesCopied;
     
     if (file->bufferUsed == file->bufferSize) {
-        if (!BSG_KSFileFlush(file)) {
+        if (!RSC_KSFileFlush(file)) {
             return false;
         }
     }
@@ -42,7 +42,7 @@ bool BSG_KSFileWrite(BSG_KSFile *file, const char *data, size_t length) {
     }
     
     if (length >= file->bufferSize) {
-        return bsg_write(file->fd, data, length);
+        return rsc_write(file->fd, data, length);
     }
     
     memcpy(file->buffer, data, length);
@@ -50,8 +50,8 @@ bool BSG_KSFileWrite(BSG_KSFile *file, const char *data, size_t length) {
     return true;
 }
 
-bool BSG_KSFileFlush(BSG_KSFile *file) {
-    if (!bsg_write(file->fd, file->buffer, file->bufferUsed)) {
+bool RSC_KSFileFlush(RSC_KSFile *file) {
+    if (!rsc_write(file->fd, file->buffer, file->bufferUsed)) {
         return false;
     }
     file->bufferUsed = 0;

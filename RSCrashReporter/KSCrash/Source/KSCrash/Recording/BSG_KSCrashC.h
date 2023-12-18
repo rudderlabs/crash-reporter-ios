@@ -1,5 +1,5 @@
 //
-//  BSG_KSCrashC.h
+//  RSC_KSCrashC.h
 //
 //  Created by Karl Stenerud on 2012-01-28.
 //
@@ -27,21 +27,21 @@
 /* Primary C entry point into the crash reporting system.
  */
 
-#ifndef HDR_BSG_KSCrashC_h
-#define HDR_BSG_KSCrashC_h
+#ifndef HDR_RSC_KSCrashC_h
+#define HDR_RSC_KSCrashC_h
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "BSG_KSCrashContext.h"
+#include "RSC_KSCrashContext.h"
 
 #include <stdbool.h>
 
 /** Initialize the KSCrash system. Call this once, before any other function.
- * Note: This gets called automatically by [BSG_KSCrash sharedInstance].
+ * Note: This gets called automatically by [RSC_KSCrash sharedInstance].
  */
-void bsg_kscrash_init(void);
+void rsc_kscrash_init(void);
 
 /** Install the crash reporter. The reporter will record the next crash and then
  * terminate the program.
@@ -57,7 +57,7 @@ void bsg_kscrash_init(void);
  *
  * @return The crash types that are being handled.
  */
-BSG_KSCrashType bsg_kscrash_install(const char *const crashReportFilePath,
+RSC_KSCrashType rsc_kscrash_install(const char *const crashReportFilePath,
                                     const char *const recrashReportFilePath,
                                     const char *stateFilePath,
                                     const char *crashID);
@@ -68,12 +68,12 @@ BSG_KSCrashType bsg_kscrash_install(const char *const crashReportFilePath,
  *
  * @param crashTypes The crash types to handle.
  *
- * @return The crash types that are now behing handled. If BSG_KSCrash has been
+ * @return The crash types that are now behing handled. If RSC_KSCrash has been
  *         installed, the return value represents the crash sentries that were
  *         successfully installed. Otherwise it represents which sentries it
- *         will attempt to activate when BSG_KSCrash installs.
+ *         will attempt to activate when RSC_KSCrash installs.
  */
-BSG_KSCrashType bsg_kscrash_setHandlingCrashTypes(BSG_KSCrashType crashTypes);
+RSC_KSCrashType rsc_kscrash_setHandlingCrashTypes(RSC_KSCrashType crashTypes);
 
 /** Reinstall the crash reporter. Useful for resetting the crash reporter
  * after a "soft" crash.
@@ -87,7 +87,7 @@ BSG_KSCrashType bsg_kscrash_setHandlingCrashTypes(BSG_KSCrashType crashTypes);
  *
  * @param crashID The unique identifier to assign to the next crash report.
  */
-void bsg_kscrash_reinstall(const char *const crashReportFilePath,
+void rsc_kscrash_reinstall(const char *const crashReportFilePath,
                            const char *const recrashReportFilePath,
                            const char *const stateFilePath,
                            const char *const crashID);
@@ -103,15 +103,15 @@ void bsg_kscrash_reinstall(const char *const crashReportFilePath,
  *
  * Default: NULL
  */
-void bsg_kscrash_setCrashNotifyCallback(
-    const BSG_KSReportWriteCallback onCrashNotify);
+void rsc_kscrash_setCrashNotifyCallback(
+    const RSC_KSReportWriteCallback onCrashNotify);
 
-void bsg_kscrash_setThreadTracingEnabled(bool threadTracingEnabled);
+void rsc_kscrash_setThreadTracingEnabled(bool threadTracingEnabled);
 
 /**
  * The current crash context
  */
-BSG_KSCrash_Context *crashContext(void);
+RSC_KSCrash_Context *crashContext(void);
 
 #ifdef __cplusplus
 }

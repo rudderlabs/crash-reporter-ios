@@ -1,34 +1,34 @@
 //
-//  BSGFeatureFlagStore.m
-//  Bugsnag
+//  RSCFeatureFlagStore.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 11/11/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGFeatureFlagStore.h"
+#import "RSCFeatureFlagStore.h"
 
-#import "BSGKeys.h"
-#import "BugsnagFeatureFlag.h"
+#import "RSCKeys.h"
+#import "RSCrashReporterFeatureFlag.h"
 
-void BSGFeatureFlagStoreAddFeatureFlag(BSGFeatureFlagStore *store, NSString *name, NSString *_Nullable variant) {
+void RSCFeatureFlagStoreAddFeatureFlag(RSCFeatureFlagStore *store, NSString *name, NSString *_Nullable variant) {
     [store addFeatureFlag:name withVariant:variant];
 }
 
-void BSGFeatureFlagStoreAddFeatureFlags(BSGFeatureFlagStore *store, NSArray<BugsnagFeatureFlag *> *featureFlags) {
+void RSCFeatureFlagStoreAddFeatureFlags(RSCFeatureFlagStore *store, NSArray<RSCrashReporterFeatureFlag *> *featureFlags) {
     [store addFeatureFlags:featureFlags];
 }
 
-void BSGFeatureFlagStoreClear(BSGFeatureFlagStore *store, NSString *_Nullable name) {
+void RSCFeatureFlagStoreClear(RSCFeatureFlagStore *store, NSString *_Nullable name) {
     [store clear:name];
 }
 
-NSArray<NSDictionary *> * BSGFeatureFlagStoreToJSON(BSGFeatureFlagStore *store) {
+NSArray<NSDictionary *> * RSCFeatureFlagStoreToJSON(RSCFeatureFlagStore *store) {
     return [store toJSON];
 }
 
-BSGFeatureFlagStore * BSGFeatureFlagStoreFromJSON(id json) {
-    return [BSGFeatureFlagStore fromJSON:json];
+RSCFeatureFlagStore * RSCFeatureFlagStoreFromJSON(id json) {
+    return [RSCFeatureFlagStore fromJSON:json];
 }
 
 
@@ -40,8 +40,8 @@ BSGFeatureFlagStore * BSGFeatureFlagStoreFromJSON(id json) {
  *
  * This gives the access speed of a dictionary while keeping ordering intact.
  */
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSGFeatureFlagStore ()
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCFeatureFlagStore ()
 
 @property(nonatomic, readwrite) NSMutableArray *flags;
 @property(nonatomic, readwrite) NSMutableDictionary *indices;
@@ -50,17 +50,17 @@ BSG_OBJC_DIRECT_MEMBERS
 
 static const int REBUILD_AT_HOLE_COUNT = 1000;
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BSGFeatureFlagStore
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCFeatureFlagStore
 
-+ (nonnull BSGFeatureFlagStore *) fromJSON:(nonnull id)json {
-    BSGFeatureFlagStore *store = [BSGFeatureFlagStore new];
++ (nonnull RSCFeatureFlagStore *) fromJSON:(nonnull id)json {
+    RSCFeatureFlagStore *store = [RSCFeatureFlagStore new];
     if ([json isKindOfClass:[NSArray class]]) {
         for (id item in json) {
             if ([item isKindOfClass:[NSDictionary class]]) {
-                NSString *featureFlag = item[BSGKeyFeatureFlag];
+                NSString *featureFlag = item[RSCKeyFeatureFlag];
                 if ([featureFlag isKindOfClass:[NSString class]]) {
-                    id variant = item[BSGKeyVariant];
+                    id variant = item[RSCKeyVariant];
                     if (![variant isKindOfClass:[NSString class]]) {
                         variant = nil;
                     }
@@ -92,10 +92,10 @@ static inline int getIndexFromDict(NSDictionary *dict, NSString *name) {
     return self.indices.count;
 }
 
-- (nonnull NSArray<BugsnagFeatureFlag *> *) allFlags {
-    NSMutableArray<BugsnagFeatureFlag *> *flags = [NSMutableArray arrayWithCapacity:self.indices.count];
-    for (BugsnagFeatureFlag *flag in self.flags) {
-        if ([flag isKindOfClass:[BugsnagFeatureFlag class]]) {
+- (nonnull NSArray<RSCrashReporterFeatureFlag *> *) allFlags {
+    NSMutableArray<RSCrashReporterFeatureFlag *> *flags = [NSMutableArray arrayWithCapacity:self.indices.count];
+    for (RSCrashReporterFeatureFlag *flag in self.flags) {
+        if ([flag isKindOfClass:[RSCrashReporterFeatureFlag class]]) {
             [flags addObject:flag];
         }
     }
@@ -110,14 +110,14 @@ static inline int getIndexFromDict(NSDictionary *dict, NSString *name) {
 
     NSMutableArray *newFlags = [NSMutableArray arrayWithCapacity:self.indices.count];
     NSMutableDictionary *newIndices = [NSMutableDictionary new];
-    for (BugsnagFeatureFlag *flag in self.flags) {
-        if ([flag isKindOfClass:[BugsnagFeatureFlag class]]) {
+    for (RSCrashReporterFeatureFlag *flag in self.flags) {
+        if ([flag isKindOfClass:[RSCrashReporterFeatureFlag class]]) {
             [newFlags addObject:flag];
         }
     }
 
     for (NSUInteger i = 0; i < newFlags.count; i++) {
-        BugsnagFeatureFlag *flag = newFlags[i];
+        RSCrashReporterFeatureFlag *flag = newFlags[i];
         newIndices[flag.name] = @(i);
     }
     self.flags = newFlags;
@@ -125,7 +125,7 @@ static inline int getIndexFromDict(NSDictionary *dict, NSString *name) {
 }
 
 - (void) addFeatureFlag:(nonnull NSString *)name withVariant:(nullable NSString *)variant {
-    BugsnagFeatureFlag *flag = [BugsnagFeatureFlag flagWithName:name variant:variant];
+    RSCrashReporterFeatureFlag *flag = [RSCrashReporterFeatureFlag flagWithName:name variant:variant];
 
     int index = getIndexFromDict(self.indices, name);
     if (index >= 0) {
@@ -137,8 +137,8 @@ static inline int getIndexFromDict(NSDictionary *dict, NSString *name) {
     }
 }
 
-- (void) addFeatureFlags:(nonnull NSArray<BugsnagFeatureFlag *> *)featureFlags {
-    for (BugsnagFeatureFlag *flag in featureFlags) {
+- (void) addFeatureFlags:(nonnull NSArray<RSCrashReporterFeatureFlag *> *)featureFlags {
+    for (RSCrashReporterFeatureFlag *flag in featureFlags) {
         [self addFeatureFlag:flag.name withVariant:flag.variant];
     }
 }
@@ -160,12 +160,12 @@ static inline int getIndexFromDict(NSDictionary *dict, NSString *name) {
 - (nonnull NSArray<NSDictionary *> *) toJSON {
     NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
 
-    for (BugsnagFeatureFlag *flag in self.flags) {
-        if ([flag isKindOfClass:[BugsnagFeatureFlag class]]) {
+    for (RSCrashReporterFeatureFlag *flag in self.flags) {
+        if ([flag isKindOfClass:[RSCrashReporterFeatureFlag class]]) {
             if (flag.variant) {
-                [result addObject:@{BSGKeyFeatureFlag:flag.name, BSGKeyVariant:(NSString *_Nonnull)flag.variant}];
+                [result addObject:@{RSCKeyFeatureFlag:flag.name, RSCKeyVariant:(NSString *_Nonnull)flag.variant}];
             } else {
-                [result addObject:@{BSGKeyFeatureFlag:flag.name}];
+                [result addObject:@{RSCKeyFeatureFlag:flag.name}];
             }
         }
     }
@@ -173,7 +173,7 @@ static inline int getIndexFromDict(NSDictionary *dict, NSString *name) {
 }
 
 - (id)copyWithZone:(NSZone *)zone {
-    BSGFeatureFlagStore *store = [[BSGFeatureFlagStore allocWithZone:zone] init];
+    RSCFeatureFlagStore *store = [[RSCFeatureFlagStore allocWithZone:zone] init];
     store.flags = [self.flags mutableCopy];
     store.indices = [self.indices mutableCopy];
     return store;

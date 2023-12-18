@@ -1,34 +1,34 @@
 //
-//  BugsnagClientMirrorTest.m
+//  RSCrashReporterClientMirrorTest.m
 //  Tests
 //
 //  Created by Jamie Lynch on 30/03/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 #import <objc/runtime.h>
 #import <RSCrashReporter/RSCrashReporter.h>
 
-@interface BugsnagClientMirrorTest : XCTestCase
-@property NSSet *clientMethodsNotRequiredOnBugsnag;
+@interface RSCrashReporterClientMirrorTest : XCTestCase
+@property NSSet *clientMethodsNotRequiredOnRSCrashReporter;
 @property NSSet *bugsnagMethodsNotRequiredOnClient;
 @end
 
 /**
- * Verifies that methods on the Bugsnag and BugsnagClient class remain in sync.
+ * Verifies that methods on the RSCrashReporter and RSCrashReporterClient class remain in sync.
  *
  * This class relies on introspection using the Objective-C runtime which gets the name
  * of all methods implemented in each class. As Objective-C doesn't seem to have a way of
  * only gathering methods implemented in a header file, the "not required" lists need to be
- * updated whenever a method signature changes within the Bugsnag/BugsnagClient class.
+ * updated whenever a method signature changes within the RSCrashReporter/RSCrashReporterClient class.
  */
-@implementation BugsnagClientMirrorTest
+@implementation RSCrashReporterClientMirrorTest
 
 - (void)setUp {
-    // the following methods are implemented on BugsnagClient but do not need to
-    // be mirrored on the Bugsnag facade
-    self.clientMethodsNotRequiredOnBugsnag = [NSSet setWithArray:@[
+    // the following methods are implemented on RSCrashReporterClient but do not need to
+    // be mirrored on the RSCrashReporter facade
+    self.clientMethodsNotRequiredOnRSCrashReporter = [NSSet setWithArray:@[
             @".cxx_destruct v16@0:8",
             @"addAutoBreadcrumbForEvent: v24@0:8@16",
             @"addAutoBreadcrumbOfType:withMessage:andMetadata: v40@0:8Q16@24@32",
@@ -131,8 +131,8 @@
             @"updateSession: v24@0:8@?16",
     ]];
 
-    // the following methods are implemented on Bugsnag but do not need to
-    // be mirrored on BugsnagClient
+    // the following methods are implemented on RSCrashReporter but do not need to
+    // be mirrored on RSCrashReporterClient
     self.bugsnagMethodsNotRequiredOnClient = [NSSet setWithArray:@[
             @"bugsnagReadyForInternalCalls B16@0:8",
             @"bugsnagReadyForInternalCalls c16@0:8",
@@ -146,31 +146,31 @@
     ]];
 }
 
-- (void)testBugsnagHasClientMethods {
+- (void)testRSCrashReporterHasClientMethods {
     NSMutableSet *bugsnagMethods = [self methodNamesForClass:object_getClass([RSCrashReporter class])];
-    NSMutableSet *clientMethods = [self methodNamesForClass:[BugsnagClient class]];
+    NSMutableSet *clientMethods = [self methodNamesForClass:[RSCrashReporterClient class]];
 
-    // remove all methods implemented on Bugsnag from Client.
-    // any leftover methods have not been implemented on the Bugsnag facade.
+    // remove all methods implemented on RSCrashReporter from Client.
+    // any leftover methods have not been implemented on the RSCrashReporter facade.
     [clientMethods minusSet:bugsnagMethods];
-    [clientMethods minusSet:self.clientMethodsNotRequiredOnBugsnag];
+    [clientMethods minusSet:self.clientMethodsNotRequiredOnRSCrashReporter];
 
     for (NSString *method in clientMethods) {
         XCTFail(@"The \"RSCrashReporter\" class should implement +%@", method);
     }
 }
 
-- (void)testClientHasBugsnagMethods {
+- (void)testClientHasRSCrashReporterMethods {
     NSMutableSet *bugsnagMethods = [self methodNamesForClass:object_getClass([RSCrashReporter class])];
-    NSMutableSet *clientMethods = [self methodNamesForClass:[BugsnagClient class]];
+    NSMutableSet *clientMethods = [self methodNamesForClass:[RSCrashReporterClient class]];
 
-    // remove all methods implemented on Client from Bugsnag.
+    // remove all methods implemented on Client from RSCrashReporter.
     // any leftover methods have not been implemented on the Client object.
     [bugsnagMethods minusSet:clientMethods];
     [bugsnagMethods minusSet:self.bugsnagMethodsNotRequiredOnClient];
 
     for (NSString *method in bugsnagMethods) {
-        XCTFail(@"The \"BugsnagClient\" class should implement -%@", method);
+        XCTFail(@"The \"RSCrashReporterClient\" class should implement -%@", method);
     }
 }
 

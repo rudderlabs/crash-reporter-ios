@@ -1,5 +1,5 @@
 //
-//  BSG_KSCrashContext.h
+//  RSC_KSCrashContext.h
 //
 //  Created by Karl Stenerud on 2012-01-28.
 //
@@ -27,16 +27,16 @@
 /* Contextual information about a crash.
  */
 
-#ifndef HDR_BSG_KSCrashContext_h
-#define HDR_BSG_KSCrashContext_h
+#ifndef HDR_RSC_KSCrashContext_h
+#define HDR_RSC_KSCrashContext_h
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "BSG_KSCrashReportWriter.h"
-#include "BSG_KSCrashSentry.h"
-#include "BSG_KSCrashState.h"
+#include "RSC_KSCrashReportWriter.h"
+#include "RSC_KSCrashSentry.h"
+#include "RSC_KSCrashState.h"
 
 #include <signal.h>
 #include <stdbool.h>
@@ -52,12 +52,12 @@ typedef struct {
     char *systemInfoJSON;
 
     /** The types of crashes that will be handled. */
-    BSG_KSCrashType handlingCrashTypes;
+    RSC_KSCrashType handlingCrashTypes;
 
     /** Callback allowing the application the opportunity to add extra data to
      * the report file. Application MUST NOT call async-unsafe methods!
      */
-    BSG_KSReportWriteCallback onCrashNotify;
+    RSC_KSReportWriteCallback onCrashNotify;
 
     /**
      * File path to write the crash report
@@ -68,15 +68,15 @@ typedef struct {
      * File path to write the recrash report, if the crash reporter crashes
      */
     char *recrashReportFilePath;
-} BSG_KSCrash_Configuration;
+} RSC_KSCrash_Configuration;
 
 /** Contextual data used by the crash report writer.
  */
 typedef struct {
-    BSG_KSCrash_Configuration config;
-    BSG_KSCrash_State state;
-    BSG_KSCrash_SentryContext crash;
-} BSG_KSCrash_Context;
+    RSC_KSCrash_Configuration config;
+    RSC_KSCrash_State state;
+    RSC_KSCrash_SentryContext crash;
+} RSC_KSCrash_Context;
 
 #ifdef __cplusplus
 }

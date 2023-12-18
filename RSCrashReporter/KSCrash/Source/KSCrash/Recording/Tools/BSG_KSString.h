@@ -24,8 +24,8 @@
 // THE SOFTWARE.
 //
 
-#ifndef HDR_BSG_KSString_h
-#define HDR_BSG_KSString_h
+#ifndef HDR_RSC_KSString_h
+#define HDR_RSC_KSString_h
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,7 +41,7 @@ extern "C" {
  *
  * @param replacement The string to replace with.
  */
-void bsg_ksstring_replace(char **dest, const char *replacement);
+void rsc_ksstring_replace(char **dest, const char *replacement);
 
 #ifdef __cplusplus
 }

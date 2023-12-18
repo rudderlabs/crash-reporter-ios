@@ -1,78 +1,78 @@
 //
-//  BSGNotificationBreadcrumbsTests.m
-//  Bugsnag
+//  RSCNotificationBreadcrumbsTests.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 10/12/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
 #import <RSCrashReporter/RSCrashReporter.h>
 
-#import "BSGNotificationBreadcrumbs.h"
-#import "BugsnagBreadcrumb+Private.h"
-#import "BSGDefines.h"
+#import "RSCNotificationBreadcrumbs.h"
+#import "RSCrashReporterBreadcrumb+Private.h"
+#import "RSCDefines.h"
 
 #if TARGET_OS_IOS || TARGET_OS_TV
 #import "UISceneStub.h"
 #endif
 
 
-@interface BSGNotificationBreadcrumbsTests : XCTestCase <BSGBreadcrumbSink>
+@interface RSCNotificationBreadcrumbsTests : XCTestCase <RSCBreadcrumbSink>
 
 @property NSNotificationCenter *notificationCenter;
 @property id notificationObject;
 @property NSDictionary *notificationUserInfo;
 
-@property BSGNotificationBreadcrumbs *notificationBreadcrumbs;
-@property (nonatomic) BugsnagBreadcrumb *breadcrumb;
+@property RSCNotificationBreadcrumbs *notificationBreadcrumbs;
+@property (nonatomic) RSCrashReporterBreadcrumb *breadcrumb;
 
 @end
 
 
 #pragma mark Mock Objects
 
-@interface BSGMockObject: NSObject
+@interface RSCMockObject: NSObject
 @property(readwrite, strong) NSString *descriptionString;
 @end
 
-@implementation BSGMockObject
+@implementation RSCMockObject
 - (NSString *)description {return self.descriptionString;}
 @end
 
 
-@interface BSGMockScene: BSGMockObject
+@interface RSCMockScene: RSCMockObject
 @property(readwrite, strong) NSString *title;
 @property(readwrite, strong) NSString *subtitle;
 @end
 
-@implementation BSGMockScene
+@implementation RSCMockScene
 @end
 
 
-@interface BSGMockViewController: BSGMockObject
+@interface RSCMockViewController: RSCMockObject
 @property(readwrite, strong) NSString *title;
 @end
 
-@implementation BSGMockViewController
+@implementation RSCMockViewController
 @end
 
-#if BSG_HAVE_WINDOW
+#if RSC_HAVE_WINDOW
 
 #if TARGET_OS_OSX
-@interface BSGMockWindow: NSWindow
+@interface RSCMockWindow: NSWindow
 #else
-@interface BSGMockWindow: UIWindow
+@interface RSCMockWindow: UIWindow
 #endif
 @property(readwrite, strong) NSString *mockDescription;
 @property(readwrite, strong) NSString *mockTitle;
 @property(readwrite, strong) NSString *mockRepresentedURLString;
-@property(readwrite, strong) BSGMockScene *mockScene;
-@property(readwrite, strong) BSGMockViewController *mockViewController;
+@property(readwrite, strong) RSCMockScene *mockScene;
+@property(readwrite, strong) RSCMockViewController *mockViewController;
 @end
 
-@implementation BSGMockWindow
+@implementation RSCMockWindow
 - (NSString *)description {return self.mockDescription;}
 #if TARGET_OS_OSX
 - (NSViewController *)contentViewController {return (NSViewController *)self.mockViewController;}
@@ -109,14 +109,14 @@
 
 #pragma mark -
 
-@implementation BSGNotificationBreadcrumbsTests
+@implementation RSCNotificationBreadcrumbsTests
 
 #pragma mark Setup
 
 - (void)setUp {
     self.breadcrumb = nil;
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:@"0192837465afbecd0192837465afbecd"];
-    self.notificationBreadcrumbs = [[BSGNotificationBreadcrumbs alloc] initWithConfiguration:configuration breadcrumbSink:self];
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:@"0192837465afbecd0192837465afbecd"];
+    self.notificationBreadcrumbs = [[RSCNotificationBreadcrumbs alloc] initWithConfiguration:configuration breadcrumbSink:self];
     self.notificationBreadcrumbs.notificationCenter = [[NSNotificationCenter alloc] init];
     self.notificationBreadcrumbs.workspaceNotificationCenter = [[NSNotificationCenter alloc] init];
     self.notificationCenter = self.notificationBreadcrumbs.notificationCenter; 
@@ -125,24 +125,24 @@
     [self.notificationBreadcrumbs start];
 }
 
-- (BugsnagBreadcrumb *)breadcrumbForNotificationWithName:(NSString *)name {
+- (RSCrashReporterBreadcrumb *)breadcrumbForNotificationWithName:(NSString *)name {
     self.breadcrumb = nil;
     [self.notificationCenter postNotification:
      [NSNotification notificationWithName:name object:self.notificationObject userInfo:self.notificationUserInfo]];
     return self.breadcrumb;
 }
 
-#pragma mark BSGBreadcrumbSink
+#pragma mark RSCBreadcrumbSink
 
-- (void)leaveBreadcrumbWithMessage:(NSString *)message metadata:(NSDictionary *)metadata andType:(BSGBreadcrumbType)type {
-    self.breadcrumb = [BugsnagBreadcrumb new];
+- (void)leaveBreadcrumbWithMessage:(NSString *)message metadata:(NSDictionary *)metadata andType:(RSCBreadcrumbType)type {
+    self.breadcrumb = [RSCrashReporterBreadcrumb new];
     self.breadcrumb.message = message;
     self.breadcrumb.metadata = metadata;
     self.breadcrumb.type = type;
 }
 
 #define TEST(__NAME__, __TYPE__, __MESSAGE__, __METADATA__) do { \
-    BugsnagBreadcrumb *breadcrumb = [self breadcrumbForNotificationWithName:__NAME__]; \
+    RSCrashReporterBreadcrumb *breadcrumb = [self breadcrumbForNotificationWithName:__NAME__]; \
     XCTAssert([NSJSONSerialization isValidJSONObject:breadcrumb.metadata]); \
     if (breadcrumb) { \
         XCTAssertEqual(breadcrumb.type, __TYPE__); \
@@ -154,8 +154,8 @@
 #pragma mark Tests
 
 - (void)testNSUndoManagerNotifications {
-    TEST(NSUndoManagerDidRedoChangeNotification, BSGBreadcrumbTypeState, @"Redo Operation", @{});
-    TEST(NSUndoManagerDidUndoChangeNotification, BSGBreadcrumbTypeState, @"Undo Operation", @{});
+    TEST(NSUndoManagerDidRedoChangeNotification, RSCBreadcrumbTypeState, @"Redo Operation", @{});
+    TEST(NSUndoManagerDidUndoChangeNotification, RSCBreadcrumbTypeState, @"Undo Operation", @{});
 }
 
 - (void)testNSProcessInfoThermalStateThermalStateNotifications {
@@ -168,7 +168,7 @@
         [self breadcrumbForNotificationWithName:NSProcessInfoThermalStateDidChangeNotification];
         
         processInfo.thermalState = NSProcessInfoThermalStateCritical;
-        TEST(NSProcessInfoThermalStateDidChangeNotification, BSGBreadcrumbTypeState,
+        TEST(NSProcessInfoThermalStateDidChangeNotification, RSCBreadcrumbTypeState,
              @"Thermal State Changed", (@{@"from": @"nominal", @"to": @"critical"}));
         
         processInfo.thermalState = NSProcessInfoThermalStateCritical;
@@ -182,11 +182,11 @@
 #if TARGET_OS_IOS
 
 - (void)testUIApplicationNotifications {
-    TEST(UIApplicationDidEnterBackgroundNotification, BSGBreadcrumbTypeState, @"App Did Enter Background", @{});
-    TEST(UIApplicationDidReceiveMemoryWarningNotification, BSGBreadcrumbTypeState, @"Memory Warning", @{});
-    TEST(UIApplicationUserDidTakeScreenshotNotification, BSGBreadcrumbTypeState, @"Took Screenshot", @{});
-    TEST(UIApplicationWillEnterForegroundNotification, BSGBreadcrumbTypeState, @"App Will Enter Foreground", @{});
-    TEST(UIApplicationWillTerminateNotification, BSGBreadcrumbTypeState, @"App Will Terminate", @{});
+    TEST(UIApplicationDidEnterBackgroundNotification, RSCBreadcrumbTypeState, @"App Did Enter Background", @{});
+    TEST(UIApplicationDidReceiveMemoryWarningNotification, RSCBreadcrumbTypeState, @"Memory Warning", @{});
+    TEST(UIApplicationUserDidTakeScreenshotNotification, RSCBreadcrumbTypeState, @"Took Screenshot", @{});
+    TEST(UIApplicationWillEnterForegroundNotification, RSCBreadcrumbTypeState, @"App Will Enter Foreground", @{});
+    TEST(UIApplicationWillTerminateNotification, RSCBreadcrumbTypeState, @"App Will Terminate", @{});
 }
  
 - (void)testUIDeviceOrientationNotifications {
@@ -198,7 +198,7 @@
     [self breadcrumbForNotificationWithName:UIDeviceOrientationDidChangeNotification];
     
     device.orientation = UIDeviceOrientationLandscapeLeft;
-    TEST(UIDeviceOrientationDidChangeNotification, BSGBreadcrumbTypeState,
+    TEST(UIDeviceOrientationDidChangeNotification, RSCBreadcrumbTypeState,
          @"Orientation Changed", (@{@"from": @"portrait", @"to": @"landscapeleft"}));
     
     device.orientation = UIDeviceOrientationUnknown;
@@ -211,41 +211,41 @@
 }
 
 - (void)testUIKeyboardNotifications {
-    TEST(UIKeyboardDidHideNotification, BSGBreadcrumbTypeState, @"Keyboard Became Hidden", @{});
-    TEST(UIKeyboardDidShowNotification, BSGBreadcrumbTypeState, @"Keyboard Became Visible", @{});
+    TEST(UIKeyboardDidHideNotification, RSCBreadcrumbTypeState, @"Keyboard Became Hidden", @{});
+    TEST(UIKeyboardDidShowNotification, RSCBreadcrumbTypeState, @"Keyboard Became Visible", @{});
 }
 
 - (void)testUIMenuNotifications {
-    TEST(UIMenuControllerDidHideMenuNotification, BSGBreadcrumbTypeState, @"Did Hide Menu", @{});
-    TEST(UIMenuControllerDidShowMenuNotification, BSGBreadcrumbTypeState, @"Did Show Menu", @{});
+    TEST(UIMenuControllerDidHideMenuNotification, RSCBreadcrumbTypeState, @"Did Hide Menu", @{});
+    TEST(UIMenuControllerDidShowMenuNotification, RSCBreadcrumbTypeState, @"Did Show Menu", @{});
 }
 
 - (void)testUITextFieldNotifications {
-    TEST(UITextFieldTextDidBeginEditingNotification, BSGBreadcrumbTypeUser, @"Began Editing Text", @{});
-    TEST(UITextFieldTextDidEndEditingNotification, BSGBreadcrumbTypeUser, @"Stopped Editing Text", @{});
+    TEST(UITextFieldTextDidBeginEditingNotification, RSCBreadcrumbTypeUser, @"Began Editing Text", @{});
+    TEST(UITextFieldTextDidEndEditingNotification, RSCBreadcrumbTypeUser, @"Stopped Editing Text", @{});
 }
 
 - (void)testUITextViewNotifications {
-    TEST(UITextViewTextDidBeginEditingNotification, BSGBreadcrumbTypeUser, @"Began Editing Text", @{});
-    TEST(UITextViewTextDidEndEditingNotification, BSGBreadcrumbTypeUser, @"Stopped Editing Text", @{});
+    TEST(UITextViewTextDidBeginEditingNotification, RSCBreadcrumbTypeUser, @"Began Editing Text", @{});
+    TEST(UITextViewTextDidEndEditingNotification, RSCBreadcrumbTypeUser, @"Stopped Editing Text", @{});
 }
 
 - (void)testUIWindowNotificationsNoData {
-    BSGMockWindow *window = [[BSGMockWindow alloc]  init];
-    window.mockScene = [[BSGMockScene alloc]  init];
-    window.mockViewController = [[BSGMockViewController alloc] init];
+    RSCMockWindow *window = [[RSCMockWindow alloc]  init];
+    window.mockScene = [[RSCMockScene alloc]  init];
+    window.mockViewController = [[RSCMockViewController alloc] init];
     self.notificationObject = window;
 
     NSMutableDictionary *metadata = [[NSMutableDictionary alloc] init];
 
-    TEST(UIWindowDidBecomeHiddenNotification, BSGBreadcrumbTypeState, @"Window Became Hidden", metadata);
-    TEST(UIWindowDidBecomeVisibleNotification, BSGBreadcrumbTypeState, @"Window Became Visible", metadata);
+    TEST(UIWindowDidBecomeHiddenNotification, RSCBreadcrumbTypeState, @"Window Became Hidden", metadata);
+    TEST(UIWindowDidBecomeVisibleNotification, RSCBreadcrumbTypeState, @"Window Became Visible", metadata);
 }
 
 - (void)testUIWindowNotificationsWithData {
-    BSGMockWindow *window = [[BSGMockWindow alloc]  init];
-    window.mockScene = [[BSGMockScene alloc]  init];
-    window.mockViewController = [[BSGMockViewController alloc] init];
+    RSCMockWindow *window = [[RSCMockWindow alloc]  init];
+    window.mockScene = [[RSCMockScene alloc]  init];
+    window.mockViewController = [[RSCMockViewController alloc] init];
     self.notificationObject = window;
 
     window.mockDescription = @"Window Description";
@@ -267,8 +267,8 @@
         metadata[@"sceneSubtitle"] = @"Scene Subtitle";
     }
 
-    TEST(UIWindowDidBecomeHiddenNotification, BSGBreadcrumbTypeState, @"Window Became Hidden", metadata);
-    TEST(UIWindowDidBecomeVisibleNotification, BSGBreadcrumbTypeState, @"Window Became Visible", metadata);
+    TEST(UIWindowDidBecomeHiddenNotification, RSCBreadcrumbTypeState, @"Window Became Hidden", metadata);
+    TEST(UIWindowDidBecomeVisibleNotification, RSCBreadcrumbTypeState, @"Window Became Visible", metadata);
 }
 
 #endif
@@ -283,31 +283,31 @@
 - (void)testUISceneNotifications {
     if (@available(iOS 13.0, tvOS 13.0, *)) {
         self.notificationObject = [[UISceneStub alloc] initWithConfiguration:@"Default Configuration"
-                                                               delegateClass:[BSGNotificationBreadcrumbsTests class]
+                                                               delegateClass:[RSCNotificationBreadcrumbsTests class]
                                                                         role:UIWindowSceneSessionRoleApplication
                                                                   sceneClass:[UISceneStub class]
                                                                        title:@"Home"];
         
-        TEST(UISceneWillConnectNotification, BSGBreadcrumbTypeState, @"Scene Will Connect",
+        TEST(UISceneWillConnectNotification, RSCBreadcrumbTypeState, @"Scene Will Connect",
              (@{@"configuration": @"Default Configuration",
-                @"delegateClass": @"BSGNotificationBreadcrumbsTests",
+                @"delegateClass": @"RSCNotificationBreadcrumbsTests",
                 @"role": @"UIWindowSceneSessionRoleApplication",
                 @"sceneClass": @"UISceneStub",
                 @"title": @"Home"}));
         
         self.notificationObject = nil;
-        TEST(UISceneDidDisconnectNotification, BSGBreadcrumbTypeState, @"Scene Disconnected", @{});
-        TEST(UISceneDidActivateNotification, BSGBreadcrumbTypeState, @"Scene Activated", @{});
-        TEST(UISceneWillDeactivateNotification, BSGBreadcrumbTypeState, @"Scene Will Deactivate", @{});
-        TEST(UISceneWillEnterForegroundNotification, BSGBreadcrumbTypeState, @"Scene Will Enter Foreground", @{});
-        TEST(UISceneDidEnterBackgroundNotification, BSGBreadcrumbTypeState, @"Scene Entered Background", @{});
+        TEST(UISceneDidDisconnectNotification, RSCBreadcrumbTypeState, @"Scene Disconnected", @{});
+        TEST(UISceneDidActivateNotification, RSCBreadcrumbTypeState, @"Scene Activated", @{});
+        TEST(UISceneWillDeactivateNotification, RSCBreadcrumbTypeState, @"Scene Will Deactivate", @{});
+        TEST(UISceneWillEnterForegroundNotification, RSCBreadcrumbTypeState, @"Scene Will Enter Foreground", @{});
+        TEST(UISceneDidEnterBackgroundNotification, RSCBreadcrumbTypeState, @"Scene Entered Background", @{});
     }
 }
 
 #endif
 
 - (void)testUITableViewNotifications {
-    TEST(UITableViewSelectionDidChangeNotification, BSGBreadcrumbTypeNavigation, @"TableView Select Change", @{});
+    TEST(UITableViewSelectionDidChangeNotification, RSCBreadcrumbTypeNavigation, @"TableView Select Change", @{});
 }
 
 #endif
@@ -317,27 +317,27 @@
 #if TARGET_OS_TV
 
 - (void)testUIScreenNotifications {
-    TEST(UIScreenBrightnessDidChangeNotification, BSGBreadcrumbTypeState, @"Screen Brightness Changed", @{});
+    TEST(UIScreenBrightnessDidChangeNotification, RSCBreadcrumbTypeState, @"Screen Brightness Changed", @{});
 }
 
 - (void)testUIWindowNotificationsNoData {
-    BSGMockWindow *window = [[BSGMockWindow alloc]  init];
-    window.mockScene = [[BSGMockScene alloc]  init];
-    window.mockViewController = [[BSGMockViewController alloc] init];
+    RSCMockWindow *window = [[RSCMockWindow alloc]  init];
+    window.mockScene = [[RSCMockScene alloc]  init];
+    window.mockViewController = [[RSCMockViewController alloc] init];
     self.notificationObject = window;
 
     NSMutableDictionary *metadata = [[NSMutableDictionary alloc] init];
 
-    TEST(UIWindowDidBecomeHiddenNotification, BSGBreadcrumbTypeState, @"Window Became Hidden", metadata);
-    TEST(UIWindowDidBecomeKeyNotification, BSGBreadcrumbTypeState, @"Window Became Key", metadata);
-    TEST(UIWindowDidBecomeVisibleNotification, BSGBreadcrumbTypeState, @"Window Became Visible", metadata);
-    TEST(UIWindowDidResignKeyNotification, BSGBreadcrumbTypeState, @"Window Resigned Key", metadata);
+    TEST(UIWindowDidBecomeHiddenNotification, RSCBreadcrumbTypeState, @"Window Became Hidden", metadata);
+    TEST(UIWindowDidBecomeKeyNotification, RSCBreadcrumbTypeState, @"Window Became Key", metadata);
+    TEST(UIWindowDidBecomeVisibleNotification, RSCBreadcrumbTypeState, @"Window Became Visible", metadata);
+    TEST(UIWindowDidResignKeyNotification, RSCBreadcrumbTypeState, @"Window Resigned Key", metadata);
 }
 
 - (void)testUIWindowNotificationsWithData {
-    BSGMockWindow *window = [[BSGMockWindow alloc]  init];
-    window.mockScene = [[BSGMockScene alloc]  init];
-    window.mockViewController = [[BSGMockViewController alloc] init];
+    RSCMockWindow *window = [[RSCMockWindow alloc]  init];
+    window.mockScene = [[RSCMockScene alloc]  init];
+    window.mockViewController = [[RSCMockViewController alloc] init];
     self.notificationObject = window;
 
     window.mockDescription = @"Window Description";
@@ -353,10 +353,10 @@
     metadata[@"viewController"] = @"ViewController Description";
     metadata[@"viewControllerTitle"] = @"ViewController Title";
 
-    TEST(UIWindowDidBecomeHiddenNotification, BSGBreadcrumbTypeState, @"Window Became Hidden", metadata);
-    TEST(UIWindowDidBecomeKeyNotification, BSGBreadcrumbTypeState, @"Window Became Key", metadata);
-    TEST(UIWindowDidBecomeVisibleNotification, BSGBreadcrumbTypeState, @"Window Became Visible", metadata);
-    TEST(UIWindowDidResignKeyNotification, BSGBreadcrumbTypeState, @"Window Resigned Key", metadata);
+    TEST(UIWindowDidBecomeHiddenNotification, RSCBreadcrumbTypeState, @"Window Became Hidden", metadata);
+    TEST(UIWindowDidBecomeKeyNotification, RSCBreadcrumbTypeState, @"Window Became Key", metadata);
+    TEST(UIWindowDidBecomeVisibleNotification, RSCBreadcrumbTypeState, @"Window Became Visible", metadata);
+    TEST(UIWindowDidResignKeyNotification, RSCBreadcrumbTypeState, @"Window Resigned Key", metadata);
 }
 
 #endif
@@ -366,12 +366,12 @@
 #if TARGET_OS_OSX
 
 - (void)testNSApplicationNotifications {
-    TEST(NSApplicationDidBecomeActiveNotification, BSGBreadcrumbTypeState, @"App Became Active", @{});
-    TEST(NSApplicationDidBecomeActiveNotification, BSGBreadcrumbTypeState, @"App Became Active", @{});
-    TEST(NSApplicationDidHideNotification, BSGBreadcrumbTypeState, @"App Did Hide", @{});
-    TEST(NSApplicationDidResignActiveNotification, BSGBreadcrumbTypeState, @"App Resigned Active", @{});
-    TEST(NSApplicationDidUnhideNotification, BSGBreadcrumbTypeState, @"App Did Unhide", @{});
-    TEST(NSApplicationWillTerminateNotification, BSGBreadcrumbTypeState, @"App Will Terminate", @{});
+    TEST(NSApplicationDidBecomeActiveNotification, RSCBreadcrumbTypeState, @"App Became Active", @{});
+    TEST(NSApplicationDidBecomeActiveNotification, RSCBreadcrumbTypeState, @"App Became Active", @{});
+    TEST(NSApplicationDidHideNotification, RSCBreadcrumbTypeState, @"App Did Hide", @{});
+    TEST(NSApplicationDidResignActiveNotification, RSCBreadcrumbTypeState, @"App Resigned Active", @{});
+    TEST(NSApplicationDidUnhideNotification, RSCBreadcrumbTypeState, @"App Did Unhide", @{});
+    TEST(NSApplicationWillTerminateNotification, RSCBreadcrumbTypeState, @"App Will Terminate", @{});
 }
 
 - (void)testNSControlNotifications {
@@ -380,40 +380,40 @@
         control.accessibilityLabel = @"button1";
         control;
     });
-    TEST(NSControlTextDidBeginEditingNotification, BSGBreadcrumbTypeUser, @"Control Text Began Edit", @{@"label": @"button1"});
-    TEST(NSControlTextDidEndEditingNotification, BSGBreadcrumbTypeUser, @"Control Text Ended Edit", @{@"label": @"button1"});
+    TEST(NSControlTextDidBeginEditingNotification, RSCBreadcrumbTypeUser, @"Control Text Began Edit", @{@"label": @"button1"});
+    TEST(NSControlTextDidEndEditingNotification, RSCBreadcrumbTypeUser, @"Control Text Ended Edit", @{@"label": @"button1"});
 }
 
 - (void)testNSMenuNotifications {
     self.notificationUserInfo = @{@"MenuItem": [[NSMenuItem alloc] initWithTitle:@"menuAction:" action:nil keyEquivalent:@""]};
-    TEST(NSMenuWillSendActionNotification, BSGBreadcrumbTypeState, @"Menu Will Send Action", @{@"action": @"menuAction:"});
+    TEST(NSMenuWillSendActionNotification, RSCBreadcrumbTypeState, @"Menu Will Send Action", @{@"action": @"menuAction:"});
 }
 
 - (void)testNSTableViewNotifications {
     self.notificationObject = [[NSTableView alloc] init];
-    TEST(NSTableViewSelectionDidChangeNotification, BSGBreadcrumbTypeNavigation, @"TableView Select Change",
+    TEST(NSTableViewSelectionDidChangeNotification, RSCBreadcrumbTypeNavigation, @"TableView Select Change",
          (@{@"selectedColumn": @(-1), @"selectedRow": @(-1)}));
 }
 
 - (void)testNSWindowNotificationsNoData {
-    BSGMockWindow *window = [[BSGMockWindow alloc]  init];
-    window.mockScene = [[BSGMockScene alloc]  init];
-    window.mockViewController = [[BSGMockViewController alloc] init];
+    RSCMockWindow *window = [[RSCMockWindow alloc]  init];
+    window.mockScene = [[RSCMockScene alloc]  init];
+    window.mockViewController = [[RSCMockViewController alloc] init];
     self.notificationObject = window;
 
     NSMutableDictionary *metadata = [[NSMutableDictionary alloc] init];
 
-    TEST(NSWindowDidBecomeKeyNotification, BSGBreadcrumbTypeState, @"Window Became Key", metadata);
-    TEST(NSWindowDidEnterFullScreenNotification, BSGBreadcrumbTypeState, @"Window Entered Full Screen", metadata);
-    TEST(NSWindowDidExitFullScreenNotification, BSGBreadcrumbTypeState, @"Window Exited Full Screen", metadata);
-    TEST(NSWindowWillCloseNotification, BSGBreadcrumbTypeState, @"Window Will Close", metadata);
-    TEST(NSWindowWillMiniaturizeNotification, BSGBreadcrumbTypeState, @"Window Will Miniaturize", metadata);
+    TEST(NSWindowDidBecomeKeyNotification, RSCBreadcrumbTypeState, @"Window Became Key", metadata);
+    TEST(NSWindowDidEnterFullScreenNotification, RSCBreadcrumbTypeState, @"Window Entered Full Screen", metadata);
+    TEST(NSWindowDidExitFullScreenNotification, RSCBreadcrumbTypeState, @"Window Exited Full Screen", metadata);
+    TEST(NSWindowWillCloseNotification, RSCBreadcrumbTypeState, @"Window Will Close", metadata);
+    TEST(NSWindowWillMiniaturizeNotification, RSCBreadcrumbTypeState, @"Window Will Miniaturize", metadata);
 }
 
 - (void)testNSWindowNotificationsWithData {
-    BSGMockWindow *window = [[BSGMockWindow alloc]  init];
-    window.mockScene = [[BSGMockScene alloc]  init];
-    window.mockViewController = [[BSGMockViewController alloc] init];
+    RSCMockWindow *window = [[RSCMockWindow alloc]  init];
+    window.mockScene = [[RSCMockScene alloc]  init];
+    window.mockViewController = [[RSCMockViewController alloc] init];
     self.notificationObject = window;
 
     window.mockDescription = @"Window Description";
@@ -436,17 +436,17 @@
     }
 #endif
 
-    TEST(NSWindowDidBecomeKeyNotification, BSGBreadcrumbTypeState, @"Window Became Key", metadata);
-    TEST(NSWindowDidEnterFullScreenNotification, BSGBreadcrumbTypeState, @"Window Entered Full Screen", metadata);
-    TEST(NSWindowDidExitFullScreenNotification, BSGBreadcrumbTypeState, @"Window Exited Full Screen", metadata);
-    TEST(NSWindowWillCloseNotification, BSGBreadcrumbTypeState, @"Window Will Close", metadata);
-    TEST(NSWindowWillMiniaturizeNotification, BSGBreadcrumbTypeState, @"Window Will Miniaturize", metadata);
+    TEST(NSWindowDidBecomeKeyNotification, RSCBreadcrumbTypeState, @"Window Became Key", metadata);
+    TEST(NSWindowDidEnterFullScreenNotification, RSCBreadcrumbTypeState, @"Window Entered Full Screen", metadata);
+    TEST(NSWindowDidExitFullScreenNotification, RSCBreadcrumbTypeState, @"Window Exited Full Screen", metadata);
+    TEST(NSWindowWillCloseNotification, RSCBreadcrumbTypeState, @"Window Will Close", metadata);
+    TEST(NSWindowWillMiniaturizeNotification, RSCBreadcrumbTypeState, @"Window Will Miniaturize", metadata);
 }
 
 - (void)testNSWorkspaceNotifications {
     self.notificationCenter = self.notificationBreadcrumbs.workspaceNotificationCenter;
-    TEST(NSWorkspaceScreensDidSleepNotification, BSGBreadcrumbTypeState, @"Workspace Screen Slept", @{});
-    TEST(NSWorkspaceScreensDidWakeNotification, BSGBreadcrumbTypeState, @"Workspace Screen Awoke", @{});
+    TEST(NSWorkspaceScreensDidSleepNotification, RSCBreadcrumbTypeState, @"Workspace Screen Slept", @{});
+    TEST(NSWorkspaceScreensDidWakeNotification, RSCBreadcrumbTypeState, @"Workspace Screen Awoke", @{});
 }
 
 #endif

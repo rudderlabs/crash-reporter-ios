@@ -1,19 +1,19 @@
 //
-//  BugsnagEvent+Private.h
-//  Bugsnag
+//  RSCrashReporterEvent+Private.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 23/11/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGDefines.h"
-#import "BSGFeatureFlagStore.h"
-#import "BugsnagInternals.h"
+#import "RSCDefines.h"
+#import "RSCFeatureFlagStore.h"
+#import "RSCrashReporterInternals.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BugsnagEvent ()
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCrashReporterEvent ()
 
 @property (copy, nonatomic) NSString *codeBundleId;
 
@@ -30,22 +30,22 @@ BSG_OBJC_DIRECT_MEMBERS
 @property (readwrite, copy, nullable, nonatomic) NSArray *enabledReleaseStages;
 
 /// The event state (whether the error is handled/unhandled.)
-@property (readwrite, nonatomic) BugsnagHandledState *handledState;
+@property (readwrite, nonatomic) RSCrashReporterHandledState *handledState;
 
-@property (strong, nullable, nonatomic) BugsnagMetadata *metadata;
+@property (strong, nullable, nonatomic) RSCrashReporterMetadata *metadata;
 
 /// The release stage of the application
 @property (readwrite, copy, nullable, nonatomic) NSString *releaseStage;
 
-@property (copy, nullable, nonatomic) BugsnagSession *session;
+@property (copy, nullable, nonatomic) RSCrashReporterSession *session;
 
-/// An array of string representations of BSGErrorType describing the types of stackframe / stacktrace in this error.
+/// An array of string representations of RSCErrorType describing the types of stackframe / stacktrace in this error.
 @property (readonly, nonatomic) NSArray<NSString *> *stacktraceTypes;
 
-/// Usage telemetry info, from BSGTelemetryCreateUsage(), or nil if BSGTelemetryUsage is not enabled.
+/// Usage telemetry info, from RSCTelemetryCreateUsage(), or nil if RSCTelemetryUsage is not enabled.
 @property (readwrite, nullable, nonatomic) NSDictionary *usage;
 
-//@property (readwrite, nonnull, nonatomic) BugsnagUser *user;
+//@property (readwrite, nonnull, nonatomic) RSCrashReporterUser *user;
 
 - (instancetype)initWithKSReport:(NSDictionary *)KSReport;
 

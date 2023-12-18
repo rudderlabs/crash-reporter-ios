@@ -1,27 +1,27 @@
 //
-//  BugsnagThread.h
-//  Bugsnag
+//  RSCrashReporterThread.h
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 01/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-#import <RSCrashReporter/BugsnagDefines.h>
+#import <RSCrashReporter/RSCrashReporterDefines.h>
 
-typedef NS_OPTIONS(NSUInteger, BSGThreadType) {
-    BSGThreadTypeCocoa NS_SWIFT_NAME(cocoa) = 0,
-    BSGThreadTypeReactNativeJs = 1 << 1
+typedef NS_OPTIONS(NSUInteger, RSCThreadType) {
+    RSCThreadTypeCocoa NS_SWIFT_NAME(cocoa) = 0,
+    RSCThreadTypeReactNativeJs = 1 << 1
 };
 
-@class BugsnagStackframe;
+@class RSCrashReporterStackframe;
 
 /**
- * A representation of thread information recorded as part of a BugsnagEvent.
+ * A representation of thread information recorded as part of a RSCrashReporterEvent.
  */
-BUGSNAG_EXTERN
-@interface BugsnagThread : NSObject
+RSCRASHREPORTER_EXTERN
+@interface RSCrashReporterThread : NSObject
 
 /**
  * A unique ID which identifies this thread
@@ -46,12 +46,12 @@ BUGSNAG_EXTERN
 /**
  * Sets a representation of this thread's stacktrace
  */
-@property (copy, nonnull, nonatomic) NSArray<BugsnagStackframe *> *stacktrace;
+@property (copy, nonnull, nonatomic) NSArray<RSCrashReporterStackframe *> *stacktrace;
 
 /**
  * Determines the type of thread based on the originating platform
  * (intended for internal use only)
  */
-@property (nonatomic) BSGThreadType type;
+@property (nonatomic) RSCThreadType type;
 
 @end

@@ -1,17 +1,17 @@
 //
-//  BugsnagSystemInfo.h
-//  Bugsnag
+//  RSCrashReporterSystemInfo.h
+//  RSCrashReporter
 //
 //  Created by Karl Stenerud on 21.09.20.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-#import <RSCrashReporter/BugsnagConfiguration.h>
+#import <RSCrashReporter/RSCrashReporterConfiguration.h>
 
-#import "BSGDefines.h"
-#import "BSGKeys.h"
+#import "RSCDefines.h"
+#import "RSCKeys.h"
 
 #define SYSTEMSTATE_KEY_APP @"app"
 #define SYSTEMSTATE_KEY_DEVICE @"device"
@@ -20,14 +20,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BugsnagSystemState : NSObject
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCrashReporterSystemState : NSObject
 
 @property(readonly,nonatomic) NSDictionary *lastLaunchState;
 @property(readonly,atomic) NSDictionary *currentLaunchState;
 
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithConfiguration:(BugsnagConfiguration *)config;
+- (instancetype)initWithConfiguration:(RSCrashReporterConfiguration *)config;
 
 - (void)setCodeBundleID:(NSString*)codeBundleID;
 

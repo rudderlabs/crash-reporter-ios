@@ -1,9 +1,9 @@
 //
-//  BugsnagMetaData.m
+//  RSCrashReporterMetaData.m
 //
 //  Created by Conrad Irwin on 2014-10-01.
 //
-//  Copyright (c) 2014 Bugsnag, Inc. All rights reserved.
+//  Copyright (c) 2014 RSCrashReporter, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,16 +24,16 @@
 // THE SOFTWARE.
 //
 
-#import "BugsnagMetadata+Private.h"
+#import "RSCrashReporterMetadata+Private.h"
 
-#import "BSGJSONSerialization.h"
-#import "BSGSerialization.h"
-#import "BSGUtils.h"
-#import "BugsnagLogger.h"
+#import "RSCJSONSerialization.h"
+#import "RSCSerialization.h"
+#import "RSCUtils.h"
+#import "RSCrashReporterLogger.h"
 
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BugsnagMetadata ()
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCrashReporterMetadata ()
 
 @property(atomic, readwrite, strong) NSMutableArray *stateEventBlocks;
 
@@ -46,8 +46,8 @@ BSG_OBJC_DIRECT_MEMBERS
 
 // MARK: -
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BugsnagMetadata
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCrashReporterMetadata
 
 - (instancetype)init {
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
@@ -58,7 +58,7 @@ BSG_OBJC_DIRECT_MEMBERS
     if ((self = [super init])) {
         // Ensure that the instantiating dictionary is mutable.
         // Saves checks later.
-        _dictionary = BSGSanitizeDict(dict);
+        _dictionary = RSCSanitizeDict(dict);
         self.stateEventBlocks = [NSMutableArray new];
     }
     if (self.observer) {
@@ -77,7 +77,7 @@ BSG_OBJC_DIRECT_MEMBERS
 
 - (id)copyWithZone:(NSZone *)zone {
     @synchronized(self) {
-        return [[BugsnagMetadata allocWithZone:zone] initWithDictionary:self.dictionary];
+        return [[RSCrashReporterMetadata allocWithZone:zone] initWithDictionary:self.dictionary];
     }
 }
 
@@ -95,7 +95,7 @@ BSG_OBJC_DIRECT_MEMBERS
     }
 }
 
-// MARK: - <BugsnagMetadataStore>
+// MARK: - <RSCrashReporterMetadataStore>
 
 /**
  * Add a single key/value to a metadata Tab/Section.
@@ -124,11 +124,11 @@ BSG_OBJC_DIRECT_MEMBERS
                 if (obj == [NSNull null]) {
                     metadata[key] = nil;
                 } else {
-                    id sanitisedObject = BSGSanitizeObject(obj);
+                    id sanitisedObject = RSCSanitizeObject(obj);
                     if (sanitisedObject) {
                         metadata[key] = sanitisedObject;
                     } else {
-                        bsg_log_err(@"Failed to add metadata: %@ is not JSON serializable.", [obj class]);
+                        rsc_log_err(@"Failed to add metadata: %@ is not JSON serializable.", [obj class]);
                     }
                 }
             }
@@ -191,9 +191,9 @@ BSG_OBJC_DIRECT_MEMBERS
 
 - (void)serialize {
     NSError *error = nil;
-    NSData *data = BSGJSONDataFromDictionary([self dictionary], &error);
+    NSData *data = RSCJSONDataFromDictionary([self dictionary], &error);
     if (!data) {
-        bsg_log_err(@"%s: %@", __FUNCTION__, error);
+        rsc_log_err(@"%s: %@", __FUNCTION__, error);
         return;
     }
     if (self.buffer) {
@@ -208,7 +208,7 @@ BSG_OBJC_DIRECT_MEMBERS
 // Metadata is stored in memory as a JSON encoded C string so that it is accessible at crash time.
 //
 - (void)writeData:(NSData *)data toBuffer:(char **)buffer {
-    char *newbuffer = BSGCStringWithData(data);
+    char *newbuffer = RSCCStringWithData(data);
     if (!newbuffer) {
         return;
     }
@@ -223,7 +223,7 @@ BSG_OBJC_DIRECT_MEMBERS
 - (void)writeData:(NSData *)data toFile:(NSString *)file {
     self.pendingWrite = data;
     
-    dispatch_async(BSGGetFileSystemQueue(), ^{
+    dispatch_async(RSCGetFileSystemQueue(), ^{
         NSData *pendingWrite;
         
         @synchronized (self) {
@@ -236,7 +236,7 @@ BSG_OBJC_DIRECT_MEMBERS
         
         NSError *error = nil;
         if (![pendingWrite writeToFile:(NSString *_Nonnull)file options:NSDataWritingAtomic error:&error]) {
-            bsg_log_err(@"%s: %@", __FUNCTION__, error);
+            rsc_log_err(@"%s: %@", __FUNCTION__, error);
         }
         
         @synchronized (self) {

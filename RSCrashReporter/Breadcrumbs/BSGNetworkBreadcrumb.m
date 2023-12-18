@@ -1,14 +1,14 @@
 //
-//  BSGNetworkBreadcrumb.m
-//  Bugsnag
+//  RSCNetworkBreadcrumb.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 24/08/2022.
-//  Copyright © 2022 Bugsnag Inc. All rights reserved.
+//  Copyright © 2022 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGNetworkBreadcrumb.h"
+#import "RSCNetworkBreadcrumb.h"
 
-BugsnagBreadcrumb * BSGNetworkBreadcrumbWithTaskMetrics(NSURLSessionTask *task, NSURLSessionTaskMetrics *metrics) {
+RSCrashReporterBreadcrumb * RSCNetworkBreadcrumbWithTaskMetrics(NSURLSessionTask *task, NSURLSessionTaskMetrics *metrics) {
     NSURLRequest *request = task.originalRequest ? task.originalRequest : task.currentRequest;
     if (!request) {
         return nil;
@@ -21,8 +21,8 @@ BugsnagBreadcrumb * BSGNetworkBreadcrumbWithTaskMetrics(NSURLSessionTask *task, 
     NSURL *url = request.URL;
     if (url) {
         NSURLComponents *components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:YES];
-        metadata[@"url"] = BSGURLStringForComponents(components);
-        metadata[@"urlParams"] = BSGURLParamsForQueryItems(components.queryItems);
+        metadata[@"url"] = RSCURLStringForComponents(components);
+        metadata[@"urlParams"] = RSCURLParamsForQueryItems(components.queryItems);
     }
 
     if (task.countOfBytesSent) {
@@ -49,14 +49,14 @@ BugsnagBreadcrumb * BSGNetworkBreadcrumbWithTaskMetrics(NSURLSessionTask *task, 
         metadata[@"status"] = @(statusCode);
     }
 
-    BugsnagBreadcrumb *breadcrumb = [BugsnagBreadcrumb new];
+    RSCrashReporterBreadcrumb *breadcrumb = [RSCrashReporterBreadcrumb new];
     breadcrumb.message = message;
     breadcrumb.metadata = metadata;
-    breadcrumb.type = BSGBreadcrumbTypeRequest;
+    breadcrumb.type = RSCBreadcrumbTypeRequest;
     return breadcrumb;
 }
 
-NSDictionary<NSString *, id> * BSGURLParamsForQueryItems(NSArray<NSURLQueryItem *> *queryItems) {
+NSDictionary<NSString *, id> * RSCURLParamsForQueryItems(NSArray<NSURLQueryItem *> *queryItems) {
     if (!queryItems) {
         return nil;
     }
@@ -82,7 +82,7 @@ NSDictionary<NSString *, id> * BSGURLParamsForQueryItems(NSArray<NSURLQueryItem 
     return result;
 }
 
-NSString * BSGURLStringForComponents(NSURLComponents *components) {
+NSString * RSCURLStringForComponents(NSURLComponents *components) {
     if (components.rangeOfQuery.location == NSNotFound) {
         return components.string;
     }

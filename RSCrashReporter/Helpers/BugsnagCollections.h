@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2016 Bugsnag, Inc. All rights reserved.
+//  Copyright (c) 2016 RSCrashReporter, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,21 +26,21 @@ NS_ASSUME_NONNULL_BEGIN
 // MARK: NSArray
 
 /// Returns an array with the object, or an empty array if object is nil.
-NSArray * BSGArrayWithObject(id _Nullable object);
+NSArray * RSCArrayWithObject(id _Nullable object);
 
-void BSGArrayAddIfNonnull(NSMutableArray *array, id _Nullable object);
+void RSCArrayAddIfNonnull(NSMutableArray *array, id _Nullable object);
 
 /// Returns an array containing the results of mapping the given block over the array's elements
-NSArray * BSGArrayMap(NSArray * _Nullable array, id _Nullable (^ transform)(id value));
+NSArray * RSCArrayMap(NSArray * _Nullable array, id _Nullable (^ transform)(id value));
 
 /// Returns a new array containing the elements starting at position `index`, or
 /// an empty array if `index` is beyond the array's range range of elements.
-NSArray * BSGArraySubarrayFromIndex(NSArray *array, NSUInteger index);
+NSArray * RSCArraySubarrayFromIndex(NSArray *array, NSUInteger index);
 
 // MARK: - NSDictionary
 
 /// Returns a dictionary containing the key and object, or an empty dictionary if the object is nil.
-NSDictionary * BSGDictionaryWithKeyAndObject(NSString *key, id _Nullable object);
+NSDictionary * RSCDictionaryWithKeyAndObject(NSString *key, id _Nullable object);
 
 /**
  *  Merge values from source dictionary with destination
@@ -48,29 +48,29 @@ NSDictionary * BSGDictionaryWithKeyAndObject(NSString *key, id _Nullable object)
  *  @param source a dictionary
  *  @param destination a dictionary or nil
  */
-NSDictionary *BSGDictMerge(NSDictionary *source, NSDictionary *destination);
+NSDictionary *RSCDictMerge(NSDictionary *source, NSDictionary *destination);
 
 /// Returns the dictionary if it contains only valid JSON, or a new dictionary
 /// where invalid values have been replaced by their descriptions.
 /// Any dictionary keys that are not strings will be ignored.
-NSDictionary * BSGJSONDictionary(NSDictionary *dictionary);
+NSDictionary * RSCJSONDictionary(NSDictionary *dictionary);
 
 // MARK: - NSSet
 
-void BSGSetAddIfNonnull(NSMutableSet *array, id _Nullable object);
+void RSCSetAddIfNonnull(NSMutableSet *array, id _Nullable object);
 
 // MARK: - Deserialization
 
-NSDictionary * _Nullable BSGDeserializeDict(id _Nullable rawValue);
+NSDictionary * _Nullable RSCDeserializeDict(id _Nullable rawValue);
 
-id _Nullable BSGDeserializeObject(id _Nullable rawValue, id _Nullable (^ deserializer)(NSDictionary * _Nonnull dict));
+id _Nullable RSCDeserializeObject(id _Nullable rawValue, id _Nullable (^ deserializer)(NSDictionary * _Nonnull dict));
 
-id _Nullable BSGDeserializeArrayOfObjects(id _Nullable rawValue, id _Nullable (^ deserializer)(NSDictionary * _Nonnull dict));
+id _Nullable RSCDeserializeArrayOfObjects(id _Nullable rawValue, id _Nullable (^ deserializer)(NSDictionary * _Nonnull dict));
 
-NSString * _Nullable BSGDeserializeString(id _Nullable rawValue);
+NSString * _Nullable RSCDeserializeString(id _Nullable rawValue);
 
-NSDate * _Nullable BSGDeserializeDate(id _Nullable rawValue);
+NSDate * _Nullable RSCDeserializeDate(id _Nullable rawValue);
 
-NSNumber * _Nullable BSGDeserializeNumber(id  _Nullable rawValue);
+NSNumber * _Nullable RSCDeserializeNumber(id  _Nullable rawValue);
 
 NS_ASSUME_NONNULL_END

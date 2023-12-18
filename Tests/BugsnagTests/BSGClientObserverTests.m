@@ -1,34 +1,34 @@
 //
-//  BSGClientObserverTests.m
+//  RSCClientObserverTests.m
 //  Tests
 //
 //  Created by Jamie Lynch on 18/03/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
 #import "RSCrashReporter.h"
-#import "BugsnagClient+Private.h"
-#import "BugsnagConfiguration.h"
-#import "BugsnagTestConstants.h"
-#import "BugsnagMetadata+Private.h"
-#import "BugsnagUser+Private.h"
+#import "RSCrashReporterClient+Private.h"
+#import "RSCrashReporterConfiguration.h"
+#import "RSCrashReporterTestConstants.h"
+#import "RSCrashReporterMetadata+Private.h"
+#import "RSCrashReporterUser+Private.h"
 
-@interface BSGClientObserverTests : XCTestCase
-@property BugsnagClient *client;
-@property BSGClientObserverEvent event;
+@interface RSCClientObserverTests : XCTestCase
+@property RSCrashReporterClient *client;
+@property RSCClientObserverEvent event;
 @property id value;
 @end
 
-@implementation BSGClientObserverTests
+@implementation RSCClientObserverTests
 
 - (void)setUp {
     [RSCrashReporter startWithDelegate:nil];
     self.client = RSCrashReporter.client;
 
     __weak __typeof__(self) weakSelf = self;
-    self.client.observer = ^(BSGClientObserverEvent event, id value) {
+    self.client.observer = ^(RSCClientObserverEvent event, id value) {
         weakSelf.event = event;
         weakSelf.value = value;
     };
@@ -37,7 +37,7 @@
 - (void)testUserUpdate {
     [self.client setUser:@"123" withEmail:@"test@example.com" andName:@"Jamie"];
 
-    XCTAssertEqual(self.event, BSGClientObserverUpdateUser);
+    XCTAssertEqual(self.event, RSCClientObserverUpdateUser);
 
     NSDictionary *dict = [self.value toJson];
     XCTAssertEqualObjects(@"123", dict[@"id"]);
@@ -47,7 +47,7 @@
 
 - (void)testContextUpdate {
     [self.client setContext:@"Foo"];
-    XCTAssertEqual(self.event, BSGClientObserverUpdateContext);
+    XCTAssertEqual(self.event, RSCClientObserverUpdateContext);
     XCTAssertEqualObjects(self.value, @"Foo");
 }
 
@@ -74,25 +74,25 @@
 
     __block NSDictionary *user;
     __block NSString *context;
-    __block BugsnagMetadata *metadata;
-    __block BugsnagFeatureFlag *featureFlag;
+    __block RSCrashReporterMetadata *metadata;
+    __block RSCrashReporterFeatureFlag *featureFlag;
 
-    BSGClientObserver observer = ^(BSGClientObserverEvent event, id value) {
+    RSCClientObserver observer = ^(RSCClientObserverEvent event, id value) {
         switch (event) {
-            case BSGClientObserverAddFeatureFlag:
+            case RSCClientObserverAddFeatureFlag:
                 featureFlag = value;
                 break;
-            case BSGClientObserverClearFeatureFlag:
-                XCTFail(@"BSGClientObserverClearFeatureFlag should not be sent when setting observer");
+            case RSCClientObserverClearFeatureFlag:
+                XCTFail(@"RSCClientObserverClearFeatureFlag should not be sent when setting observer");
                 break;
-            case BSGClientObserverUpdateContext:
+            case RSCClientObserverUpdateContext:
                 context = value;
                 break;
-            case BSGClientObserverUpdateMetadata:
+            case RSCClientObserverUpdateMetadata:
                 metadata = value;
                 break;
-            case BSGClientObserverUpdateUser:
-                user = [(BugsnagUser *)value toJson];
+            case RSCClientObserverUpdateUser:
+                user = [(RSCrashReporterUser *)value toJson];
                 break;
         }
     };
@@ -110,27 +110,27 @@
 }
 
 - (void)testFeatureFlags {
-    [self.client addFeatureFlags:@[[BugsnagFeatureFlag flagWithName:@"foo" variant:@"bar"]]];
-    XCTAssertEqual(self.event, BSGClientObserverAddFeatureFlag);
+    [self.client addFeatureFlags:@[[RSCrashReporterFeatureFlag flagWithName:@"foo" variant:@"bar"]]];
+    XCTAssertEqual(self.event, RSCClientObserverAddFeatureFlag);
     XCTAssertEqualObjects([self.value name], @"foo");
     XCTAssertEqualObjects([self.value variant], @"bar");
     
     [self.client addFeatureFlagWithName:@"baz"];
-    XCTAssertEqual(self.event, BSGClientObserverAddFeatureFlag);
+    XCTAssertEqual(self.event, RSCClientObserverAddFeatureFlag);
     XCTAssertEqualObjects([self.value name], @"baz");
     XCTAssertNil([self.value variant]);
     
     [self.client addFeatureFlagWithName:@"baz" variant:@"vvv"];
-    XCTAssertEqual(self.event, BSGClientObserverAddFeatureFlag);
+    XCTAssertEqual(self.event, RSCClientObserverAddFeatureFlag);
     XCTAssertEqualObjects([self.value name], @"baz");
     XCTAssertEqualObjects([self.value variant], @"vvv");
     
     [self.client clearFeatureFlagWithName:@"baz"];
-    XCTAssertEqual(self.event, BSGClientObserverClearFeatureFlag);
+    XCTAssertEqual(self.event, RSCClientObserverClearFeatureFlag);
     XCTAssertEqualObjects(self.value, @"baz");
     
     [self.client clearFeatureFlags];
-    XCTAssertEqual(self.event, BSGClientObserverClearFeatureFlag);
+    XCTAssertEqual(self.event, RSCClientObserverClearFeatureFlag);
     XCTAssertNil(self.value);
 }
 

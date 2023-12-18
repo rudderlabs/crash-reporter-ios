@@ -1,5 +1,5 @@
 //
-//  BSG_KSCrashReportFields.h
+//  RSC_KSCrashReportFields.h
 //
 //  Created by Karl Stenerud on 2012-10-07.
 //
@@ -24,146 +24,146 @@
 // THE SOFTWARE.
 //
 
-#ifndef HDR_BSG_KSCrashReportFields_h
-#define HDR_BSG_KSCrashReportFields_h
+#ifndef HDR_RSC_KSCrashReportFields_h
+#define HDR_RSC_KSCrashReportFields_h
 
 #pragma mark - Report Types -
 
-#define BSG_KSCrashReportType_Minimal "minimal"
-#define BSG_KSCrashReportType_Standard "standard"
-#define BSG_KSCrashReportType_Custom "custom"
+#define RSC_KSCrashReportType_Minimal "minimal"
+#define RSC_KSCrashReportType_Standard "standard"
+#define RSC_KSCrashReportType_Custom "custom"
 
 #pragma mark - Exception Types -
 
-#define BSG_KSCrashExcType_CPPException "cpp_exception"
-#define BSG_KSCrashExcType_Mach "mach"
-#define BSG_KSCrashExcType_NSException "nsexception"
-#define BSG_KSCrashExcType_Signal "signal"
-#define BSG_KSCrashExcType_User "user"
+#define RSC_KSCrashExcType_CPPException "cpp_exception"
+#define RSC_KSCrashExcType_Mach "mach"
+#define RSC_KSCrashExcType_NSException "nsexception"
+#define RSC_KSCrashExcType_Signal "signal"
+#define RSC_KSCrashExcType_User "user"
 
 #pragma mark - Common -
 
-#define BSG_KSCrashField_Address "address"
-#define BSG_KSCrashField_Contents "contents"
-#define BSG_KSCrashField_Exception "exception"
-#define BSG_KSCrashField_FirstObject "first_object"
-#define BSG_KSCrashField_Index "index"
-#define BSG_KSCrashField_Ivars "ivars"
-#define BSG_KSCrashField_Language "language"
-#define BSG_KSCrashField_Name "name"
-#define BSG_KSCrashField_Type "type"
-#define BSG_KSCrashField_UserInfo "userInfo"
-#define BSG_KSCrashField_UUID "uuid"
+#define RSC_KSCrashField_Address "address"
+#define RSC_KSCrashField_Contents "contents"
+#define RSC_KSCrashField_Exception "exception"
+#define RSC_KSCrashField_FirstObject "first_object"
+#define RSC_KSCrashField_Index "index"
+#define RSC_KSCrashField_Ivars "ivars"
+#define RSC_KSCrashField_Language "language"
+#define RSC_KSCrashField_Name "name"
+#define RSC_KSCrashField_Type "type"
+#define RSC_KSCrashField_UserInfo "userInfo"
+#define RSC_KSCrashField_UUID "uuid"
 
-#define BSG_KSCrashField_Error "error"
-#define BSG_KSCrashField_JSONData "json_data"
+#define RSC_KSCrashField_Error "error"
+#define RSC_KSCrashField_JSONData "json_data"
 
 #pragma mark - Notable Address -
 
-#define BSG_KSCrashField_Class "class"
-#define BSG_KSCrashField_LastDeallocObject "last_deallocated_obj"
+#define RSC_KSCrashField_Class "class"
+#define RSC_KSCrashField_LastDeallocObject "last_deallocated_obj"
 
 #pragma mark - Backtrace -
 
-#define BSG_KSCrashField_InstructionAddr "instruction_addr"
-#define BSG_KSCrashField_LineOfCode "line_of_code"
-#define BSG_KSCrashField_ObjectAddr "object_addr"
-#define BSG_KSCrashField_ObjectName "object_name"
-#define BSG_KSCrashField_SymbolAddr "symbol_addr"
-#define BSG_KSCrashField_SymbolName "symbol_name"
+#define RSC_KSCrashField_InstructionAddr "instruction_addr"
+#define RSC_KSCrashField_LineOfCode "line_of_code"
+#define RSC_KSCrashField_ObjectAddr "object_addr"
+#define RSC_KSCrashField_ObjectName "object_name"
+#define RSC_KSCrashField_SymbolAddr "symbol_addr"
+#define RSC_KSCrashField_SymbolName "symbol_name"
 
 #pragma mark - Stack Dump -
 
-#define BSG_KSCrashField_DumpEnd "dump_end"
-#define BSG_KSCrashField_DumpStart "dump_start"
-#define BSG_KSCrashField_GrowDirection "grow_direction"
-#define BSG_KSCrashField_Overflow "overflow"
-#define BSG_KSCrashField_StackPtr "stack_pointer"
+#define RSC_KSCrashField_DumpEnd "dump_end"
+#define RSC_KSCrashField_DumpStart "dump_start"
+#define RSC_KSCrashField_GrowDirection "grow_direction"
+#define RSC_KSCrashField_Overflow "overflow"
+#define RSC_KSCrashField_StackPtr "stack_pointer"
 
 #pragma mark - Thread Dump -
 
-#define BSG_KSCrashField_Backtrace "backtrace"
-#define BSG_KSCrashField_Basic "basic"
-#define BSG_KSCrashField_Crashed "crashed"
-#define BSG_KSCrashField_CrashInfoMessage "crash_info_message"
-#define BSG_KSCrashField_CurrentThread "current_thread"
-#define BSG_KSCrashField_DispatchQueue "dispatch_queue"
-#define BSG_KSCrashField_Registers "registers"
-#define BSG_KSCrashField_Skipped "skipped"
-#define BSG_KSCrashField_Stack "stack"
+#define RSC_KSCrashField_Backtrace "backtrace"
+#define RSC_KSCrashField_Basic "basic"
+#define RSC_KSCrashField_Crashed "crashed"
+#define RSC_KSCrashField_CrashInfoMessage "crash_info_message"
+#define RSC_KSCrashField_CurrentThread "current_thread"
+#define RSC_KSCrashField_DispatchQueue "dispatch_queue"
+#define RSC_KSCrashField_Registers "registers"
+#define RSC_KSCrashField_Skipped "skipped"
+#define RSC_KSCrashField_Stack "stack"
 
 #pragma mark - Binary Image -
 
-#define BSG_KSCrashField_CPUSubType "cpu_subtype"
-#define BSG_KSCrashField_CPUType "cpu_type"
-#define BSG_KSCrashField_ImageAddress "image_addr"
-#define BSG_KSCrashField_ImageVmAddress "image_vmaddr"
-#define BSG_KSCrashField_ImageSize "image_size"
+#define RSC_KSCrashField_CPUSubType "cpu_subtype"
+#define RSC_KSCrashField_CPUType "cpu_type"
+#define RSC_KSCrashField_ImageAddress "image_addr"
+#define RSC_KSCrashField_ImageVmAddress "image_vmaddr"
+#define RSC_KSCrashField_ImageSize "image_size"
 
 #pragma mark - Memory -
 
-#define BSG_KSCrashField_Free "free"
-#define BSG_KSCrashField_Size "size"
+#define RSC_KSCrashField_Free "free"
+#define RSC_KSCrashField_Size "size"
 
 #pragma mark - Error -
 
-#define BSG_KSCrashField_Backtrace "backtrace"
-#define BSG_KSCrashField_Code "code"
-#define BSG_KSCrashField_CodeName "code_name"
-#define BSG_KSCrashField_CPPException "cpp_exception"
-#define BSG_KSCrashField_ExceptionName "exception_name"
-#define BSG_KSCrashField_Mach "mach"
-#define BSG_KSCrashField_NSException "nsexception"
-#define BSG_KSCrashField_Reason "reason"
-#define BSG_KSCrashField_Signal "signal"
-#define BSG_KSCrashField_Subcode "subcode"
-#define BSG_KSCrashField_UserReported "user_reported"
-#define BSG_KSCrashField_Overrides "overrides"
-#define BSG_KSCrashField_EventJson "event"
-#define BSG_KSCrashField_HandledState "handledState"
-#define BSG_KSCrashField_Metadata "metaData"
-#define BSG_KSCrashField_State "state"
-#define BSG_KSCrashField_Config "config"
-#define BSG_KSCrashField_DiscardDepth "depth"
+#define RSC_KSCrashField_Backtrace "backtrace"
+#define RSC_KSCrashField_Code "code"
+#define RSC_KSCrashField_CodeName "code_name"
+#define RSC_KSCrashField_CPPException "cpp_exception"
+#define RSC_KSCrashField_ExceptionName "exception_name"
+#define RSC_KSCrashField_Mach "mach"
+#define RSC_KSCrashField_NSException "nsexception"
+#define RSC_KSCrashField_Reason "reason"
+#define RSC_KSCrashField_Signal "signal"
+#define RSC_KSCrashField_Subcode "subcode"
+#define RSC_KSCrashField_UserReported "user_reported"
+#define RSC_KSCrashField_Overrides "overrides"
+#define RSC_KSCrashField_EventJson "event"
+#define RSC_KSCrashField_HandledState "handledState"
+#define RSC_KSCrashField_Metadata "metaData"
+#define RSC_KSCrashField_State "state"
+#define RSC_KSCrashField_Config "config"
+#define RSC_KSCrashField_DiscardDepth "depth"
 
 #pragma mark - Process State -
 
-#define BSG_KSCrashField_LastDeallocedNSException "last_dealloced_nsexception"
-#define BSG_KSCrashField_ProcessState "process"
+#define RSC_KSCrashField_LastDeallocedNSException "last_dealloced_nsexception"
+#define RSC_KSCrashField_ProcessState "process"
 
 #pragma mark - App Stats -
 
-#define BSG_KSCrashField_ActiveTimeSinceLaunch "active_time_since_launch"
-#define BSG_KSCrashField_AppInFG "application_in_foreground"
-#define BSG_KSCrashField_BGTimeSinceLaunch "background_time_since_launch"
+#define RSC_KSCrashField_ActiveTimeSinceLaunch "active_time_since_launch"
+#define RSC_KSCrashField_AppInFG "application_in_foreground"
+#define RSC_KSCrashField_BGTimeSinceLaunch "background_time_since_launch"
 
 #pragma mark - Report -
 
-#define BSG_KSCrashField_Crash "crash"
-#define BSG_KSCrashField_ID "id"
-#define BSG_KSCrashField_ProcessName "process_name"
-#define BSG_KSCrashField_Report "report"
-#define BSG_KSCrashField_Timestamp "timestamp"
-#define BSG_KSCrashField_Timestamp_Millis "timestamp_millis"
-#define BSG_KSCrashField_Version "version"
+#define RSC_KSCrashField_Crash "crash"
+#define RSC_KSCrashField_ID "id"
+#define RSC_KSCrashField_ProcessName "process_name"
+#define RSC_KSCrashField_Report "report"
+#define RSC_KSCrashField_Timestamp "timestamp"
+#define RSC_KSCrashField_Timestamp_Millis "timestamp_millis"
+#define RSC_KSCrashField_Version "version"
 
 #pragma mark Minimal
-#define BSG_KSCrashField_CrashedThread "crashed_thread"
+#define RSC_KSCrashField_CrashedThread "crashed_thread"
 
 #pragma mark Standard
-#define BSG_KSCrashField_AppStats "application_stats"
-#define BSG_KSCrashField_BinaryImages "binary_images"
-#define BSG_KSCrashField_Disk "disk"
-#define BSG_KSCrashField_SystemAtCrash "system_atcrash"
-#define BSG_KSCrashField_System "system"
-#define BSG_KSCrashField_Memory "memory"
-#define BSG_KSCrashField_Threads "threads"
-#define BSG_KSCrashField_User "user"
-#define BSG_KSCrashField_UserAtCrash "user_atcrash"
-#define BSG_KSCrashField_OnCrashMetadataSectionName "onCrash"
+#define RSC_KSCrashField_AppStats "application_stats"
+#define RSC_KSCrashField_BinaryImages "binary_images"
+#define RSC_KSCrashField_Disk "disk"
+#define RSC_KSCrashField_SystemAtCrash "system_atcrash"
+#define RSC_KSCrashField_System "system"
+#define RSC_KSCrashField_Memory "memory"
+#define RSC_KSCrashField_Threads "threads"
+#define RSC_KSCrashField_User "user"
+#define RSC_KSCrashField_UserAtCrash "user_atcrash"
+#define RSC_KSCrashField_OnCrashMetadataSectionName "onCrash"
 
 #pragma mark Incomplete
-#define BSG_KSCrashField_Incomplete "incomplete"
-#define BSG_KSCrashField_RecrashReport "recrash_report"
+#define RSC_KSCrashField_Incomplete "incomplete"
+#define RSC_KSCrashField_RecrashReport "recrash_report"
 
 #endif

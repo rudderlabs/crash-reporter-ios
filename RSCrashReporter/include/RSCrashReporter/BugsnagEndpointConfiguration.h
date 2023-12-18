@@ -1,24 +1,24 @@
 //
-//  BugsnagEndpointConfiguration.h
-//  Bugsnag
+//  RSCrashReporterEndpointConfiguration.h
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 15/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-#import <RSCrashReporter/BugsnagDefines.h>
+#import <RSCrashReporter/RSCrashReporterDefines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Set the endpoints to send data to. By default we'll send error reports to
  * https://notify.bugsnag.com, and sessions to https://sessions.bugsnag.com, but you can
- * override this if you are using Bugsnag Enterprise to point to your own Bugsnag endpoints.
+ * override this if you are using RSCrashReporter Enterprise to point to your own RSCrashReporter endpoints.
  */
-BUGSNAG_EXTERN
-@interface BugsnagEndpointConfiguration : NSObject
+RSCRASHREPORTER_EXTERN
+@interface RSCrashReporterEndpointConfiguration : NSObject
 
 /**
  * Configures the endpoint to which events should be sent

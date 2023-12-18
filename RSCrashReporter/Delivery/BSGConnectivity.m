@@ -1,9 +1,9 @@
 //
-//  BSGConnectivity.m
+//  RSCConnectivity.m
 //
 //  Created by Jamie Lynch on 2017-09-04.
 //
-//  Copyright (c) 2017 Bugsnag, Inc. All rights reserved.
+//  Copyright (c) 2017 RSCrashReporter, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,28 +24,28 @@
 // THE SOFTWARE.
 //
 
-#import "BSGConnectivity.h"
+#import "RSCConnectivity.h"
 #import "RSCrashReporter.h"
 
-#if BSG_HAVE_REACHABILITY
+#if RSC_HAVE_REACHABILITY
 
 static const SCNetworkReachabilityFlags kSCNetworkReachabilityFlagsUninitialized = UINT32_MAX;
 
-static SCNetworkReachabilityRef bsg_reachability_ref;
-static BSGConnectivityChangeBlock bsg_reachability_change_block;
-static SCNetworkReachabilityFlags bsg_current_reachability_state = kSCNetworkReachabilityFlagsUninitialized;
+static SCNetworkReachabilityRef rsc_reachability_ref;
+static RSCConnectivityChangeBlock rsc_reachability_change_block;
+static SCNetworkReachabilityFlags rsc_current_reachability_state = kSCNetworkReachabilityFlagsUninitialized;
 
-static NSString *const BSGConnectivityCellular = @"cellular";
-static NSString *const BSGConnectivityWiFi = @"wifi";
-static NSString *const BSGConnectivityNone = @"none";
+static NSString *const RSCConnectivityCellular = @"cellular";
+static NSString *const RSCConnectivityWiFi = @"wifi";
+static NSString *const RSCConnectivityNone = @"none";
 
 /**
  * Check whether the connectivity change should be noted or ignored.
  *
  * @return YES if the connectivity change should be reported
  */
-BOOL BSGConnectivityShouldReportChange(SCNetworkReachabilityFlags flags) {
-    #if BSG_HAVE_REACHABILITY_WWAN
+BOOL RSCConnectivityShouldReportChange(SCNetworkReachabilityFlags flags) {
+    #if RSC_HAVE_REACHABILITY_WWAN
         // kSCNetworkReachabilityFlagsIsWWAN does not exist on macOS
         const SCNetworkReachabilityFlags importantFlags = kSCNetworkReachabilityFlagsIsWWAN | kSCNetworkReachabilityFlagsReachable;
     #else
@@ -54,16 +54,16 @@ BOOL BSGConnectivityShouldReportChange(SCNetworkReachabilityFlags flags) {
     __block BOOL shouldReport = YES;
     // Check if the reported state is different from the last known state (if any)
     SCNetworkReachabilityFlags newFlags = flags & importantFlags;
-    SCNetworkReachabilityFlags oldFlags = bsg_current_reachability_state & importantFlags;
+    SCNetworkReachabilityFlags oldFlags = rsc_current_reachability_state & importantFlags;
     if (newFlags != oldFlags) {
         // When first subscribing to be notified of changes, the callback is
         // invoked immmediately even if nothing has changed. So this block
         // ignores the very first check, reporting all others.
-        if (bsg_current_reachability_state == kSCNetworkReachabilityFlagsUninitialized) {
+        if (rsc_current_reachability_state == kSCNetworkReachabilityFlagsUninitialized) {
             shouldReport = NO;
         }
         // Cache the reachability state to report the previous value representation
-        bsg_current_reachability_state = flags;
+        rsc_current_reachability_state = flags;
     } else {
         shouldReport = NO;
     }
@@ -73,14 +73,14 @@ BOOL BSGConnectivityShouldReportChange(SCNetworkReachabilityFlags flags) {
 /**
  * Textual representation of a connection type
  */
-NSString *BSGConnectivityFlagRepresentation(SCNetworkReachabilityFlags flags) {
+NSString *RSCConnectivityFlagRepresentation(SCNetworkReachabilityFlags flags) {
     BOOL connected = (flags & kSCNetworkReachabilityFlagsReachable) != 0;
-    #if BSG_HAVE_REACHABILITY_WWAN
+    #if RSC_HAVE_REACHABILITY_WWAN
         return connected
-            ? ((flags & kSCNetworkReachabilityFlagsIsWWAN) ? BSGConnectivityCellular : BSGConnectivityWiFi)
-            : BSGConnectivityNone;
+            ? ((flags & kSCNetworkReachabilityFlagsIsWWAN) ? RSCConnectivityCellular : RSCConnectivityWiFi)
+            : RSCConnectivityNone;
     #else
-        return connected ? BSGConnectivityWiFi : BSGConnectivityNone;
+        return connected ? RSCConnectivityWiFi : RSCConnectivityNone;
     #endif
 }
 
@@ -88,36 +88,36 @@ NSString *BSGConnectivityFlagRepresentation(SCNetworkReachabilityFlags flags) {
  * Callback invoked by SCNetworkReachability, which calls an Objective-C block
  * that handles the connection change.
  */
-void BSGConnectivityCallback(__unused SCNetworkReachabilityRef target,
+void RSCConnectivityCallback(__unused SCNetworkReachabilityRef target,
                              SCNetworkReachabilityFlags flags,
                              __unused void *info)
 {
-    if (bsg_reachability_change_block && BSGConnectivityShouldReportChange(flags)) {
+    if (rsc_reachability_change_block && RSCConnectivityShouldReportChange(flags)) {
         BOOL connected = (flags & kSCNetworkReachabilityFlagsReachable) != 0;
-        bsg_reachability_change_block(connected, BSGConnectivityFlagRepresentation(flags));
+        rsc_reachability_change_block(connected, RSCConnectivityFlagRepresentation(flags));
     }
 }
 
-@implementation BSGConnectivity
+@implementation RSCConnectivity
 
-+ (void)monitorURL:(NSURL *)URL usingCallback:(BSGConnectivityChangeBlock)block {
++ (void)monitorURL:(NSURL *)URL usingCallback:(RSCConnectivityChangeBlock)block {
     static dispatch_once_t once_t;
     static dispatch_queue_t reachabilityQueue;
     dispatch_once(&once_t, ^{
         reachabilityQueue = dispatch_queue_create("com.bugsnag.cocoa.connectivity", DISPATCH_QUEUE_SERIAL);
     });
 
-    bsg_reachability_change_block = block;
+    rsc_reachability_change_block = block;
 
     const char *nodename = URL.host.UTF8String;
     if (!nodename || ![self isValidHostname:@(nodename)]) {
         return;
     }
 
-    bsg_reachability_ref = SCNetworkReachabilityCreateWithName(NULL, nodename);
-    if (bsg_reachability_ref) { // Can be null if a bad hostname was specified
-        SCNetworkReachabilitySetCallback(bsg_reachability_ref, BSGConnectivityCallback, NULL);
-        SCNetworkReachabilitySetDispatchQueue(bsg_reachability_ref, reachabilityQueue);
+    rsc_reachability_ref = SCNetworkReachabilityCreateWithName(NULL, nodename);
+    if (rsc_reachability_ref) { // Can be null if a bad hostname was specified
+        SCNetworkReachabilitySetCallback(rsc_reachability_ref, RSCConnectivityCallback, NULL);
+        SCNetworkReachabilitySetDispatchQueue(rsc_reachability_ref, reachabilityQueue);
     }
 }
 
@@ -135,12 +135,12 @@ void BSGConnectivityCallback(__unused SCNetworkReachabilityRef target,
 }
 
 + (void)stopMonitoring {
-    bsg_reachability_change_block = nil;
-    if (bsg_reachability_ref) {
-        SCNetworkReachabilitySetCallback(bsg_reachability_ref, NULL, NULL);
-        SCNetworkReachabilitySetDispatchQueue(bsg_reachability_ref, NULL);
+    rsc_reachability_change_block = nil;
+    if (rsc_reachability_ref) {
+        SCNetworkReachabilitySetCallback(rsc_reachability_ref, NULL, NULL);
+        SCNetworkReachabilitySetDispatchQueue(rsc_reachability_ref, NULL);
     }
-    bsg_current_reachability_state = kSCNetworkReachabilityFlagsUninitialized;
+    rsc_current_reachability_state = kSCNetworkReachabilityFlagsUninitialized;
 }
 
 @end

@@ -1,32 +1,32 @@
 //
-//  BugsnagError.h
-//  Bugsnag
+//  RSCrashReporterError.h
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 01/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-#import <RSCrashReporter/BugsnagDefines.h>
+#import <RSCrashReporter/RSCrashReporterDefines.h>
 
-@class BugsnagStackframe;
+@class RSCrashReporterStackframe;
 
 /**
  * Denote which platform or runtime the Error occurred in.
  */
-typedef NS_OPTIONS(NSUInteger, BSGErrorType) {
-    BSGErrorTypeCocoa NS_SWIFT_NAME(cocoa), // Swift won't bring in the zeroeth option by default
-    BSGErrorTypeC NS_SWIFT_NAME(c), // Fix Swift auto-capitalisation
-    BSGErrorTypeReactNativeJs,
-    BSGErrorTypeCSharp,
+typedef NS_OPTIONS(NSUInteger, RSCErrorType) {
+    RSCErrorTypeCocoa NS_SWIFT_NAME(cocoa), // Swift won't bring in the zeroeth option by default
+    RSCErrorTypeC NS_SWIFT_NAME(c), // Fix Swift auto-capitalisation
+    RSCErrorTypeReactNativeJs,
+    RSCErrorTypeCSharp,
 };
 
 /**
  * An Error represents information extracted from an NSError, NSException, or other error source.
  */
-BUGSNAG_EXTERN
-@interface BugsnagError : NSObject
+RSCRASHREPORTER_EXTERN
+@interface RSCrashReporterError : NSObject
 
 /**
  * The class of the error generating the report
@@ -41,11 +41,11 @@ BUGSNAG_EXTERN
 /**
  * Sets a representation of this error's stacktrace
  */
-@property (copy, nonnull, nonatomic) NSArray<BugsnagStackframe *> *stacktrace;
+@property (copy, nonnull, nonatomic) NSArray<RSCrashReporterStackframe *> *stacktrace;
 
 /**
  * The type of the captured error
  */
-@property (nonatomic) BSGErrorType type;
+@property (nonatomic) RSCErrorType type;
 
 @end

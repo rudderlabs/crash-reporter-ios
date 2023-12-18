@@ -1,5 +1,5 @@
 //
-//  BSG_KSCrash.m
+//  RSC_KSCrash.m
 //
 //  Created by Karl Stenerud on 2012-01-28.
 //
@@ -24,46 +24,46 @@
 // THE SOFTWARE.
 //
 
-#import "BSG_KSCrash.h"
+#import "RSC_KSCrash.h"
 
-#import "BSGAppKit.h"
-#import "BSGDefines.h"
-#import "BSGUIKit.h"
-#import "BSGWatchKit.h"
-#import "BSG_KSCrashC.h"
-#import "BSG_KSCrashIdentifier.h"
+#import "RSCAppKit.h"
+#import "RSCDefines.h"
+#import "RSCUIKit.h"
+#import "RSCWatchKit.h"
+#import "RSC_KSCrashC.h"
+#import "RSC_KSCrashIdentifier.h"
 
 // ============================================================================
 #pragma mark - Constants -
 // ============================================================================
 
-#define BSG_kCrashStateFilenameSuffix "-CrashState.json"
+#define RSC_kCrashStateFilenameSuffix "-CrashState.json"
 
-@implementation BSG_KSCrash
+@implementation RSC_KSCrash
 
-+ (BSG_KSCrash *)sharedInstance {
++ (RSC_KSCrash *)sharedInstance {
     static id sharedInstance;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        bsg_kscrash_init();
+        rsc_kscrash_init();
         sharedInstance = [[self alloc] init];
     });
     return sharedInstance;
 }
 
-- (BSG_KSCrashType)install:(BSG_KSCrashType)crashTypes directory:(NSString *)directory {
-    bsg_kscrash_generate_report_initialize(directory.fileSystemRepresentation);
+- (RSC_KSCrashType)install:(RSC_KSCrashType)crashTypes directory:(NSString *)directory {
+    rsc_kscrash_generate_report_initialize(directory.fileSystemRepresentation);
     NSString *nextCrashID = [NSUUID UUID].UUIDString;
-    char *crashReportPath = bsg_kscrash_generate_report_path(nextCrashID.UTF8String, false);
-    char *recrashReportPath = bsg_kscrash_generate_report_path(nextCrashID.UTF8String, true);
+    char *crashReportPath = rsc_kscrash_generate_report_path(nextCrashID.UTF8String, false);
+    char *recrashReportPath = rsc_kscrash_generate_report_path(nextCrashID.UTF8String, true);
     NSString *stateFilePrefix = [[NSBundle mainBundle] infoDictionary][@"CFBundleName"]
     /* Not all processes have an Info.plist */ ?: NSProcessInfo.processInfo.processName;
     NSString *stateFilePath = [directory stringByAppendingPathComponent:
-                               [stateFilePrefix stringByAppendingString:@BSG_kCrashStateFilenameSuffix]];
+                               [stateFilePrefix stringByAppendingString:@RSC_kCrashStateFilenameSuffix]];
     
-    bsg_kscrash_setHandlingCrashTypes(crashTypes);
+    rsc_kscrash_setHandlingCrashTypes(crashTypes);
     
-    BSG_KSCrashType installedCrashTypes = bsg_kscrash_install(
+    RSC_KSCrashType installedCrashTypes = rsc_kscrash_install(
         crashReportPath, recrashReportPath,
         [stateFilePath UTF8String], [nextCrashID UTF8String]);
     
@@ -125,25 +125,25 @@
 // ============================================================================
 
 - (void)applicationDidBecomeActive {
-    bsg_kscrashstate_notifyAppInForeground(true);
+    rsc_kscrashstate_notifyAppInForeground(true);
 }
 
 - (void)applicationWillResignActive {
-    bsg_kscrashstate_notifyAppInForeground(true);
+    rsc_kscrashstate_notifyAppInForeground(true);
 }
 
 - (void)applicationDidEnterBackground {
-    bsg_kscrashstate_notifyAppInForeground(false);
+    rsc_kscrashstate_notifyAppInForeground(false);
 }
 
 - (void)applicationWillEnterForeground {
-    bsg_kscrashstate_notifyAppInForeground(true);
+    rsc_kscrashstate_notifyAppInForeground(true);
 }
 
 @end
 
-//! Project version number for BSG_KSCrashFramework.
-//const double BSG_KSCrashFrameworkVersionNumber = 1.813;
+//! Project version number for RSC_KSCrashFramework.
+//const double RSC_KSCrashFrameworkVersionNumber = 1.813;
 
-//! Project version string for BSG_KSCrashFramework.
-//const unsigned char BSG_KSCrashFrameworkVersionString[] = "1.8.13";
+//! Project version string for RSC_KSCrashFramework.
+//const unsigned char RSC_KSCrashFrameworkVersionString[] = "1.8.13";

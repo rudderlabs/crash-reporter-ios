@@ -1,33 +1,33 @@
 //
-//  BugsnagSession.h
-//  Bugsnag
+//  RSCrashReporterSession.h
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 24/11/2017.
-//  Copyright © 2017 Bugsnag. All rights reserved.
+//  Copyright © 2017 RSCrashReporter. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-#import <RSCrashReporter/BugsnagApp.h>
-#import <RSCrashReporter/BugsnagDefines.h>
-#import <RSCrashReporter/BugsnagDevice.h>
-#import <RSCrashReporter/BugsnagUser.h>
+#import <RSCrashReporter/RSCrashReporterApp.h>
+#import <RSCrashReporter/RSCrashReporterDefines.h>
+#import <RSCrashReporter/RSCrashReporterDevice.h>
+#import <RSCrashReporter/RSCrashReporterUser.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Represents a session of user interaction with your app.
  */
-BUGSNAG_EXTERN
-@interface BugsnagSession : NSObject
+RSCRASHREPORTER_EXTERN
+@interface RSCrashReporterSession : NSObject
 
 @property (copy, nonatomic) NSString *id;
 
 @property (strong, nonatomic) NSDate *startedAt;
 
-@property (readonly, nonatomic) BugsnagApp *app;
+@property (readonly, nonatomic) RSCrashReporterApp *app;
 
-@property (readonly, nonatomic) BugsnagDevice *device;
+@property (readonly, nonatomic) RSCrashReporterDevice *device;
 
 // =============================================================================
 // MARK: - User
@@ -36,7 +36,7 @@ BUGSNAG_EXTERN
 /**
  * The current user
  */
-@property (readonly, nonnull, nonatomic) BugsnagUser *user;
+@property (readonly, nonnull, nonatomic) RSCrashReporterUser *user;
 
 /**
  *  Set user metadata

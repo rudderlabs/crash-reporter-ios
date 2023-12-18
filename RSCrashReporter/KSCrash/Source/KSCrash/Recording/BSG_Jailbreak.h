@@ -1,9 +1,9 @@
 //
-//  bsg_jailbreak.h
-//  Bugsnag
+//  rsc_jailbreak.h
+//  RSCrashReporter
 //
 //  Created by Karl Stenerud on 10.02.21.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 //
 // Robust Enough Jailbreak Detection
@@ -33,8 +33,8 @@
 // stick to very basic and old syscalls that have remained stable for decades.
 //
 
-#ifndef bsg_jailbreak_h
-#define bsg_jailbreak_h
+#ifndef rsc_jailbreak_h
+#define rsc_jailbreak_h
 
 #include <fcntl.h>
 #include <stdbool.h>
@@ -43,13 +43,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <TargetConditionals.h>
-#include "BSGDefines.h"
+#include "RSCDefines.h"
 
 // The global environ variable must be imported this way.
 // See: https://opensource.apple.com/source/Libc/Libc-1439.40.11/man/FreeBSD/environ.7
 extern char **environ;
 
-static inline bool bsg_local_is_insert_libraries_env_var(const char* str) {
+static inline bool rsc_local_is_insert_libraries_env_var(const char* str) {
     if (str == NULL) {
         return false;
     }
@@ -77,7 +77,7 @@ static inline bool bsg_local_is_insert_libraries_env_var(const char* str) {
 // - Beware of global consts or defines bleeding through.
 
 #if TARGET_CPU_ARM64
-#define BSG_HAS_CUSTOM_SYSCALL 1
+#define RSC_HAS_CUSTOM_SYSCALL 1
 
 // ARM64 3-parameter syscall
 // Writes -1 to *(pResult) on failure, or the actual result on success.
@@ -86,7 +86,7 @@ static inline bool bsg_local_is_insert_libraries_env_var(const char* str) {
 // - Syscall# is in x16, params in x0, x1, x2, and return in x0.
 // - Carry bit is cleared on success, set on failure (we copy the carry bit to x3).
 // - We must also inform the compiler that memory and condition codes may get clobbered.
-#define bsg_syscall3(call_num, param0, param1, param2, pResult) do { \
+#define rsc_syscall3(call_num, param0, param1, param2, pResult) do { \
     register uintptr_t call asm("x16") = (uintptr_t)(call_num); \
     register uintptr_t p0 asm("x0") = (uintptr_t)(param0); \
     register uintptr_t p1 asm("x1") = (uintptr_t)(param1); \
@@ -106,7 +106,7 @@ static inline bool bsg_local_is_insert_libraries_env_var(const char* str) {
 } while(0)
 
 #elif TARGET_CPU_X86_64 && defined(__GCC_ASM_FLAG_OUTPUTS__)
-#define BSG_HAS_CUSTOM_SYSCALL 1
+#define RSC_HAS_CUSTOM_SYSCALL 1
 
 // X86_64 3-parameter syscall
 // Writes -1 to *(pResult) on failure, or the actual result on success.
@@ -117,7 +117,7 @@ static inline bool bsg_local_is_insert_libraries_env_var(const char* str) {
 // - We must also inform the compiler that memory, rcx, r11 may get clobbered.
 // The "=@ccc" constraint requires __GCC_ASM_FLAG_OUTPUTS__, not available in Xcode 10
 // https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html#index-asm-flag-output-operands
-#define bsg_syscall3(call_num, param0, param1, param2, pResult) do { \
+#define rsc_syscall3(call_num, param0, param1, param2, pResult) do { \
     register uintptr_t rax = (uintptr_t)(call_num) | (2<<24); \
     register uintptr_t p0 = (uintptr_t)(param0); \
     register uintptr_t p1 = (uintptr_t)(param1); \
@@ -136,7 +136,7 @@ static inline bool bsg_local_is_insert_libraries_env_var(const char* str) {
 } while(0)
 
 #else
-#define BSG_HAS_CUSTOM_SYSCALL 0
+#define RSC_HAS_CUSTOM_SYSCALL 0
 
 // Unhandled architecture.
 // We fall back to the libc functions in this case, mimicing the syscall-like API.
@@ -145,17 +145,17 @@ static inline bool bsg_local_is_insert_libraries_env_var(const char* str) {
 #endif /* TARGET_CPU_XYZ */
 
 
-#if BSG_HAS_CUSTOM_SYSCALL
+#if RSC_HAS_CUSTOM_SYSCALL
 
 // See: https://opensource.apple.com/source/xnu/xnu-7195.81.3/bsd/kern/syscalls.master
-#define BSG_SYSCALL_OPEN 5
-#define bsg_syscall_open(path, flags, mode, pResult) bsg_syscall3(BSG_SYSCALL_OPEN, (uintptr_t)path, flags, mode, pResult)
+#define RSC_SYSCALL_OPEN 5
+#define rsc_syscall_open(path, flags, mode, pResult) rsc_syscall3(RSC_SYSCALL_OPEN, (uintptr_t)path, flags, mode, pResult)
 
 #else
 
-#define bsg_syscall_open(path, flags, mode, pResult) do {*(pResult) = open(path, flags, mode);} while(0)
+#define rsc_syscall_open(path, flags, mode, pResult) do {*(pResult) = open(path, flags, mode);} while(0)
 
-#endif /* BSG_HAS_CUSTOM_SYSCALL */
+#endif /* RSC_HAS_CUSTOM_SYSCALL */
 
 
 /**
@@ -163,7 +163,7 @@ static inline bool bsg_local_is_insert_libraries_env_var(const char* str) {
  * Stores nonzero in *(pIsJailbroken) if the device is jailbroken, 0 otherwise.
  * Note: Implemented as a macro to force it inline always.
  */
-#if !TARGET_OS_SIMULATOR && !TARGET_OS_OSX && BSG_HAVE_SYSCALL
+#if !TARGET_OS_SIMULATOR && !TARGET_OS_OSX && RSC_HAVE_SYSCALL
 #define get_jailbreak_status(pIsJailbroken) do { \
     int fd = 0; \
  \
@@ -174,12 +174,12 @@ static inline bool bsg_local_is_insert_libraries_env_var(const char* str) {
  \
     const char* test_write_file = "/tmp/bugsnag-check.txt"; \
     remove(test_write_file); \
-    bsg_syscall_open(test_write_file, O_CREAT, 0644, &fd); \
+    rsc_syscall_open(test_write_file, O_CREAT, 0644, &fd); \
     if(fd > 0) { \
         close(fd); \
         tmp_file_is_accessible = true; \
     } else { \
-        bsg_syscall_open(test_write_file, O_RDONLY, 0, &fd); \
+        rsc_syscall_open(test_write_file, O_RDONLY, 0, &fd); \
         if(fd > 0) { \
             close(fd); \
             tmp_file_is_accessible = true; \
@@ -188,7 +188,7 @@ static inline bool bsg_local_is_insert_libraries_env_var(const char* str) {
     remove(test_write_file); \
  \
     const char* mobile_substrate_path = "/Library/MobileSubstrate/MobileSubstrate.dylib"; \
-    bsg_syscall_open(mobile_substrate_path, O_RDONLY, 0, &fd); \
+    rsc_syscall_open(mobile_substrate_path, O_RDONLY, 0, &fd); \
     if(fd > 0) { \
         close(fd); \
         mobile_substrate_exists = true; \
@@ -201,7 +201,7 @@ static inline bool bsg_local_is_insert_libraries_env_var(const char* str) {
     } \
  \
     for(int i = 0; environ[i] != NULL; i++) { \
-        if(bsg_local_is_insert_libraries_env_var(environ[i])) { \
+        if(rsc_local_is_insert_libraries_env_var(environ[i])) { \
             has_insert_libraries = true; \
             break; \
         } \
@@ -222,4 +222,4 @@ static inline bool bsg_local_is_insert_libraries_env_var(const char* str) {
 #endif /* !TARGET_OS_SIMULATOR */
 
 
-#endif /* bsg_jailbreak_h */
+#endif /* rsc_jailbreak_h */

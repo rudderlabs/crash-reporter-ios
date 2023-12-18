@@ -1,5 +1,5 @@
 //
-//  BSG_KSCrashSentry_CPPException.h
+//  RSC_KSCrashSentry_CPPException.h
 //
 //  Copyright (c) 2012 Karl Stenerud. All rights reserved.
 //
@@ -22,14 +22,14 @@
 // THE SOFTWARE.
 //
 
-#ifndef HDR_BSG_KSCrashSentry_CPPException_h
-#define HDR_BSG_KSCrashSentry_CPPException_h
+#ifndef HDR_RSC_KSCrashSentry_CPPException_h
+#define HDR_RSC_KSCrashSentry_CPPException_h
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "BSG_KSCrashSentry.h"
+#include "RSC_KSCrashSentry.h"
 
 /** Install the C++ exception handler.
  *
@@ -37,12 +37,12 @@ extern "C" {
  *
  * @return true if installation was succesful.
  */
-bool bsg_kscrashsentry_installCPPExceptionHandler(
-    BSG_KSCrash_SentryContext *context);
+bool rsc_kscrashsentry_installCPPExceptionHandler(
+    RSC_KSCrash_SentryContext *context);
 
 /** Uninstall the C++ exception handler.
  */
-void bsg_kscrashsentry_uninstallCPPExceptionHandler(void);
+void rsc_kscrashsentry_uninstallCPPExceptionHandler(void);
 
 #ifdef __cplusplus
 }

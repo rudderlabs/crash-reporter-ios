@@ -1,26 +1,26 @@
 //
-//  BSG_KSCrashReportTests.m
-//  Bugsnag
+//  RSC_KSCrashReportTests.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 06/01/2022.
-//  Copyright © 2022 Bugsnag Inc. All rights reserved.
+//  Copyright © 2022 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BSG_KSCrashC.h"
-#import "BSG_KSCrashReport.h"
-#import "BSG_KSCrashSentry_Private.h"
-#import "BSG_KSMach.h"
-#import "BSGDefines.h"
+#import "RSC_KSCrashC.h"
+#import "RSC_KSCrashReport.h"
+#import "RSC_KSCrashSentry_Private.h"
+#import "RSC_KSMach.h"
+#import "RSCDefines.h"
 
 #import <execinfo.h>
 
-@interface BSG_KSCrashReportTests : XCTestCase
+@interface RSC_KSCrashReportTests : XCTestCase
 
 @end
 
-@implementation BSG_KSCrashReportTests
+@implementation RSC_KSCrashReportTests
 
 - (void)testBinaryImages {
     NSString *crashReportFilePath = [self temporaryFile:@"crash_report.json"];
@@ -28,32 +28,32 @@
     NSString *stateFilePath = [self temporaryFile:@"kscrash_state"];
     NSString *crashID = [[NSUUID UUID] UUIDString];
     
-    bsg_kscrash_init();
-    bsg_kscrash_setHandlingCrashTypes(BSG_KSCrashTypeNSException);
-    bsg_kscrash_install([crashReportFilePath fileSystemRepresentation],
+    rsc_kscrash_init();
+    rsc_kscrash_setHandlingCrashTypes(RSC_KSCrashTypeNSException);
+    rsc_kscrash_install([crashReportFilePath fileSystemRepresentation],
                         [recrashReportFilePath fileSystemRepresentation],
                         [stateFilePath fileSystemRepresentation],
                         [crashID UTF8String]);
     
     uintptr_t stackTrace[500];
     
-    BSG_KSCrash_Context *context = crashContext();
-    context->crash.crashType = BSG_KSCrashTypeNSException;
-    context->crash.offendingThread = bsg_ksmachthread_self();
+    RSC_KSCrash_Context *context = crashContext();
+    context->crash.crashType = RSC_KSCrashTypeNSException;
+    context->crash.offendingThread = rsc_ksmachthread_self();
     context->crash.registersAreValid = false;
-    context->crash.NSException.name = "BSG_KSCrashReportTests";
+    context->crash.NSException.name = "RSC_KSCrashReportTests";
     context->crash.crashReason = "testBinaryImages";
     context->crash.stackTrace = stackTrace;
     context->crash.stackTraceLength = backtrace((void **)stackTrace, sizeof(stackTrace) / sizeof(*stackTrace));
     context->crash.threadTracingEnabled = false;
     
     const char *reportPath = [crashReportFilePath fileSystemRepresentation];
-#if BSG_HAVE_MACH_THREADS
-    bsg_kscrashsentry_suspendThreads();
+#if RSC_HAVE_MACH_THREADS
+    rsc_kscrashsentry_suspendThreads();
 #endif
-    bsg_kscrashreport_writeStandardReport(context, reportPath);
-#if BSG_HAVE_MACH_THREADS
-    bsg_kscrashsentry_resumeThreads();
+    rsc_kscrashreport_writeStandardReport(context, reportPath);
+#if RSC_HAVE_MACH_THREADS
+    rsc_kscrashsentry_resumeThreads();
 #endif
     
     NSDictionary *report = [NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfFile:crashReportFilePath] options:0 error:nil];
@@ -74,9 +74,9 @@
     NSString *stateFilePath = [self temporaryFile:@"kscrash_state"];
     NSString *crashID = [[NSUUID UUID] UUIDString];
     
-    bsg_kscrash_init();
-    bsg_kscrash_setHandlingCrashTypes(BSG_KSCrashTypeNSException);
-    bsg_kscrash_install([crashReportFilePath fileSystemRepresentation],
+    rsc_kscrash_init();
+    rsc_kscrash_setHandlingCrashTypes(RSC_KSCrashTypeNSException);
+    rsc_kscrash_install([crashReportFilePath fileSystemRepresentation],
                         [recrashReportFilePath fileSystemRepresentation],
                         [stateFilePath fileSystemRepresentation],
                         [crashID UTF8String]);
@@ -90,11 +90,11 @@
         assert(stackTrace[i] != 0);
     }
     
-    BSG_KSCrash_Context *context = crashContext();
-    context->crash.crashType = BSG_KSCrashTypeNSException;
-    context->crash.offendingThread = bsg_ksmachthread_self();
+    RSC_KSCrash_Context *context = crashContext();
+    context->crash.crashType = RSC_KSCrashTypeNSException;
+    context->crash.offendingThread = rsc_ksmachthread_self();
     context->crash.registersAreValid = false;
-    context->crash.NSException.name = "BSG_KSCrashReportTests";
+    context->crash.NSException.name = "RSC_KSCrashReportTests";
     context->crash.crashReason = "testWriteStandardReportPerformance";
     context->crash.stackTrace = stackTrace;
     context->crash.stackTraceLength = numFrames;
@@ -104,12 +104,12 @@
         const char *reportPath = [crashReportFilePath fileSystemRepresentation];
         
         [self startMeasuring]; {
-#if BSG_HAVE_MACH_THREADS
-            bsg_kscrashsentry_suspendThreads();
+#if RSC_HAVE_MACH_THREADS
+            rsc_kscrashsentry_suspendThreads();
 #endif
-            bsg_kscrashreport_writeStandardReport(context, reportPath);
-#if BSG_HAVE_MACH_THREADS
-            bsg_kscrashsentry_resumeThreads();
+            rsc_kscrashreport_writeStandardReport(context, reportPath);
+#if RSC_HAVE_MACH_THREADS
+            rsc_kscrashsentry_resumeThreads();
 #endif
         }
         [self stopMeasuring];

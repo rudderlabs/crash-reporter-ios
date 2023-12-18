@@ -39,7 +39,7 @@
     // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
 }
 
-- (void)notifyCrashEvent:(BugsnagEvent *)event withRequestPayload:(NSDictionary *)requestPayload {
+- (void)notifyCrashEvent:(RSCrashReporterEvent *)event withRequestPayload:(NSDictionary *)requestPayload {
     
 }
 

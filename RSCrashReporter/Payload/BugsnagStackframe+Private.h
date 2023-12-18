@@ -1,20 +1,20 @@
 //
-//  BugsnagStackframe+Private.h
-//  Bugsnag
+//  RSCrashReporterStackframe+Private.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 20/11/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGDefines.h"
-#import "BugsnagInternals.h"
+#import "RSCDefines.h"
+#import "RSCrashReporterInternals.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BugsnagStackframe ()
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCrashReporterStackframe ()
 
-+ (NSArray<BugsnagStackframe *> *)stackframesWithBacktrace:(uintptr_t *)backtrace length:(NSUInteger)length;
++ (NSArray<RSCrashReporterStackframe *> *)stackframesWithBacktrace:(uintptr_t *)backtrace length:(NSUInteger)length;
 
 /// Constructs a stackframe object from a KSCrashReport backtrace dictionary.
 + (nullable instancetype)frameFromDict:(NSDictionary<NSString *, id> *)dict withImages:(NSArray<NSDictionary<NSString *, id> *> *)binaryImages;

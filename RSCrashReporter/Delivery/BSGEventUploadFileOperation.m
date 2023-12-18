@@ -1,46 +1,46 @@
 //
-//  BSGEventUploadFileOperation.m
-//  Bugsnag
+//  RSCEventUploadFileOperation.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 17/02/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGEventUploadFileOperation.h"
+#import "RSCEventUploadFileOperation.h"
 
-#import "BSGFileLocations.h"
-#import "BSGJSONSerialization.h"
-#import "BSGUtils.h"
-#import "BugsnagEvent+Private.h"
-#import "BugsnagInternals.h"
-#import "BugsnagLogger.h"
+#import "RSCFileLocations.h"
+#import "RSCJSONSerialization.h"
+#import "RSCUtils.h"
+#import "RSCrashReporterEvent+Private.h"
+#import "RSCrashReporterInternals.h"
+#import "RSCrashReporterLogger.h"
 
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BSGEventUploadFileOperation
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCEventUploadFileOperation
 
-- (instancetype)initWithFile:(NSString *)file delegate:(id<BSGEventUploadOperationDelegate>)delegate {
+- (instancetype)initWithFile:(NSString *)file delegate:(id<RSCEventUploadOperationDelegate>)delegate {
     if ((self = [super initWithDelegate:delegate])) {
         _file = [file copy];
     }
     return self;
 }
 
-- (BugsnagEvent *)loadEventAndReturnError:(NSError * __autoreleasing *)errorPtr {
-    NSDictionary *json = BSGJSONDictionaryFromFile(self.file, 0, errorPtr);
+- (RSCrashReporterEvent *)loadEventAndReturnError:(NSError * __autoreleasing *)errorPtr {
+    NSDictionary *json = RSCJSONDictionaryFromFile(self.file, 0, errorPtr);
     if (!json) {
         return nil;
     }
-    return [[BugsnagEvent alloc] initWithJson:json];
+    return [[RSCrashReporterEvent alloc] initWithJson:json];
 }
 
 - (void)deleteEvent {
-    dispatch_sync(BSGGetFileSystemQueue(), ^{
+    dispatch_sync(RSCGetFileSystemQueue(), ^{
         NSError *error = nil;
         if ([NSFileManager.defaultManager removeItemAtPath:self.file error:&error]) {
-            bsg_log_debug(@"Deleted event %@", self.name);
+            rsc_log_debug(@"Deleted event %@", self.name);
         } else {
-            bsg_log_err(@"%@", error);
+            rsc_log_err(@"%@", error);
         }
     });
 }
@@ -51,14 +51,14 @@ BSG_OBJC_DIRECT_MEMBERS
     // If the payload is oversized or too old, it should be discarded to prevent retrying indefinitely.
     
     if (HTTPBodySize > MaxPersistedSize) {
-        bsg_log_debug(@"Deleting oversized event %@", self.name);
+        rsc_log_debug(@"Deleting oversized event %@", self.name);
         [self deleteEvent];
         return;
     }
     
     NSDictionary *attributes = [NSFileManager.defaultManager attributesOfItemAtPath:self.file error:nil];
     if (attributes.fileCreationDate.timeIntervalSinceNow < -MaxPersistedAge) { 
-        bsg_log_debug(@"Deleting stale event %@", self.name);
+        rsc_log_debug(@"Deleting stale event %@", self.name);
         [self deleteEvent];
         return;
     }

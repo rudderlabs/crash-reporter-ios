@@ -1,38 +1,38 @@
 //
-//  BugsnagTests.m
+//  RSCrashReporterTests.m
 //  Tests
 //
 //  Created by Robin Macharg on 04/02/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
-// Unit tests of global Bugsnag behaviour
+// Unit tests of global RSCrashReporter behaviour
 
 #import <XCTest/XCTest.h>
 
 #import "RSCrashReporter.h"
-#import "BugsnagClient+Private.h"
-#import "BugsnagConfiguration+Private.h"
-#import "BugsnagEvent+Private.h"
-#import "BugsnagTestConstants.h"
-#import "BugsnagNotifier.h"
+#import "RSCrashReporterClient+Private.h"
+#import "RSCrashReporterConfiguration+Private.h"
+#import "RSCrashReporterEvent+Private.h"
+#import "RSCrashReporterTestConstants.h"
+#import "RSCrashReporterNotifier.h"
 
-// MARK: - BugsnagTests
+// MARK: - RSCrashReporterTests
 
-@interface BugsnagTests : XCTestCase
+@interface RSCrashReporterTests : XCTestCase
 @end
 
-@implementation BugsnagTests
+@implementation RSCrashReporterTests
 
 /**
  * Test that global metadata is added correctly, applied to each event, and
  * deleted appropriately.
  */
-- (void)testBugsnagMetadataAddition {
+- (void)testRSCrashReporterMetadataAddition {
 
 	__block XCTestExpectation *expectation = [self expectationWithDescription:@"Localized metadata changes"];
 
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     [client addMetadata:@"aValue1" withKey:@"aKey1" toSection:@"mySection1"];
     
@@ -41,7 +41,7 @@
     NSException *exception1 = [[NSException alloc] initWithName:@"exception1" reason:@"reason1" userInfo:nil];
     NSException *exception2 = [[NSException alloc] initWithName:@"exception2" reason:@"reason2" userInfo:nil];
 
-    [client notify:exception1 block:^BOOL(BugsnagEvent * _Nonnull event) {
+    [client notify:exception1 block:^BOOL(RSCrashReporterEvent * _Nonnull event) {
         XCTAssertEqualObjects([event getMetadataFromSection:@"mySection1" withKey:@"aKey1"], @"aValue1");
         XCTAssertEqual(event.errors[0].errorClass, @"exception1");
         XCTAssertEqual(event.errors[0].errorMessage, @"reason1");
@@ -52,7 +52,7 @@
         return event;
     }];
     
-    [client notify:exception2 block:^BOOL(BugsnagEvent * _Nonnull event) {
+    [client notify:exception2 block:^BOOL(RSCrashReporterEvent * _Nonnull event) {
         XCTAssertEqualObjects([event getMetadataFromSection:@"mySection1" withKey:@"aKey1"], @"aValue1");
         XCTAssertEqualObjects([event getMetadataFromSection:@"mySection2" withKey:@"aKey2"], @"aValue2");
         XCTAssertEqual(event.errors[0].errorClass, @"exception2");
@@ -65,7 +65,7 @@
     [client addMetadata:nil withKey:@"aKey1" toSection:@"mySection1"];
     [client addMetadata:nil withKey:@"aKey2" toSection:@"mySection2"];
     
-    [client notify:exception1 block:^BOOL(BugsnagEvent * _Nonnull event) {
+    [client notify:exception1 block:^BOOL(RSCrashReporterEvent * _Nonnull event) {
         XCTAssertNil([event getMetadataFromSection:@"mySection1" withKey:@"aKey1"]);
         XCTAssertNil([event getMetadataFromSection:@"mySection2" withKey:@"aKey2"]);
         return event;
@@ -75,7 +75,7 @@
     
     // This goes to Client
     [client addMetadata:@"aValue1" withKey:@"aKey1" toSection:@"mySection1"];
-    [client notify:exception1 block:^BOOL(BugsnagEvent * _Nonnull event) {
+    [client notify:exception1 block:^BOOL(RSCrashReporterEvent * _Nonnull event) {
         // event should have a copy of Client metadata
         
         XCTAssertEqualObjects([client getMetadataFromSection:@"mySection1" withKey:@"aKey1"],
@@ -103,12 +103,12 @@
 }
 
 /**
- * Test that the global Bugsnag metadata retrieval performs as expected:
+ * Test that the global RSCrashReporter metadata retrieval performs as expected:
  * return a section when there is one, or nil otherwise.
  */
 - (void)testGetMetadata {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     
     XCTAssertNil([client getMetadataFromSection:@"dummySection"]);
@@ -127,13 +127,13 @@
  * NOTE: For now this test is inadequate.  Some form of dependency injection
  *       or mocking is required to isolate and test the session pausing semantics.
  */
--(void)testBugsnagPauseSession {
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    [configuration addOnSendErrorBlock:^BOOL(BugsnagEvent *_Nonnull event) {
+-(void)testRSCrashReporterPauseSession {
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    [configuration addOnSendErrorBlock:^BOOL(RSCrashReporterEvent *_Nonnull event) {
         return false;
     }];
 
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
 
     // For now only test that the method exists
@@ -141,25 +141,25 @@
 }
 
 /**
- * Test that the BugsnagConfiguration-mirroring Bugsnag.context is mutable
+ * Test that the RSCrashReporterConfiguration-mirroring RSCrashReporter.context is mutable
  */
 - (void)testMutableContext {
     // Allow for checks inside blocks that may (potentially) be run asynchronously
     __block XCTestExpectation *expectation1 = [self expectationWithDescription:@"Localized metadata changes"];
     
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     [configuration setContext:@"firstContext"];
-    [configuration addOnSendErrorBlock:^BOOL(BugsnagEvent *_Nonnull event) {
+    [configuration addOnSendErrorBlock:^BOOL(RSCrashReporterEvent *_Nonnull event) {
         return false;
     }];
 
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration  delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:configuration  delegate:nil];
     [client start];
 
     NSException *exception1 = [[NSException alloc] initWithName:@"exception1" reason:@"reason1" userInfo:nil];
 
     // Check that the context is set going in to the test and that we can change it
-    [client notify:exception1 block:^BOOL(BugsnagEvent * _Nonnull event) {
+    [client notify:exception1 block:^BOOL(RSCrashReporterEvent * _Nonnull event) {
         XCTAssertEqual(client.configuration.context, @"firstContext");
         
         // Change the global context
@@ -179,7 +179,7 @@
     [self waitForExpectationsWithTimeout:5.0 handler:^(NSError * _Nullable error) {
         XCTAssertEqual(client.configuration.context, @"secondContext");
         
-        [client notify:exception1 block:^BOOL(BugsnagEvent * _Nonnull report) {
+        [client notify:exception1 block:^BOOL(RSCrashReporterEvent * _Nonnull report) {
             XCTAssertEqual(client.configuration.context, @"secondContext");
             XCTAssertEqual([report context], @"secondContext");
             return true;
@@ -188,8 +188,8 @@
 }
 
 -(void)testClearMetadataInSectionWithKey {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
     [client addMetadata:@"myValue1" withKey:@"myKey1" toSection:@"section1"];
@@ -206,8 +206,8 @@
 }
 
 -(void)testClearMetadataInSection {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
     [client addMetadata:@"myValue1" withKey:@"myKey1" toSection:@"section1"];
@@ -228,7 +228,7 @@
 }
 
 /**
- * Test that removing an onSession block via the Bugsnag object works as expected
+ * Test that removing an onSession block via the RSCrashReporter object works as expected
  */
 /*- (void)testRemoveOnSessionBlock {
     
@@ -238,15 +238,15 @@
     __block XCTestExpectation *expectation2 = [self expectationWithDescription:@"Remove On Session Block 2"];
     expectation2.inverted = YES;
     
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     configuration.autoTrackSessions = NO;
 
     // non-sending bugsnag
-    [configuration addOnSendErrorBlock:^BOOL(BugsnagEvent *_Nonnull event) {
+    [configuration addOnSendErrorBlock:^BOOL(RSCrashReporterEvent *_Nonnull event) {
         return false;
     }];
 
-    BugsnagOnSessionBlock sessionBlock = ^BOOL(BugsnagSession * _Nonnull sessionPayload) {
+    RSCrashReporterOnSessionBlock sessionBlock = ^BOOL(RSCrashReporterSession * _Nonnull sessionPayload) {
         switch (called) {
         case 0:
             [expectation1 fulfill];
@@ -258,9 +258,9 @@
         return true;
     };
 
-    BugsnagOnSessionRef callback = [configuration addOnSessionBlock:sessionBlock];
+    RSCrashReporterOnSessionRef callback = [configuration addOnSessionBlock:sessionBlock];
 
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
     [client startSession];
     [self waitForExpectations:@[expectation1] timeout:1.0];
@@ -283,15 +283,15 @@
     __block XCTestExpectation *expectation2 = [self expectationWithDescription:@"Remove On Session Block 3X"];
     expectation2.inverted = YES;
     
-    BugsnagConfiguration *configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterConfiguration *configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     configuration.autoTrackSessions = NO;
     
     // non-sending bugsnag
-    [configuration addOnSendErrorBlock:^BOOL(BugsnagEvent *_Nonnull event) {
+    [configuration addOnSendErrorBlock:^BOOL(RSCrashReporterEvent *_Nonnull event) {
         return false;
     }];
 
-    BugsnagOnSessionBlock sessionBlock = ^BOOL(BugsnagSession * _Nonnull sessionPayload) {
+    RSCrashReporterOnSessionBlock sessionBlock = ^BOOL(RSCrashReporterSession * _Nonnull sessionPayload) {
         switch (called) {
         case 0:
             [expectation1 fulfill];
@@ -303,15 +303,15 @@
         return true;
     };
 
-    // NOTE: Due to test conditions the state of the Bugsnag/client class is indeterminate.
+    // NOTE: Due to test conditions the state of the RSCrashReporter/client class is indeterminate.
     //       We *should* be able to test that pre-start() calls to add/removeOnSessionBlock()
     //       do nothing, but actually we can't guarantee this.  For now we don't test this.
 
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:configuration delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:configuration delegate:nil];
     [client start];
     [client pauseSession];
 
-    BugsnagOnSessionRef callback = [client addOnSessionBlock:sessionBlock];
+    RSCrashReporterOnSessionRef callback = [client addOnSessionBlock:sessionBlock];
     [client startSession];
     [self waitForExpectations:@[expectation1] timeout:1.0];
 
@@ -325,8 +325,8 @@
 }*/
 
 - (void)testMetadataMutability {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
     // Immutable in, mutable out

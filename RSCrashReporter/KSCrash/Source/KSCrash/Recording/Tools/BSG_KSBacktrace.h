@@ -27,15 +27,15 @@
 /* Stack backtrace and symbolication functions.
  */
 
-#ifndef HDR_BSG_KSBacktrace_h
-#define HDR_BSG_KSBacktrace_h
+#ifndef HDR_RSC_KSBacktrace_h
+#define HDR_RSC_KSBacktrace_h
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "BSG_Symbolicate.h"
-#include "BSGDefines.h"
+#include "RSC_Symbolicate.h"
+#include "RSCDefines.h"
 
 #include <mach/mach.h>
 #include <pthread.h>
@@ -68,7 +68,7 @@ extern "C" {
 #define CALL_INSTRUCTION_FROM_RETURN_ADDRESS(A) \
     (DETAG_INSTRUCTION_ADDRESS((A)) - 1)
 
-#if BSG_HAVE_MACH_THREADS
+#if RSC_HAVE_MACH_THREADS
 /** Generate a backtrace on the specified mach thread (async-safe).
  *
  *
@@ -81,7 +81,7 @@ extern "C" {
  *
  * @return The number of backtrace entries generated.
  */
-int bsg_ksbt_backtraceThread(thread_t thread, uintptr_t *backtraceBuffer,
+int rsc_ksbt_backtraceThread(thread_t thread, uintptr_t *backtraceBuffer,
                              int maxEntries);
 #endif
 
@@ -101,8 +101,8 @@ int bsg_ksbt_backtraceThread(thread_t thread, uintptr_t *backtraceBuffer,
  * @param skippedEntries The number of entries skipped from the start of this
  * backtrace.
  */
-void bsg_ksbt_symbolicate(const uintptr_t *backtraceBuffer,
-                          struct bsg_symbolicate_result *symbolsBuffer, int numEntries,
+void rsc_ksbt_symbolicate(const uintptr_t *backtraceBuffer,
+                          struct rsc_symbolicate_result *symbolsBuffer, int numEntries,
                           int skippedEntries);
 
 #ifdef __cplusplus

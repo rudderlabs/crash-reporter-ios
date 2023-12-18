@@ -27,7 +27,7 @@
 
 #import <XCTest/XCTest.h>
 
-#import "BSG_KSCrashSentry_NSException.h"
+#import "RSC_KSCrashSentry_NSException.h"
 
 
 @interface KSCrashSentry_NSException_Tests : XCTestCase @end
@@ -38,23 +38,23 @@
 - (void) testInstallAndRemove
 {
     bool success;
-    BSG_KSCrash_SentryContext context;
-    success = bsg_kscrashsentry_installNSExceptionHandler(&context);
+    RSC_KSCrash_SentryContext context;
+    success = rsc_kscrashsentry_installNSExceptionHandler(&context);
     XCTAssertTrue(success, @"");
     [NSThread sleepForTimeInterval:0.1];
-    bsg_kscrashsentry_uninstallNSExceptionHandler();
+    rsc_kscrashsentry_uninstallNSExceptionHandler();
 }
 
 - (void) testDoubleInstallAndRemove
 {
     bool success;
-    BSG_KSCrash_SentryContext context;
-    success = bsg_kscrashsentry_installNSExceptionHandler(&context);
+    RSC_KSCrash_SentryContext context;
+    success = rsc_kscrashsentry_installNSExceptionHandler(&context);
     XCTAssertTrue(success, @"");
-    success = bsg_kscrashsentry_installNSExceptionHandler(&context);
+    success = rsc_kscrashsentry_installNSExceptionHandler(&context);
     XCTAssertTrue(success, @"");
-    bsg_kscrashsentry_uninstallNSExceptionHandler();
-    bsg_kscrashsentry_uninstallNSExceptionHandler();
+    rsc_kscrashsentry_uninstallNSExceptionHandler();
+    rsc_kscrashsentry_uninstallNSExceptionHandler();
 }
 
 @end

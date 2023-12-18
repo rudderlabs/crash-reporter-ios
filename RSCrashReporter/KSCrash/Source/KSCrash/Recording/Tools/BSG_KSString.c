@@ -24,11 +24,11 @@
 // THE SOFTWARE.
 //
 
-#include "BSG_KSString.h"
+#include "RSC_KSString.h"
 #include <stdlib.h>
 #include <string.h>
 
-void bsg_ksstring_replace(char **dest, const char *replacement) {
+void rsc_ksstring_replace(char **dest, const char *replacement) {
     if (*dest != NULL) {
         free(*dest);
     }

@@ -1,32 +1,32 @@
 //
-//  BugsnagClientPayloadInfoTest.m
+//  RSCrashReporterClientPayloadInfoTest.m
 //  Tests
 //
 //  Created by Jamie Lynch on 30/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BugsnagAppWithState+Private.h"
-#import "BugsnagConfiguration.h"
-#import "BugsnagDeviceWithState+Private.h"
-#import "BugsnagTestConstants.h"
+#import "RSCrashReporterAppWithState+Private.h"
+#import "RSCrashReporterConfiguration.h"
+#import "RSCrashReporterDeviceWithState+Private.h"
+#import "RSCrashReporterTestConstants.h"
 
-@interface BugsnagClientPayloadInfoTest : XCTestCase
+@interface RSCrashReporterClientPayloadInfoTest : XCTestCase
 
 @end
 
-@implementation BugsnagClientPayloadInfoTest
+@implementation RSCrashReporterClientPayloadInfoTest
 
 - (void)setUp {
     [RSCrashReporter startWithDelegate:nil];
 }
 
 - (void)testAppInfo {
-    BugsnagClient *client = [RSCrashReporter client];
+    RSCrashReporterClient *client = [RSCrashReporter client];
     client.codeBundleId = @"f00123";
-    NSDictionary *app = [[client generateAppWithState:BSGGetSystemInfo()] toDict];
+    NSDictionary *app = [[client generateAppWithState:RSCGetSystemInfo()] toDict];
     XCTAssertNotNil(app);
     
     XCTAssertEqualObjects(app[@"codeBundleId"], @"f00123");
@@ -44,8 +44,8 @@
 }
 
 - (void)testDeviceInfo {
-    BugsnagClient *client = [RSCrashReporter client];
-    NSDictionary *device = [[client generateDeviceWithState:BSGGetSystemInfo()] toDictionary];
+    RSCrashReporterClient *client = [RSCrashReporter client];
+    NSDictionary *device = [[client generateDeviceWithState:RSCGetSystemInfo()] toDictionary];
     XCTAssertNotNil(device[@"freeDisk"]);
     XCTAssertNotNil(device[@"freeMemory"]);
 //    XCTAssertNotNil(device[@"id"]);

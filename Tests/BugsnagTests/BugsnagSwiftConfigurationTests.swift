@@ -1,15 +1,15 @@
 //
-//  BugsnagSwiftConfigurationTests.swift
+//  RSCrashReporterSwiftConfigurationTests.swift
 //  Tests
 //
 //  Created by Robin Macharg on 22/01/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 import XCTest
 import RSCrashReporter
 
-class BugsnagSwiftConfigurationTests: XCTestCase {
+class RSCrashReporterSwiftConfigurationTests: XCTestCase {
 
     /**
      * Objective C trailing-NSError* initializers are translated into throwing
@@ -17,12 +17,12 @@ class BugsnagSwiftConfigurationTests: XCTestCase {
      * (read: longer) ObjC invocation).
      */
     func testDesignatedInitializerHasCorrectNS_SWIFT_NAME() {
-        let config = BugsnagConfiguration(DUMMY_APIKEY_16CHAR)
+        let config = RSCrashReporterConfiguration(DUMMY_APIKEY_16CHAR)
         XCTAssertEqual(config.apiKey, DUMMY_APIKEY_16CHAR)
     }
     
     func testRemoveOnSendError() {
-        let config = BugsnagConfiguration(DUMMY_APIKEY_16CHAR)
+        let config = RSCrashReporterConfiguration(DUMMY_APIKEY_16CHAR)
         let onSendBlocks: NSMutableArray = config.value(forKey: "onSendBlocks") as! NSMutableArray
         XCTAssertEqual(onSendBlocks.count, 0)
         
@@ -34,11 +34,11 @@ class BugsnagSwiftConfigurationTests: XCTestCase {
     }
     
     func testRemoveOnSendErrorBlockDoesNotWork() {
-        let config = BugsnagConfiguration(DUMMY_APIKEY_16CHAR)
+        let config = RSCrashReporterConfiguration(DUMMY_APIKEY_16CHAR)
         let onSendBlocks: NSMutableArray = config.value(forKey: "onSendBlocks") as! NSMutableArray
         XCTAssertEqual(onSendBlocks.count, 0)
         
-        let onSendErrorBlock: (BugsnagEvent) -> Bool = { _ in false }
+        let onSendErrorBlock: (RSCrashReporterEvent) -> Bool = { _ in false }
         config.addOnSendError(block: onSendErrorBlock)
         XCTAssertEqual(onSendBlocks.count, 1)
         
@@ -50,8 +50,8 @@ class BugsnagSwiftConfigurationTests: XCTestCase {
     }
     
     func testRemoveInvalidOnSendErrorDoesNotCrash() {
-        let config = BugsnagConfiguration(DUMMY_APIKEY_16CHAR)
-        let onSendErrorBlock: (BugsnagEvent) -> Bool = { _ in false }
+        let config = RSCrashReporterConfiguration(DUMMY_APIKEY_16CHAR)
+        let onSendErrorBlock: (RSCrashReporterEvent) -> Bool = { _ in false }
         config.addOnSendError(block: onSendErrorBlock)
         
         // This does not compile:

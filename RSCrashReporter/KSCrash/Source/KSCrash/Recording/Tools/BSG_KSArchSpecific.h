@@ -27,8 +27,8 @@
 /* Architecture-dependent defines.
  */
 
-#ifndef HDR_BSG_KSArchSpecific_h
-#define HDR_BSG_KSArchSpecific_h
+#ifndef HDR_RSC_KSArchSpecific_h
+#define HDR_RSC_KSArchSpecific_h
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,9 +37,9 @@ extern "C" {
 #include <sys/_structs.h>
 
 #ifdef __arm64__
-#define BSG_STRUCT_MCONTEXT_L _STRUCT_MCONTEXT64
+#define RSC_STRUCT_MCONTEXT_L _STRUCT_MCONTEXT64
 #else
-#define BSG_STRUCT_MCONTEXT_L _STRUCT_MCONTEXT
+#define RSC_STRUCT_MCONTEXT_L _STRUCT_MCONTEXT
 #endif
 
 #ifdef __cplusplus

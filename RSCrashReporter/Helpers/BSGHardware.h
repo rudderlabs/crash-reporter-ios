@@ -1,37 +1,37 @@
 //
-//  BSGHardware.h
-//  Bugsnag
+//  RSCHardware.h
+//  RSCrashReporter
 //
 //  Created by Karl Stenerud on 26.05.22.
-//  Copyright © 2022 Bugsnag Inc. All rights reserved.
+//  Copyright © 2022 RSCrashReporter Inc. All rights reserved.
 //
 
-#ifndef BSGHardware_h
-#define BSGHardware_h
+#ifndef RSCHardware_h
+#define RSCHardware_h
 
 #import <Foundation/Foundation.h>
 
-#import "BSGDefines.h"
-#import "BSGUIKit.h"
-#import "BSGWatchKit.h"
+#import "RSCDefines.h"
+#import "RSCUIKit.h"
+#import "RSCWatchKit.h"
 
 #pragma mark Device
 
 #if TARGET_OS_IOS
-static inline UIDevice *BSGGetDevice(void) {
+static inline UIDevice *RSCGetDevice(void) {
     return [UIDEVICE currentDevice];
 }
 #elif TARGET_OS_WATCH
-static inline WKInterfaceDevice *BSGGetDevice(void) {
+static inline WKInterfaceDevice *RSCGetDevice(void) {
     return [WKInterfaceDevice currentDevice];
 }
 #endif
 
 #pragma mark Battery
 
-#if BSG_HAVE_BATTERY
+#if RSC_HAVE_BATTERY
 
-static inline BOOL BSGIsBatteryStateKnown(long battery_state) {
+static inline BOOL RSCIsBatteryStateKnown(long battery_state) {
 #if TARGET_OS_IOS
     const long state_unknown = UIDeviceBatteryStateUnknown;
 #elif TARGET_OS_WATCH
@@ -40,7 +40,7 @@ static inline BOOL BSGIsBatteryStateKnown(long battery_state) {
     return battery_state != state_unknown;
 }
 
-static inline BOOL BSGIsBatteryCharging(long battery_state) {
+static inline BOOL RSCIsBatteryCharging(long battery_state) {
 #if TARGET_OS_IOS
     const long state_charging = UIDeviceBatteryStateCharging;
 #elif TARGET_OS_WATCH
@@ -49,6 +49,6 @@ static inline BOOL BSGIsBatteryCharging(long battery_state) {
     return battery_state >= state_charging;
 }
 
-#endif // BSG_HAVE_BATTERY
+#endif // RSC_HAVE_BATTERY
 
-#endif /* BSGHardware_h */
+#endif /* RSCHardware_h */

@@ -1,5 +1,5 @@
 //
-//  BSG_KSLogger.c
+//  RSC_KSLogger.c
 //
 //  Created by Karl Stenerud on 11-06-25.
 //
@@ -24,7 +24,7 @@
 // THE SOFTWARE.
 //
 
-#include "BSG_KSLogger.h"
+#include "RSC_KSLogger.h"
 
 #include <stdarg.h>
 #include <string.h>
@@ -32,9 +32,9 @@
 #include <sys/fcntl.h>
 #include <unistd.h>
 
-#if BSG_KSLOG_ENABLED
+#if RSC_KSLOG_ENABLED
 #define STB_SPRINTF_IMPLEMENTATION
-#define STB_SPRINTF_DECORATE(name) bsg_##name
+#define STB_SPRINTF_DECORATE(name) rsc_##name
 #pragma clang diagnostic ignored "-Wcast-qual"
 #pragma clang diagnostic ignored "-Wconditional-uninitialized"
 #pragma clang diagnostic ignored "-Wsign-conversion"
@@ -47,7 +47,7 @@
  *
  * Any log entries that exceed this length will be truncated.
  */
-#define BSG_KSLOGGER_CBufferSize 1024
+#define RSC_KSLOGGER_CBufferSize 1024
 
 /** Interpret the path as a unix file path and return the last path entry.
  * e.g. "/some/path/to/a/file.txt" will result in "file.txt"
@@ -62,23 +62,23 @@ static inline const char *lastPathEntry(const char *const path) {
 }
 
 /** The file descriptor where log entries get written. */
-static int bsg_g_fd = STDOUT_FILENO;
+static int rsc_g_fd = STDOUT_FILENO;
 
 static inline void setLogFD(int fd) {
-    if (bsg_g_fd >= 0 && bsg_g_fd != STDOUT_FILENO &&
-        bsg_g_fd != STDERR_FILENO && bsg_g_fd != STDIN_FILENO) {
-        close(bsg_g_fd);
+    if (rsc_g_fd >= 0 && rsc_g_fd != STDOUT_FILENO &&
+        rsc_g_fd != STDERR_FILENO && rsc_g_fd != STDIN_FILENO) {
+        close(rsc_g_fd);
     }
-    bsg_g_fd = fd;
+    rsc_g_fd = fd;
 }
-#endif // BSG_KSLOG_ENABLED
+#endif // RSC_KSLOG_ENABLED
 
-#if !BSG_KSLOG_ENABLED
-bool bsg_kslog_setLogFilename(__unused const char *filename, __unused bool overwrite) {
+#if !RSC_KSLOG_ENABLED
+bool rsc_kslog_setLogFilename(__unused const char *filename, __unused bool overwrite) {
     return true;
 }
 #else
-bool bsg_kslog_setLogFilename(const char *filename, bool overwrite) {
+bool rsc_kslog_setLogFilename(const char *filename, bool overwrite) {
     if (filename == NULL) {
         setLogFD(STDOUT_FILENO);
         return true;
@@ -90,7 +90,7 @@ bool bsg_kslog_setLogFilename(const char *filename, bool overwrite) {
     }
     int fd = open(filename, openMask, 0644);
     unlikely_if(fd < 0) {
-        bsg_i_kslog_logCBasic("KSLogger: Could not open %s: %s", filename,
+        rsc_i_kslog_logCBasic("KSLogger: Could not open %s: %s", filename,
                               strerror(errno));
         return false;
     }
@@ -101,21 +101,21 @@ bool bsg_kslog_setLogFilename(const char *filename, bool overwrite) {
 #endif
 
 __printflike(1, 2)
-#if !BSG_KSLOG_ENABLED
-void bsg_i_kslog_logCBasic(__unused const char *const fmt, ...) {
+#if !RSC_KSLOG_ENABLED
+void rsc_i_kslog_logCBasic(__unused const char *const fmt, ...) {
 }
 #else
-void bsg_i_kslog_logCBasic(const char *const fmt, ...) {
+void rsc_i_kslog_logCBasic(const char *const fmt, ...) {
     unlikely_if(!fmt) {
         return;
     }
 
-    char buf[BSG_KSLOGGER_CBufferSize];
+    char buf[RSC_KSLOGGER_CBufferSize];
     const int size = sizeof(buf);
 
     va_list args;
     va_start(args, fmt);
-    int len = bsg_vsnprintf(buf, size, fmt, args);
+    int len = rsc_vsnprintf(buf, size, fmt, args);
     if (len > size) {
         len = size;
     }
@@ -131,28 +131,28 @@ void bsg_i_kslog_logCBasic(const char *const fmt, ...) {
         buf[size - 1] = '\n';
     }
 
-    write(bsg_g_fd, buf, (size_t)len);
+    write(rsc_g_fd, buf, (size_t)len);
 }
 #endif
 
 __printflike(5, 6)
-#if !BSG_KSLOG_ENABLED
-void bsg_i_kslog_logC(__unused const char *const level, __unused const char *const file,
+#if !RSC_KSLOG_ENABLED
+void rsc_i_kslog_logC(__unused const char *const level, __unused const char *const file,
                       __unused const int line, __unused const char *const function,
                       __unused const char *const fmt, ...) {
 }
 #else
-void bsg_i_kslog_logC(const char *const level, const char *const file,
+void rsc_i_kslog_logC(const char *const level, const char *const file,
                       const int line, const char *const function,
                       const char *const fmt, ...) {
     unlikely_if(!fmt) {
         return;
     }
 
-    char buf[BSG_KSLOGGER_CBufferSize];
+    char buf[RSC_KSLOGGER_CBufferSize];
     const int size = sizeof(buf);
 
-    int len = bsg_snprintf(buf, size, "%s: %s:%u: %s(): ",
+    int len = rsc_snprintf(buf, size, "%s: %s:%u: %s(): ",
                        level, lastPathEntry(file), line, function);
     if (len < 0) {
         return;
@@ -165,7 +165,7 @@ void bsg_i_kslog_logC(const char *const level, const char *const file,
         va_list args;
         va_start(args, fmt);
         int max = size - len;
-        int msglen = bsg_vsnprintf(buf + len, max, fmt, args);
+        int msglen = rsc_vsnprintf(buf + len, max, fmt, args);
         va_end(args);
         unlikely_if(msglen < 0) {
             return;
@@ -180,6 +180,6 @@ void bsg_i_kslog_logC(const char *const level, const char *const file,
         buf[size - 1] = '\n';
     }
 
-    write(bsg_g_fd, buf, (size_t)len);
+    write(rsc_g_fd, buf, (size_t)len);
 }
 #endif

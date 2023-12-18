@@ -1,6 +1,6 @@
 //
-//  BugsnagEventTests.m
-//  Bugsnag
+//  RSCrashReporterEventTests.m
+//  RSCrashReporter
 //
 //  Created by Simon Maynard on 12/1/14.
 //
@@ -9,26 +9,26 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 
-#import "BSG_RFC3339DateTool.h"
+#import "RSC_RFC3339DateTool.h"
 #import "RSCrashReporter.h"
-#import "BugsnagBreadcrumb+Private.h"
-#import "BugsnagClient+Private.h"
-#import "BugsnagEvent+Private.h"
-#import "BugsnagHandledState.h"
-#import "BugsnagMetadata+Private.h"
-#import "BugsnagSession.h"
-#import "BugsnagSession+Private.h"
-#import "BugsnagStackframe+Private.h"
-#import "BugsnagTestConstants.h"
-#import "BugsnagTestsDummyClass.h"
+#import "RSCrashReporterBreadcrumb+Private.h"
+#import "RSCrashReporterClient+Private.h"
+#import "RSCrashReporterEvent+Private.h"
+#import "RSCrashReporterHandledState.h"
+#import "RSCrashReporterMetadata+Private.h"
+#import "RSCrashReporterSession.h"
+#import "RSCrashReporterSession+Private.h"
+#import "RSCrashReporterStackframe+Private.h"
+#import "RSCrashReporterTestConstants.h"
+#import "RSCrashReporterTestsDummyClass.h"
 
-@interface BugsnagEventTests : XCTestCase
+@interface RSCrashReporterEventTests : XCTestCase
 @end
 
-@implementation BugsnagEventTests
+@implementation RSCrashReporterEventTests
 
-- (BugsnagEvent *)generateEvent:(BugsnagHandledState *)handledState {
-    return [[BugsnagEvent alloc] initWithApp:nil
+- (RSCrashReporterEvent *)generateEvent:(RSCrashReporterHandledState *)handledState {
+    return [[RSCrashReporterEvent alloc] initWithApp:nil
                                       device:nil
                                 handledState:handledState
                                         user:nil
@@ -40,14 +40,14 @@
 }
 
 - (void)testEnabledReleaseStagesSendsFromConfig {
-    BugsnagEvent *event = [self generateEvent:nil];
+    RSCrashReporterEvent *event = [self generateEvent:nil];
     event.enabledReleaseStages = @[@"foo"];
     event.releaseStage = @"foo";
     XCTAssertTrue([event shouldBeSent]);
 }
 
 - (void)testEnabledReleaseStagesSkipsSendFromConfig {
-    BugsnagEvent *event = [self generateEvent:nil];
+    RSCrashReporterEvent *event = [self generateEvent:nil];
     event.enabledReleaseStages = @[ @"foo", @"bar" ];
     event.releaseStage = @"not foo or bar";
     XCTAssertFalse([event shouldBeSent]);
@@ -55,9 +55,9 @@
 
 - (void)testSessionJson {
     NSDate *now = [NSDate date];
-    BugsnagApp *app;
-    BugsnagDevice *device;
-    BugsnagSession *bugsnagSession = [[BugsnagSession alloc] initWithId:@"123"
+    RSCrashReporterApp *app;
+    RSCrashReporterDevice *device;
+    RSCrashReporterSession *bugsnagSession = [[RSCrashReporterSession alloc] initWithId:@"123"
                                                               startedAt:now
                                                                    user:nil
                                                                     app:app
@@ -65,7 +65,7 @@
     bugsnagSession.handledCount = 2;
     bugsnagSession.unhandledCount = 1;
 
-    BugsnagEvent *event = [self generateEvent:nil];
+    RSCrashReporterEvent *event = [self generateEvent:nil];
     event.session = bugsnagSession;
     NSDictionary *json = [event toJsonWithRedactedKeys:nil];
     XCTAssertNotNil(json);
@@ -73,7 +73,7 @@
     NSDictionary *session = json[@"session"];
     XCTAssertNotNil(session);
     XCTAssertEqualObjects(@"123", session[@"id"]);
-    XCTAssertEqualObjects([BSG_RFC3339DateTool stringFromDate:now],
+    XCTAssertEqualObjects([RSC_RFC3339DateTool stringFromDate:now],
                           session[@"startedAt"]);
 
     NSDictionary *events = session[@"events"];
@@ -83,7 +83,7 @@
 }
 
 - (void)testDefaultErrorMessageNilForEmptyThreads {
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{
         @"threads" : @[]
     }];
     NSDictionary *payload = [event toJsonWithRedactedKeys:nil];
@@ -97,47 +97,47 @@
 }
 
 - (void)testEmptyReport {
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{}];
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{}];
     XCTAssertNil(event);
 }
 
 - (void)testUnhandledReportDepth {
     // unhandled reports should calculate their own depth
     NSDictionary *dict = @{@"user.depth": @2};
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:dict];
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:dict];
     XCTAssertEqual(event.depth, 0);
 }
 
 - (void)testHandledReportDepth {
     // handled reports should use the serialised depth
-    BugsnagHandledState *state = [BugsnagHandledState handledStateWithSeverityReason:HandledException];
+    RSCrashReporterHandledState *state = [RSCrashReporterHandledState handledStateWithSeverityReason:HandledException];
     NSDictionary *dict = @{@"user.depth": @2, @"user.handledState": [state toJson]};
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:dict];
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:dict];
     XCTAssertEqual(event.depth, 2);
 }
 
 - (void)testUnhandledReportSeverity {
     // unhandled reports should calculate their own severity
     NSDictionary *dict = @{@"user.state.crash.severity": @"info"};
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:dict];
-    XCTAssertEqual(event.severity, BSGSeverityError);
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:dict];
+    XCTAssertEqual(event.severity, RSCSeverityError);
 }
 
 - (void)testHandledReportSeverity {
     // handled reports should use the serialised depth
-    BugsnagHandledState *state = [BugsnagHandledState handledStateWithSeverityReason:HandledException];
+    RSCrashReporterHandledState *state = [RSCrashReporterHandledState handledStateWithSeverityReason:HandledException];
     NSDictionary *dict = @{@"user.handledState": [state toJson]};
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:dict];
-    XCTAssertEqual(event.severity, BSGSeverityWarning);
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:dict];
+    XCTAssertEqual(event.severity, RSCSeverityWarning);
 }
 
 - (void)testHandledReportMetaData {
-    BugsnagHandledState *state = [BugsnagHandledState handledStateWithSeverityReason:HandledException];
-    BugsnagMetadata *metadata = [BugsnagMetadata new];
+    RSCrashReporterHandledState *state = [RSCrashReporterHandledState handledStateWithSeverityReason:HandledException];
+    RSCrashReporterMetadata *metadata = [RSCrashReporterMetadata new];
     [metadata addMetadata:@"Bar" withKey:@"Foo" toSection:@"Custom"];
     NSDictionary *dict = @{@"user.handledState": [state toJson], @"user.metaData": [metadata toDictionary]};
 
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:dict];
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:dict];
     [event clearMetadataFromSection:@"device"];
     XCTAssertNotNil(event.metadata);
     XCTAssertEqual([[event.metadata toDictionary] count], 1);
@@ -145,11 +145,11 @@
 }
 
 - (void)testUnhandledReportMetaData {
-    BugsnagMetadata *metadata = [BugsnagMetadata new];
+    RSCrashReporterMetadata *metadata = [RSCrashReporterMetadata new];
     [metadata addMetadata:@"Bar" withKey:@"Foo" toSection:@"Custom"];
     NSDictionary *dict = @{@"user.metaData": [metadata toDictionary]};
 
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:dict];
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:dict];
     [event clearMetadataFromSection:@"device"];
     XCTAssertNotNil(event.metadata);
     XCTAssertEqual([[event.metadata toDictionary] count], 1);
@@ -157,7 +157,7 @@
 }
 
 - (void)testAppVersionOverride {
-    BugsnagEvent *overrideReport = [[BugsnagEvent alloc] initWithKSReport:@{
+    RSCrashReporterEvent *overrideReport = [[RSCrashReporterEvent alloc] initWithKSReport:@{
             @"system" : @{
                     @"CFBundleShortVersionString": @"1.1",
             },
@@ -172,7 +172,7 @@
 }
 
 - (void)testBundleVersionOverride {
-    BugsnagEvent *overrideReport = [[BugsnagEvent alloc] initWithKSReport:@{
+    RSCrashReporterEvent *overrideReport = [[RSCrashReporterEvent alloc] initWithKSReport:@{
             @"system" : @{
                     @"CFBundleVersion": @"1.1",
             },
@@ -187,35 +187,35 @@
 }
 
 - (void)testReportAddAttr {
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{@"user.metaData": @{@"user": @{@"id": @"user id"}}}];
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{@"user.metaData": @{@"user": @{@"id": @"user id"}}}];
     [event addMetadata:@"user" withKey:@"foo" toSection:@"bar"];
 }
 
 - (void)testReportAddMetadata {
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{@"user.metaData": @{@"user": @{@"id": @"user id"}}}];
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{@"user.metaData": @{@"user": @{@"id": @"user id"}}}];
     [event addMetadata:@{@"foo": @"bar"} toSection:@"user"];
 }
 
 
 /**
- * Test that BugsnagEvent has an apiKey value and supports non-persistent
+ * Test that RSCrashReporterEvent has an apiKey value and supports non-persistent
  * per-event changes to apiKey.
  */
 - (void)testApiKey {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
     NSException *ex = [[NSException alloc] initWithName:@"myName" reason:@"myReason1" userInfo:nil];
 
     // Check that the event is passed the apiKey
-    [client notify:ex block:^BOOL(BugsnagEvent * _Nonnull event) {
+    [client notify:ex block:^BOOL(RSCrashReporterEvent * _Nonnull event) {
         XCTAssertEqualObjects(event.apiKey, DUMMY_APIKEY_32CHAR_1);
         return true;
     }];
 
     // Check that we can change it
-    [client notify:ex block:^BOOL(BugsnagEvent * _Nonnull event) {
+    [client notify:ex block:^BOOL(RSCrashReporterEvent * _Nonnull event) {
         XCTAssertEqualObjects(event.apiKey, DUMMY_APIKEY_32CHAR_1);
         event.apiKey = DUMMY_APIKEY_32CHAR_2;
         XCTAssertEqual(event.apiKey, DUMMY_APIKEY_32CHAR_2);
@@ -224,7 +224,7 @@
     }];
 
     // Check that the global configuration is unaffected
-    [client notify:ex block:^BOOL(BugsnagEvent * _Nonnull event) {
+    [client notify:ex block:^BOOL(RSCrashReporterEvent * _Nonnull event) {
         XCTAssertEqualObjects(event.apiKey, DUMMY_APIKEY_32CHAR_1);
         event.apiKey = DUMMY_APIKEY_32CHAR_1;
         XCTAssertEqual(event.apiKey, DUMMY_APIKEY_32CHAR_1);
@@ -236,7 +236,7 @@
 
     // Check that previous local and global values are not persisted erroneously
     client.configuration.apiKey = DUMMY_APIKEY_32CHAR_4;
-    [client notify:ex block:^BOOL(BugsnagEvent * _Nonnull event) {
+    [client notify:ex block:^BOOL(RSCrashReporterEvent * _Nonnull event) {
         XCTAssertEqual(event.apiKey, DUMMY_APIKEY_32CHAR_4);
         event.apiKey = DUMMY_APIKEY_32CHAR_1;
         XCTAssertEqual(event.apiKey, DUMMY_APIKEY_32CHAR_1);
@@ -248,7 +248,7 @@
 
     // Check that validation is performed and that invalid API keys can't be set
     client.configuration.apiKey = DUMMY_APIKEY_32CHAR_1;
-    [client notify:ex block:^BOOL(BugsnagEvent * _Nonnull event) {
+    [client notify:ex block:^BOOL(RSCrashReporterEvent * _Nonnull event) {
         event.apiKey = DUMMY_APIKEY_16CHAR;
         XCTAssertEqual(event.apiKey, DUMMY_APIKEY_32CHAR_1);
         return true;
@@ -256,46 +256,46 @@
 }
 
 - (void)testStacktraceTypes {
-    BugsnagEvent *event = [[BugsnagEvent alloc] init];
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] init];
     XCTAssertEqualObjects(event.stacktraceTypes, @[]);
     
-    BugsnagError *error = [[BugsnagError alloc] init];
+    RSCrashReporterError *error = [[RSCrashReporterError alloc] init];
     event.errors = @[error];
-    error.type = BSGErrorTypeCocoa;
+    error.type = RSCErrorTypeCocoa;
     XCTAssertEqualObjects(event.stacktraceTypes, @[@"cocoa"]);
     
-    error.type = BSGErrorTypeReactNativeJs;
+    error.type = RSCErrorTypeReactNativeJs;
     XCTAssertEqualObjects(event.stacktraceTypes, @[@"reactnativejs"]);
 
-    error.type = BSGErrorTypeCSharp;
+    error.type = RSCErrorTypeCSharp;
     XCTAssertEqualObjects(event.stacktraceTypes, @[@"csharp"]);
 
     NSArray *(^ sorted)(NSArray *) = ^(NSArray *array) { return [array sortedArrayUsingSelector:@selector(compare:)]; };
     
-    error = [[BugsnagError alloc] init];
+    error = [[RSCrashReporterError alloc] init];
     event.errors = @[error];
     error.stacktrace = @[
-        [BugsnagStackframe frameFromJson:@{}],
-        [BugsnagStackframe frameFromJson:@{@"type": @"cocoa"}],
-        [BugsnagStackframe frameFromJson:@{@"type": @"reactnativejs"}],
+        [RSCrashReporterStackframe frameFromJson:@{}],
+        [RSCrashReporterStackframe frameFromJson:@{@"type": @"cocoa"}],
+        [RSCrashReporterStackframe frameFromJson:@{@"type": @"reactnativejs"}],
     ];
     XCTAssertEqualObjects(sorted(event.stacktraceTypes), (@[@"cocoa", @"reactnativejs"]));
     
-    event.errors = @[[[BugsnagError alloc] init]];
+    event.errors = @[[[RSCrashReporterError alloc] init]];
     
-    BugsnagThread *thread1 = [[BugsnagThread alloc] init];
+    RSCrashReporterThread *thread1 = [[RSCrashReporterThread alloc] init];
     thread1.stacktrace = @[
-        [BugsnagStackframe frameFromJson:@{@"type": @"c"}],
-        [BugsnagStackframe frameFromJson:@{@"type": @"java"}],
+        [RSCrashReporterStackframe frameFromJson:@{@"type": @"c"}],
+        [RSCrashReporterStackframe frameFromJson:@{@"type": @"java"}],
     ];
-    thread1.type = BSGThreadTypeCocoa;
+    thread1.type = RSCThreadTypeCocoa;
     event.threads = @[thread1];
     XCTAssertEqualObjects(sorted(event.stacktraceTypes), (@[@"c", @"cocoa", @"java"]));
 
-    BugsnagThread *thread2 = [[BugsnagThread alloc] init];
+    RSCrashReporterThread *thread2 = [[RSCrashReporterThread alloc] init];
     thread2.stacktrace = @[
-        [BugsnagStackframe frameFromJson:@{@"type": @"csharp"}],
-        [BugsnagStackframe frameFromJson:@{@"type": @"android"}],
+        [RSCrashReporterStackframe frameFromJson:@{@"type": @"csharp"}],
+        [RSCrashReporterStackframe frameFromJson:@{@"type": @"android"}],
     ];
     event.threads = @[thread1, thread2];
     XCTAssertEqualObjects(sorted(event.stacktraceTypes), (@[@"android", @"c", @"cocoa", @"csharp", @"java"]));
@@ -306,7 +306,7 @@
 - (void)testJsonToEventToJson {
     NSString *directory = [[[[NSBundle bundleForClass:[self class]] resourcePath]
                             stringByAppendingPathComponent:@"Data"]
-                           stringByAppendingPathComponent:@"BugsnagEvents"];
+                           stringByAppendingPathComponent:@"RSCrashReporterEvents"];
     
     NSArray<NSString *> *entries = [NSFileManager.defaultManager contentsOfDirectoryAtPath:directory error:nil];
     
@@ -319,7 +319,7 @@
         NSData *data = [NSData dataWithContentsOfFile:file];
         NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
         
-        BugsnagEvent *event = [[BugsnagEvent alloc] initWithJson:json];
+        RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithJson:json];
         XCTAssertNotNil(event);
         
         NSDictionary *toJson = [event toJsonWithRedactedKeys:nil];
@@ -328,10 +328,10 @@
 }
 
 - (void)testTrimBreadcrumbs {
-    BugsnagEvent *event = [BugsnagEvent new];
+    RSCrashReporterEvent *event = [RSCrashReporterEvent new];
     
-    BugsnagBreadcrumb * (^ MakeBreadcrumb)() = ^(BSGBreadcrumbType type, NSString *message, NSDictionary *metadata) {
-        BugsnagBreadcrumb *breadcrumb = [BugsnagBreadcrumb new];
+    RSCrashReporterBreadcrumb * (^ MakeBreadcrumb)() = ^(RSCBreadcrumbType type, NSString *message, NSDictionary *metadata) {
+        RSCrashReporterBreadcrumb *breadcrumb = [RSCrashReporterBreadcrumb new];
         breadcrumb.type = type;
         breadcrumb.message = message;
         breadcrumb.metadata = metadata;
@@ -339,9 +339,9 @@
     };
     
     event.breadcrumbs = @[
-        MakeBreadcrumb(BSGBreadcrumbTypeState, @"Test started", @{}), // 91 bytes
-        MakeBreadcrumb(BSGBreadcrumbTypeLog, @"Some log message", @{@"some": @"metadata"}), // 110 bytes
-        MakeBreadcrumb(BSGBreadcrumbTypeManual, @"The final breadcrumb", @{@"key": @"untouched"})];
+        MakeBreadcrumb(RSCBreadcrumbTypeState, @"Test started", @{}), // 91 bytes
+        MakeBreadcrumb(RSCBreadcrumbTypeLog, @"Some log message", @{@"some": @"metadata"}), // 110 bytes
+        MakeBreadcrumb(RSCBreadcrumbTypeManual, @"The final breadcrumb", @{@"key": @"untouched"})];
     
     event.usage = @{@"sentinel": @42}; // Enable gathering telemetry
     
@@ -349,11 +349,11 @@
     
     XCTAssertEqual(event.breadcrumbs.count, 2);
     
-    XCTAssertEqual       (event.breadcrumbs[0].type, BSGBreadcrumbTypeLog);
+    XCTAssertEqual       (event.breadcrumbs[0].type, RSCBreadcrumbTypeLog);
     XCTAssertEqualObjects(event.breadcrumbs[0].message, @"Removed, along with 1 older breadcrumb, to reduce payload size");
     XCTAssertEqualObjects(event.breadcrumbs[0].metadata, @{});
     
-    XCTAssertEqual       (event.breadcrumbs[1].type, BSGBreadcrumbTypeManual);
+    XCTAssertEqual       (event.breadcrumbs[1].type, RSCBreadcrumbTypeManual);
     XCTAssertEqualObjects(event.breadcrumbs[1].message, @"The final breadcrumb");
     XCTAssertEqualObjects(event.breadcrumbs[1].metadata, @{@"key": @"untouched"});
     
@@ -361,9 +361,9 @@
 }
 
 - (void)testTrimSingleBreadcrumbs {
-    BugsnagEvent *event = [BugsnagEvent new];
+    RSCrashReporterEvent *event = [RSCrashReporterEvent new];
     
-    BugsnagBreadcrumb *breadcrumb = [BugsnagBreadcrumb new]; 
+    RSCrashReporterBreadcrumb *breadcrumb = [RSCrashReporterBreadcrumb new]; 
     breadcrumb.message = @""
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i"
     "ncididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostru"
@@ -372,7 +372,7 @@
     "ulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui"
     " officia deserunt mollit anim id est laborum.";
     breadcrumb.metadata = @{@"something": @"👍🏾🔥"};
-    breadcrumb.type = BSGBreadcrumbTypeError;
+    breadcrumb.type = RSCBreadcrumbTypeError;
     event.breadcrumbs = @[breadcrumb];
     
     NSUInteger byteCount = [NSJSONSerialization dataWithJSONObject:[breadcrumb objectValue] options:0 error:NULL].length; 
@@ -381,17 +381,17 @@
     
     [event trimBreadcrumbs:100];
     
-    XCTAssertEqual       (event.breadcrumbs[0].type, BSGBreadcrumbTypeError);
+    XCTAssertEqual       (event.breadcrumbs[0].type, RSCBreadcrumbTypeError);
     XCTAssertEqualObjects(event.breadcrumbs[0].message, @"Removed to reduce payload size");
     XCTAssertEqualObjects(event.breadcrumbs[0].metadata, @{});
     XCTAssertEqualObjects(event.usage, (@{@"system": @{@"breadcrumbBytesRemoved": @(byteCount), @"breadcrumbsRemoved": @1}}));
 }
 
 - (void)testTruncateStrings {
-    BugsnagEvent *event = [BugsnagEvent new];
+    RSCrashReporterEvent *event = [RSCrashReporterEvent new];
     
-    BugsnagBreadcrumb * (^ MakeBreadcrumb)() = ^(NSString *message) {
-        BugsnagBreadcrumb *breadcrumb = [BugsnagBreadcrumb new];
+    RSCrashReporterBreadcrumb * (^ MakeBreadcrumb)() = ^(NSString *message) {
+        RSCrashReporterBreadcrumb *breadcrumb = [RSCrashReporterBreadcrumb new];
         breadcrumb.message = message;
         breadcrumb.metadata = @{@"string": message};
         return breadcrumb;
@@ -406,7 +406,7 @@
         
         MakeBreadcrumb(@"20 characters string")];
     
-    event.metadata = [[BugsnagMetadata alloc] initWithDictionary:@{}];
+    event.metadata = [[RSCrashReporterMetadata alloc] initWithDictionary:@{}];
     [event addMetadata:@"From its medieval or"
      "igins to the digital era, learn everything there is to know about the ubiquitous lorem ipsum passage."
                withKey:@"name" toSection:@"test"];
@@ -442,7 +442,7 @@
 // MARK: - Feature flags interface
 
 - (void)testFeatureFlags {
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{
         @"user.metaData": @{
                 @"user": @{@"id": @"user id"}
         }}];
@@ -472,7 +472,7 @@
 // MARK: - Metadata interface
 
 - (void)testAddMetadataSectionKeyValue {
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{
         @"user.metaData": @{
                 @"user": @{@"id": @"user id"}
         }}];
@@ -500,11 +500,11 @@
  */
 - (void)testInvalidSectionData {
     NSException *ex = [[NSException alloc] initWithName:@"myName" reason:@"myReason1" userInfo:nil];
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
-    [client notify:ex block:^BOOL(BugsnagEvent * _Nonnull event) {
+    [client notify:ex block:^BOOL(RSCrashReporterEvent * _Nonnull event) {
         [event clearMetadataFromSection:@"app"];
         [event clearMetadataFromSection:@"user"];
         [event clearMetadataFromSection:@"device"];
@@ -521,11 +521,11 @@
 
 - (void)testInvalidKeyValueData {
     NSException *ex = [[NSException alloc] initWithName:@"myName" reason:@"myReason1" userInfo:nil];
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
-    [client notify:ex block:^BOOL(BugsnagEvent * _Nonnull event) {
+    [client notify:ex block:^BOOL(RSCrashReporterEvent * _Nonnull event) {
         [event clearMetadataFromSection:@"app"];
         [event clearMetadataFromSection:@"user"];
         [event clearMetadataFromSection:@"device"];
@@ -540,7 +540,7 @@
         XCTAssertEqual([[event.metadata toDictionary] count], 1);
         XCTAssertNotNil([event.metadata getMetadataFromSection:@"mySection" withKey:@"myKey"]);
 
-        BugsnagTestsDummyClass *dummy = [BugsnagTestsDummyClass new];
+        RSCrashReporterTestsDummyClass *dummy = [RSCrashReporterTestsDummyClass new];
         [event addMetadata:dummy withKey:@"myNewKey" toSection:@"mySection"];
         XCTAssertEqual([[event.metadata toDictionary] count], 1);
         XCTAssertNil([event.metadata getMetadataFromSection:@"mySection" withKey:@"myNewKey"]);
@@ -554,7 +554,7 @@
 
 - (void)testClearMetadataSection {
     // Setup
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{
         @"user.metaData": @{
                 @"user": @{@"id": @"user id"}
         }}];
@@ -594,7 +594,7 @@
 
 - (void)testClearMetadataSectionWithKey {
     // Setup
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{
         @"user.metaData": @{
                 @"user": @{@"id": @"user id"}
         }}];
@@ -617,7 +617,7 @@
 
 - (void)testClearMetadataSectionWithKeyNonExistentKeys {
     // Setup
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{
         @"user.metaData": @{
                 @"user": @{@"id": @"user id"}
         }}];
@@ -642,25 +642,25 @@
 }
 
 - (void)testUnhandled {
-    BugsnagHandledState *state = [BugsnagHandledState handledStateWithSeverityReason:HandledException];
-    BugsnagEvent *event = [self generateEvent:state];
+    RSCrashReporterHandledState *state = [RSCrashReporterHandledState handledStateWithSeverityReason:HandledException];
+    RSCrashReporterEvent *event = [self generateEvent:state];
     XCTAssertFalse(event.unhandled);
 
-    state = [BugsnagHandledState handledStateWithSeverityReason:UnhandledException];
+    state = [RSCrashReporterHandledState handledStateWithSeverityReason:UnhandledException];
     event = [self generateEvent:state];
     XCTAssertTrue(event.unhandled);
 }
 
 - (void)testUnhandledOverride {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
 
     NSException *ex = [[NSException alloc] initWithName:@"myName" reason:@"myReason1" userInfo:nil];
-    __block BugsnagEvent *eventRef = nil;
+    __block RSCrashReporterEvent *eventRef = nil;
 
     // No change to unhandled.
-    [client notify:ex block:^BOOL(BugsnagEvent * _Nonnull event) {
+    [client notify:ex block:^BOOL(RSCrashReporterEvent * _Nonnull event) {
         eventRef = event;
         return true;
     }];
@@ -668,7 +668,7 @@
     XCTAssertEqual(eventRef.handledState.unhandledOverridden, NO);
 
     // Change unhandled from NO to YES.
-    [client notify:ex block:^BOOL(BugsnagEvent * _Nonnull event) {
+    [client notify:ex block:^BOOL(RSCrashReporterEvent * _Nonnull event) {
         eventRef = event;
         event.unhandled = YES;
         return true;
@@ -677,7 +677,7 @@
     XCTAssertEqual(eventRef.handledState.unhandledOverridden, YES);
 
     // Set unhandled to NO, but was already NO.
-    [client notify:ex block:^BOOL(BugsnagEvent * _Nonnull event) {
+    [client notify:ex block:^BOOL(RSCrashReporterEvent * _Nonnull event) {
         eventRef = event;
         event.unhandled = NO;
         return true;
@@ -687,7 +687,7 @@
 }
 
 - (void)testMetadataMutability {
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{@"dummy" : @"value"}];
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{@"dummy" : @"value"}];
 
     // Immutable in, mutable out
     [event addMetadata:@{@"foo" : @"bar"} toSection:@"section1"];
@@ -704,7 +704,7 @@
  * Legacy unhandled reports stored user in metadata - this should be loaded if present
  */
 /*- (void)testLoadUserFromMetadata {
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{
             @"user": @{
                     @"metaData": @{
                             @"user": @{
@@ -724,7 +724,7 @@
  * Current unhandled reports store user in state - this should be loaded if present
  */
 /*- (void)testLoadUserFromState {
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{
             @"user": @{
                     @"state": @{
                             @"user": @{
@@ -741,14 +741,14 @@
 }
 
 - (void)testLoadNoUser {
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{@"user": @{}}];
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{@"user": @{}}];
     XCTAssertNil(event.user.id);
     XCTAssertNil(event.user.name);
     XCTAssertNil(event.user.email);
 }*/
 
 - (void)testCodeBundleIdHandled {
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithUserData:@{
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithUserData:@{
             @"user": @{
                     @"event": @{
                             @"app": @{
@@ -761,7 +761,7 @@
 }
 
 - (void)testCodeBundleIdUnhandled {
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{
             @"user": @{
                     @"state": @{
                             @"app": @{
@@ -778,7 +778,7 @@
             @"fooVersion": @"5.23",
             @"barVersion": @"7.902.40fc"
     };
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{
             @"system": @{
                     @"os_version": @"13.2"
             },

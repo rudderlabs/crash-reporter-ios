@@ -24,24 +24,24 @@
 // THE SOFTWARE.
 //
 
-#ifndef HDR_BSG_KSBacktrace_private_h
-#define HDR_BSG_KSBacktrace_private_h
+#ifndef HDR_RSC_KSBacktrace_private_h
+#define HDR_RSC_KSBacktrace_private_h
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "BSG_KSArchSpecific.h"
-#include "BSG_KSBacktrace.h"
+#include "RSC_KSArchSpecific.h"
+#include "RSC_KSBacktrace.h"
 
 #include <stdbool.h>
 #include <sys/ucontext.h>
 
-/** Point at which bsg_ksbt_backtraceLength() will give up trying to count.
+/** Point at which rsc_ksbt_backtraceLength() will give up trying to count.
  *
  * This really only comes into play during a stack overflow.
  */
-#define BSG_kBacktraceGiveUpPoint 10000000
+#define RSC_kBacktraceGiveUpPoint 10000000
 
 /** Count how many entries there are in a potential backtrace.
  *
@@ -52,7 +52,7 @@ extern "C" {
  *
  * @return The number of backtrace entries.
  */
-int bsg_ksbt_backtraceLength(const BSG_STRUCT_MCONTEXT_L *machineContext);
+int rsc_ksbt_backtraceLength(const RSC_STRUCT_MCONTEXT_L *machineContext);
 
 /** Check if a backtrace is too long.
  *
@@ -62,8 +62,8 @@ int bsg_ksbt_backtraceLength(const BSG_STRUCT_MCONTEXT_L *machineContext);
  *
  * @return true if the backtrace is longer than maxLength.
  */
-bool bsg_ksbt_isBacktraceTooLong(
-    const BSG_STRUCT_MCONTEXT_L *const machineContext, int maxLength);
+bool rsc_ksbt_isBacktraceTooLong(
+    const RSC_STRUCT_MCONTEXT_L *const machineContext, int maxLength);
 
 /** Generate a backtrace using the thread state in the specified machine context
  *  (async-safe).
@@ -78,7 +78,7 @@ bool bsg_ksbt_isBacktraceTooLong(
  *
  * @return The number of backtrace entries generated.
  */
-int bsg_ksbt_backtraceThreadState(const BSG_STRUCT_MCONTEXT_L *machineContext,
+int rsc_ksbt_backtraceThreadState(const RSC_STRUCT_MCONTEXT_L *machineContext,
                                   uintptr_t *backtraceBuffer, int skipEntries,
                                   int maxEntries);
 

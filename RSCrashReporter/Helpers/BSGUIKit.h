@@ -1,9 +1,9 @@
 //
-//  BSGUIKit.h
-//  Bugsnag
+//  RSCUIKit.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 01/12/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
 #if __has_include(<UIKit/UIKit.h>)

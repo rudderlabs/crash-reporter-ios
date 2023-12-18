@@ -1,9 +1,9 @@
 //
-//  BugsnagConfiguration.m
+//  RSCrashReporterConfiguration.m
 //
 //  Created by Conrad Irwin on 2014-10-01.
 //
-//  Copyright (c) 2014 Bugsnag, Inc. All rights reserved.
+//  Copyright (c) 2014 RSCrashReporter, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,22 +24,22 @@
 // THE SOFTWARE.
 //
 
-#import "BugsnagConfiguration+Private.h"
+#import "RSCrashReporterConfiguration+Private.h"
 
-#import "BSGConfigurationBuilder.h"
-#import "BSGDefines.h"
-#import "BSGFeatureFlagStore.h"
-#import "BSGKeys.h"
-#import "BugsnagApiClient.h"
-#import "BugsnagEndpointConfiguration.h"
-#import "BugsnagErrorTypes.h"
-#import "BugsnagLogger.h"
-#import "BugsnagMetadata+Private.h"
-#import "BugsnagUser+Private.h"
+#import "RSCConfigurationBuilder.h"
+#import "RSCDefines.h"
+#import "RSCFeatureFlagStore.h"
+#import "RSCKeys.h"
+#import "RSCrashReporterApiClient.h"
+#import "RSCrashReporterEndpointConfiguration.h"
+#import "RSCrashReporterErrorTypes.h"
+#import "RSCrashReporterLogger.h"
+#import "RSCrashReporterMetadata+Private.h"
+#import "RSCrashReporterUser+Private.h"
 
-const NSUInteger BugsnagAppHangThresholdFatalOnly = INT_MAX;
+const NSUInteger RSCrashReporterAppHangThresholdFatalOnly = INT_MAX;
 
-static const int BSGApiKeyLength = 32;
+static const int RSCApiKeyLength = 32;
 
 static NSURLSession *getConfigDefaultURLSession(void);
 static NSURLSession *getConfigDefaultURLSession(void) {
@@ -54,15 +54,15 @@ static NSURLSession *getConfigDefaultURLSession(void) {
 }
 
 // =============================================================================
-// MARK: - BugsnagConfiguration
+// MARK: - RSCrashReporterConfiguration
 // =============================================================================
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BugsnagConfiguration
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCrashReporterConfiguration
 
 + (instancetype _Nonnull)loadConfig {
     NSDictionary *options = [[NSBundle mainBundle] infoDictionary][@"bugsnag"];
-    return BSGConfigurationWithOptions(options);
+    return RSCConfigurationWithOptions(options);
 }
 
 // -----------------------------------------------------------------------------
@@ -70,14 +70,14 @@ BSG_OBJC_DIRECT_MEMBERS
 // -----------------------------------------------------------------------------
 
 /**
- * Produce a shallow copy of the BugsnagConfiguration object.
+ * Produce a shallow copy of the RSCrashReporterConfiguration object.
  *
  * @param zone This parameter is ignored. Memory zones are no longer used by Objective-C.
  */
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    BugsnagConfiguration *copy = [[BugsnagConfiguration alloc] initWithApiKey:[self.apiKey copy]];
+    RSCrashReporterConfiguration *copy = [[RSCrashReporterConfiguration alloc] initWithApiKey:[self.apiKey copy]];
     // Omit apiKey - it's set explicitly in the line above
-#if BSG_HAVE_APP_HANG_DETECTION
+#if RSC_HAVE_APP_HANG_DETECTION
     [copy setAppHangThresholdMillis:self.appHangThresholdMillis];
     [copy setReportBackgroundAppHangs:self.reportBackgroundAppHangs];
 #endif
@@ -108,7 +108,7 @@ BSG_OBJC_DIRECT_MEMBERS
     [copy setPlugins:[self.plugins mutableCopyWithZone:zone]];
     [copy setReleaseStage:self.releaseStage];
     copy.session = self.session; // NSURLSession does not declare conformance to NSCopying
-#if BSG_HAVE_MACH_THREADS
+#if RSC_HAVE_MACH_THREADS
     [copy setSendThreads:self.sendThreads];
 #endif
     [copy setUser:self.user.id
@@ -141,7 +141,7 @@ BSG_OBJC_DIRECT_MEMBERS
 
     BOOL isHex = (NSNotFound == [[apiKey uppercaseString] rangeOfCharacterFromSet:chars].location);
 
-    return isHex && [apiKey length] == BSGApiKeyLength;
+    return isHex && [apiKey length] == RSCApiKeyLength;
 }
 
 // -----------------------------------------------------------------------------
@@ -153,7 +153,7 @@ BSG_OBJC_DIRECT_MEMBERS
  */
 - (instancetype)init {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:
-            @"-[BugsnagConfiguration init] is unavailable.  Use -[BugsnagConfiguration initWithApiKey:] instead." userInfo:nil];
+            @"-[RSCrashReporterConfiguration init] is unavailable.  Use -[RSCrashReporterConfiguration initWithApiKey:] instead." userInfo:nil];
 }
 
 /**
@@ -166,12 +166,12 @@ BSG_OBJC_DIRECT_MEMBERS
     if (apiKey) {
         [self setApiKey:apiKey];
     }
-    _featureFlagStore = [[BSGFeatureFlagStore alloc] init];
-    _metadata = [[BugsnagMetadata alloc] init];
-    _endpoints = [BugsnagEndpointConfiguration new];
+    _featureFlagStore = [[RSCFeatureFlagStore alloc] init];
+    _metadata = [[RSCrashReporterMetadata alloc] init];
+    _endpoints = [RSCrashReporterEndpointConfiguration new];
     _autoDetectErrors = YES;
-#if BSG_HAVE_APP_HANG_DETECTION
-    _appHangThresholdMillis = BugsnagAppHangThresholdFatalOnly;
+#if RSC_HAVE_APP_HANG_DETECTION
+    _appHangThresholdMillis = RSCrashReporterAppHangThresholdFatalOnly;
 #endif
     _onSendBlocks = [NSMutableArray new];
     _onSessionBlocks = [NSMutableArray new];
@@ -179,7 +179,7 @@ BSG_OBJC_DIRECT_MEMBERS
     _plugins = [NSMutableSet new];
     _enabledReleaseStages = nil;
     _redactedKeys = [NSSet setWithArray:@[@"password"]];
-    _enabledBreadcrumbTypes = BSGEnabledBreadcrumbTypeAll;
+    _enabledBreadcrumbTypes = RSCEnabledBreadcrumbTypeAll;
     _launchDurationMillis = 5000;
     _sendLaunchCrashesSynchronously = YES;
     _attemptDeliveryOnCrash = NO;
@@ -188,27 +188,27 @@ BSG_OBJC_DIRECT_MEMBERS
     _maxPersistedSessions = 128;
     _maxStringValueLength = 10000;
     _autoTrackSessions = YES;
-#if BSG_HAVE_MACH_THREADS
-    _sendThreads = BSGThreadSendPolicyAlways;
+#if RSC_HAVE_MACH_THREADS
+    _sendThreads = RSCThreadSendPolicyAlways;
 #else
-    _sendThreads = BSGThreadSendPolicyNever;
+    _sendThreads = RSCThreadSendPolicyNever;
 #endif
     // Default to recording all error types
-    _enabledErrorTypes = [BugsnagErrorTypes new];
+    _enabledErrorTypes = [RSCrashReporterErrorTypes new];
 
     // Enabling OOM detection only happens in release builds, to avoid triggering
     // the heuristic when killing/restarting an app in Xcode or similar.
     _persistUser = YES;
     // persistUser isn't settable until post-init.
-    _user = BSGGetPersistedUser();
+    _user = RSCGetPersistedUser();
 
-    _telemetry = BSGTelemetryAll;
+    _telemetry = RSCTelemetryAll;
     
     NSString *releaseStage = nil;
     #if defined(DEBUG) && DEBUG
-        releaseStage = BSGKeyDevelopment;
+        releaseStage = RSCKeyDevelopment;
     #else
-        releaseStage = BSGKeyProduction;
+        releaseStage = RSCKeyProduction;
     #endif
 
     NSString *appType = nil;
@@ -236,13 +236,13 @@ BSG_OBJC_DIRECT_MEMBERS
     if (!(self = [super init])) {
         return nil;
     }
-    _appType = dictionaryRepresentation[BSGKeyAppType];
-    _appVersion = dictionaryRepresentation[BSGKeyAppVersion];
-    _bundleVersion = dictionaryRepresentation[BSGKeyBundleVersion];
-    _context = dictionaryRepresentation[BSGKeyContext];
-    _enabledReleaseStages = dictionaryRepresentation[BSGKeyEnabledReleaseStages];
-    _featureFlagStore = [[BSGFeatureFlagStore alloc] init];
-    _releaseStage = dictionaryRepresentation[BSGKeyReleaseStage];
+    _appType = dictionaryRepresentation[RSCKeyAppType];
+    _appVersion = dictionaryRepresentation[RSCKeyAppVersion];
+    _bundleVersion = dictionaryRepresentation[RSCKeyBundleVersion];
+    _context = dictionaryRepresentation[RSCKeyContext];
+    _enabledReleaseStages = dictionaryRepresentation[RSCKeyEnabledReleaseStages];
+    _featureFlagStore = [[RSCFeatureFlagStore alloc] init];
+    _releaseStage = dictionaryRepresentation[RSCKeyReleaseStage];
     return self;
 }
 
@@ -252,12 +252,12 @@ BSG_OBJC_DIRECT_MEMBERS
 
 - (NSDictionary<NSString *, id> *)dictionaryRepresentation {
     NSMutableDictionary *dictionaryRepresentation = [NSMutableDictionary dictionary];
-    dictionaryRepresentation[BSGKeyAppType] = self.appType;
-    dictionaryRepresentation[BSGKeyAppVersion] = self.appVersion;
-    dictionaryRepresentation[BSGKeyBundleVersion] = self.bundleVersion;
-    dictionaryRepresentation[BSGKeyContext] = self.context;
-    dictionaryRepresentation[BSGKeyEnabledReleaseStages] = self.enabledReleaseStages.allObjects;
-    dictionaryRepresentation[BSGKeyReleaseStage] = self.releaseStage;
+    dictionaryRepresentation[RSCKeyAppType] = self.appType;
+    dictionaryRepresentation[RSCKeyAppVersion] = self.appVersion;
+    dictionaryRepresentation[RSCKeyBundleVersion] = self.bundleVersion;
+    dictionaryRepresentation[RSCKeyContext] = self.context;
+    dictionaryRepresentation[RSCKeyEnabledReleaseStages] = self.enabledReleaseStages.allObjects;
+    dictionaryRepresentation[RSCKeyReleaseStage] = self.releaseStage;
     return dictionaryRepresentation;
 }
 
@@ -272,10 +272,10 @@ BSG_OBJC_DIRECT_MEMBERS
 }
 
 - (void)setUser:(NSString *)userId withEmail:(NSString *)email andName:(NSString *)name {
-    BugsnagUser *user = [[BugsnagUser alloc] initWithId:userId name:name emailAddress:email]; 
+    RSCrashReporterUser *user = [[RSCrashReporterUser alloc] initWithId:userId name:name emailAddress:email]; 
     self.user = user;
     if (self.persistUser) {
-        BSGSetPersistedUser(user);
+        RSCSetPersistedUser(user);
     }
 }
 
@@ -288,21 +288,21 @@ BSG_OBJC_DIRECT_MEMBERS
 // MARK: - onSendBlock
 // =============================================================================
 
-- (BugsnagOnSendErrorRef)addOnSendErrorBlock:(BugsnagOnSendErrorBlock)block {
-    BugsnagOnSendErrorBlock callback = [block copy];
+- (RSCrashReporterOnSendErrorRef)addOnSendErrorBlock:(RSCrashReporterOnSendErrorBlock)block {
+    RSCrashReporterOnSendErrorBlock callback = [block copy];
     [self.onSendBlocks addObject:callback];
     return callback;
 }
 
-- (void)removeOnSendError:(BugsnagOnSendErrorRef)callback {
+- (void)removeOnSendError:(RSCrashReporterOnSendErrorRef)callback {
     if (![callback isKindOfClass:NSClassFromString(@"NSBlock")]) {
-        bsg_log_err(@"Invalid object type passed to %@", NSStringFromSelector(_cmd));
+        rsc_log_err(@"Invalid object type passed to %@", NSStringFromSelector(_cmd));
         return;
     }
     [self.onSendBlocks removeObject:(id)callback];
 }
 
-- (void)removeOnSendErrorBlock:(BugsnagOnSendErrorBlock)block {
+- (void)removeOnSendErrorBlock:(RSCrashReporterOnSendErrorBlock)block {
     [self.onSendBlocks removeObject:block];
 }
 
@@ -310,21 +310,21 @@ BSG_OBJC_DIRECT_MEMBERS
 // MARK: - onSessionBlock
 // =============================================================================
 
-- (BugsnagOnSessionRef)addOnSessionBlock:(BugsnagOnSessionBlock)block {
-    BugsnagOnSessionBlock callback = [block copy];
+- (RSCrashReporterOnSessionRef)addOnSessionBlock:(RSCrashReporterOnSessionBlock)block {
+    RSCrashReporterOnSessionBlock callback = [block copy];
     [self.onSessionBlocks addObject:callback];
     return callback;
 }
 
-- (void)removeOnSession:(BugsnagOnSessionRef)callback {
+- (void)removeOnSession:(RSCrashReporterOnSessionRef)callback {
     if (![callback isKindOfClass:NSClassFromString(@"NSBlock")]) {
-        bsg_log_err(@"Invalid object type passed to %@", NSStringFromSelector(_cmd));
+        rsc_log_err(@"Invalid object type passed to %@", NSStringFromSelector(_cmd));
         return;
     }
     [self.onSessionBlocks removeObject:(id)callback];
 }
 
-- (void)removeOnSessionBlock:(BugsnagOnSessionBlock)block {
+- (void)removeOnSessionBlock:(RSCrashReporterOnSessionBlock)block {
     [self.onSessionBlocks removeObject:block];
 }
 
@@ -332,21 +332,21 @@ BSG_OBJC_DIRECT_MEMBERS
 // MARK: - onBreadcrumbBlock
 // =============================================================================
 
-- (BugsnagOnBreadcrumbRef)addOnBreadcrumbBlock:(BugsnagOnBreadcrumbBlock)block {
-    BugsnagOnBreadcrumbBlock callback = [block copy];
+- (RSCrashReporterOnBreadcrumbRef)addOnBreadcrumbBlock:(RSCrashReporterOnBreadcrumbBlock)block {
+    RSCrashReporterOnBreadcrumbBlock callback = [block copy];
     [self.onBreadcrumbBlocks addObject:callback];
     return callback;
 }
 
-- (void)removeOnBreadcrumb:(BugsnagOnBreadcrumbRef)callback {
+- (void)removeOnBreadcrumb:(RSCrashReporterOnBreadcrumbRef)callback {
     if (![callback isKindOfClass:NSClassFromString(@"NSBlock")]) {
-        bsg_log_err(@"Invalid object type passed to %@", NSStringFromSelector(_cmd));
+        rsc_log_err(@"Invalid object type passed to %@", NSStringFromSelector(_cmd));
         return;
     }
     [self.onBreadcrumbBlocks removeObject:(id)callback];
 }
 
-- (void)removeOnBreadcrumbBlock:(BugsnagOnBreadcrumbBlock)block {
+- (void)removeOnBreadcrumbBlock:(RSCrashReporterOnBreadcrumbBlock)block {
     [self.onBreadcrumbBlocks removeObject:block];
 }
 
@@ -354,7 +354,7 @@ BSG_OBJC_DIRECT_MEMBERS
 // MARK: -
 // =============================================================================
 
-- (void)setEndpoints:(BugsnagEndpointConfiguration *)endpoints {
+- (void)setEndpoints:(RSCrashReporterEndpointConfiguration *)endpoints {
     if ([self isValidURLString:endpoints.notify]) {
         _endpoints.notify = [endpoints.notify copy];
     } else {
@@ -365,7 +365,7 @@ BSG_OBJC_DIRECT_MEMBERS
     if ([self isValidURLString:endpoints.sessions]) {
         _endpoints.sessions = [endpoints.sessions copy];
     } else {
-        bsg_log_err(@"Invalid URL supplied for session endpoint");
+        rsc_log_err(@"Invalid URL supplied for session endpoint");
         _endpoints.sessions = @"";
     }
 }
@@ -379,7 +379,7 @@ BSG_OBJC_DIRECT_MEMBERS
 
 - (void)setPersistUser:(BOOL)persistUser {
     _persistUser = persistUser;
-    BSGSetPersistedUser(persistUser ? self.user : nil);
+    RSCSetPersistedUser(persistUser ? self.user : nil);
 }
 
 // -----------------------------------------------------------------------------
@@ -390,7 +390,7 @@ BSG_OBJC_DIRECT_MEMBERS
     if (appHangThresholdMillis >= 250) {
         _appHangThresholdMillis = appHangThresholdMillis;
     } else {
-        bsg_log_err(@"Invalid configuration value detected. Option appHangThresholdMillis "
+        rsc_log_err(@"Invalid configuration value detected. Option appHangThresholdMillis "
                     "should be greater than or equal to 250. Supplied value is %lu",
                     (unsigned long)appHangThresholdMillis);
     }
@@ -400,7 +400,7 @@ BSG_OBJC_DIRECT_MEMBERS
     if (maxPersistedEvents >= 1) {
         _maxPersistedEvents = maxPersistedEvents;
     } else {
-        bsg_log_err(@"Invalid configuration value detected. Option maxPersistedEvents "
+        rsc_log_err(@"Invalid configuration value detected. Option maxPersistedEvents "
                     "should be a non-zero integer. Supplied value is %lu",
                     (unsigned long)maxPersistedEvents);
     }
@@ -410,7 +410,7 @@ BSG_OBJC_DIRECT_MEMBERS
     if (maxPersistedSessions >= 1) {
         _maxPersistedSessions = maxPersistedSessions;
     } else {
-        bsg_log_err(@"Invalid configuration value detected. Option maxPersistedSessions "
+        rsc_log_err(@"Invalid configuration value detected. Option maxPersistedSessions "
                     "should be a non-zero integer. Supplied value is %lu",
                     (unsigned long)maxPersistedSessions);
     }
@@ -419,7 +419,7 @@ BSG_OBJC_DIRECT_MEMBERS
 - (void)setMaxBreadcrumbs:(NSUInteger)newValue {
     static const NSUInteger maxAllowed = 500;
     if (newValue > maxAllowed) {
-        bsg_log_err(@"Invalid configuration value detected. "
+        rsc_log_err(@"Invalid configuration value detected. "
                     "Option maxBreadcrumbs should be an integer between 0-%lu. "
                     "Supplied value is %lu",
                     (unsigned long)maxAllowed,
@@ -459,29 +459,29 @@ BSG_OBJC_DIRECT_MEMBERS
  * @param type The breadcrumb type to test
  * @returns Whether to record the breadcrumb
  */
-- (BOOL)shouldRecordBreadcrumbType:(BSGBreadcrumbType)type {
-    // enabledBreadcrumbTypes is BSGEnabledBreadcrumbTypeNone
-    if (self.enabledBreadcrumbTypes == BSGEnabledBreadcrumbTypeNone && type != BSGBreadcrumbTypeManual) {
+- (BOOL)shouldRecordBreadcrumbType:(RSCBreadcrumbType)type {
+    // enabledBreadcrumbTypes is RSCEnabledBreadcrumbTypeNone
+    if (self.enabledBreadcrumbTypes == RSCEnabledBreadcrumbTypeNone && type != RSCBreadcrumbTypeManual) {
         return NO;
     }
 
     switch (type) {
-        case BSGBreadcrumbTypeManual:
+        case RSCBreadcrumbTypeManual:
             return YES;
-        case BSGBreadcrumbTypeError :
-            return (self.enabledBreadcrumbTypes & BSGEnabledBreadcrumbTypeError) != 0;
-        case BSGBreadcrumbTypeLog:
-            return (self.enabledBreadcrumbTypes & BSGEnabledBreadcrumbTypeLog) != 0;
-        case BSGBreadcrumbTypeNavigation:
-            return (self.enabledBreadcrumbTypes & BSGEnabledBreadcrumbTypeNavigation) != 0;
-        case BSGBreadcrumbTypeProcess:
-            return (self.enabledBreadcrumbTypes & BSGEnabledBreadcrumbTypeProcess) != 0;
-        case BSGBreadcrumbTypeRequest:
-            return (self.enabledBreadcrumbTypes & BSGEnabledBreadcrumbTypeRequest) != 0;
-        case BSGBreadcrumbTypeState:
-            return (self.enabledBreadcrumbTypes & BSGEnabledBreadcrumbTypeState) != 0;
-        case BSGBreadcrumbTypeUser:
-            return (self.enabledBreadcrumbTypes & BSGEnabledBreadcrumbTypeUser) != 0;
+        case RSCBreadcrumbTypeError :
+            return (self.enabledBreadcrumbTypes & RSCEnabledBreadcrumbTypeError) != 0;
+        case RSCBreadcrumbTypeLog:
+            return (self.enabledBreadcrumbTypes & RSCEnabledBreadcrumbTypeLog) != 0;
+        case RSCBreadcrumbTypeNavigation:
+            return (self.enabledBreadcrumbTypes & RSCEnabledBreadcrumbTypeNavigation) != 0;
+        case RSCBreadcrumbTypeProcess:
+            return (self.enabledBreadcrumbTypes & RSCEnabledBreadcrumbTypeProcess) != 0;
+        case RSCBreadcrumbTypeRequest:
+            return (self.enabledBreadcrumbTypes & RSCEnabledBreadcrumbTypeRequest) != 0;
+        case RSCBreadcrumbTypeState:
+            return (self.enabledBreadcrumbTypes & RSCEnabledBreadcrumbTypeState) != 0;
+        case RSCBreadcrumbTypeUser:
+            return (self.enabledBreadcrumbTypes & RSCEnabledBreadcrumbTypeUser) != 0;
     }
     return NO;
 }
@@ -491,40 +491,40 @@ BSG_OBJC_DIRECT_MEMBERS
 - (void)validate {
     if (self.apiKey.length == 0) {
         @throw [NSException exceptionWithName:NSInvalidArgumentException reason:
-                @"No Bugsnag API key has been provided" userInfo:nil];
+                @"No RSCrashReporter API key has been provided" userInfo:nil];
     }
 
-    if (![BugsnagConfiguration isValidApiKey:self.apiKey]) {
-        bsg_log_warn(@"Invalid apiKey: expected a 32-character hexademical string, got \"%@\"", self.apiKey);
+    if (![RSCrashReporterConfiguration isValidApiKey:self.apiKey]) {
+        rsc_log_warn(@"Invalid apiKey: expected a 32-character hexademical string, got \"%@\"", self.apiKey);
     }
 }
 
 // MARK: -
 
-- (void)addPlugin:(id<BugsnagPlugin> _Nonnull)plugin {
+- (void)addPlugin:(id<RSCrashReporterPlugin> _Nonnull)plugin {
     [self.plugins addObject:plugin];
 }
 
-// MARK: - <BugsnagFeatureFlagStore>
+// MARK: - <RSCrashReporterFeatureFlagStore>
 
 - (void)addFeatureFlagWithName:(NSString *)name variant:(nullable NSString *)variant {
-    BSGFeatureFlagStoreAddFeatureFlag(self.featureFlagStore, name, variant);
+    RSCFeatureFlagStoreAddFeatureFlag(self.featureFlagStore, name, variant);
 }
 
 - (void)addFeatureFlagWithName:(NSString *)name {
-    BSGFeatureFlagStoreAddFeatureFlag(self.featureFlagStore, name, nil);
+    RSCFeatureFlagStoreAddFeatureFlag(self.featureFlagStore, name, nil);
 }
 
-- (void)addFeatureFlags:(NSArray<BugsnagFeatureFlag *> *)featureFlags {
-    BSGFeatureFlagStoreAddFeatureFlags(self.featureFlagStore, featureFlags);
+- (void)addFeatureFlags:(NSArray<RSCrashReporterFeatureFlag *> *)featureFlags {
+    RSCFeatureFlagStoreAddFeatureFlags(self.featureFlagStore, featureFlags);
 }
 
 - (void)clearFeatureFlagWithName:(NSString *)name {
-    BSGFeatureFlagStoreClear(self.featureFlagStore, name);
+    RSCFeatureFlagStoreClear(self.featureFlagStore, name);
 }
 
 - (void)clearFeatureFlags {
-    BSGFeatureFlagStoreClear(self.featureFlagStore, nil);
+    RSCFeatureFlagStoreClear(self.featureFlagStore, nil);
 }
 
 // MARK: - <MetadataStore>

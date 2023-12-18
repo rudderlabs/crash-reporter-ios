@@ -1,26 +1,26 @@
 //
-//  BugsnagStacktrace.m
-//  Bugsnag
+//  RSCrashReporterStacktrace.m
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 06/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
-#import "BugsnagStacktrace.h"
+#import "RSCrashReporterStacktrace.h"
 
-#import "BSGKeys.h"
-#import "BugsnagStackframe+Private.h"
+#import "RSCKeys.h"
+#import "RSCrashReporterStackframe+Private.h"
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BugsnagStacktrace
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCrashReporterStacktrace
 
 + (instancetype)stacktraceFromJson:(NSArray<NSDictionary *> *)json {
-    BugsnagStacktrace *trace = [BugsnagStacktrace new];
+    RSCrashReporterStacktrace *trace = [RSCrashReporterStacktrace new];
     NSMutableArray *data = [NSMutableArray new];
 
     if (json != nil) {
         for (NSDictionary *dict in json) {
-            BugsnagStackframe *frame = [BugsnagStackframe frameFromJson:dict];
+            RSCrashReporterStackframe *frame = [RSCrashReporterStackframe frameFromJson:dict];
 
             if (frame != nil) {
                 [data addObject:frame];
@@ -37,7 +37,7 @@ BSG_OBJC_DIRECT_MEMBERS
         _trace = [NSMutableArray new];
 
         for (NSDictionary *obj in trace) {
-            BugsnagStackframe *frame = [BugsnagStackframe frameFromDict:obj withImages:binaryImages];
+            RSCrashReporterStackframe *frame = [RSCrashReporterStackframe frameFromDict:obj withImages:binaryImages];
 
             if (frame != nil && [self.trace count] < 200) {
                 [self.trace addObject:frame];

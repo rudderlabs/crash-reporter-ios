@@ -1,5 +1,5 @@
 //
-//  BSG_KSCrashState.c
+//  RSC_KSCrashState.c
 //
 //  Created by Karl Stenerud on 2012-02-05.
 //
@@ -24,16 +24,16 @@
 // THE SOFTWARE.
 //
 
-#import "BSG_KSCrashState.h"
+#import "RSC_KSCrashState.h"
 
-#import "BSGJSONSerialization.h"
-#import "BSGRunContext.h"
-#import "BSG_KSFile.h"
-#import "BSG_KSJSONCodec.h"
-#import "BSG_KSLogger.h"
-#import "BSG_KSMach.h"
-#import "BSG_KSSystemInfo.h"
-#import "BSGUIKit.h"
+#import "RSCJSONSerialization.h"
+#import "RSCRunContext.h"
+#import "RSC_KSFile.h"
+#import "RSC_KSJSONCodec.h"
+#import "RSC_KSLogger.h"
+#import "RSC_KSMach.h"
+#import "RSC_KSSystemInfo.h"
+#import "RSCUIKit.h"
 
 #import <errno.h>
 #import <fcntl.h>
@@ -45,20 +45,20 @@
 #pragma mark - Constants -
 // ============================================================================
 
-#define BSG_kFormatVersion 1
+#define RSC_kFormatVersion 1
 
-#define BSG_kKeyFormatVersion "version"
-#define BSG_kKeyCrashedLastLaunch "crashedLastLaunch"
+#define RSC_kKeyFormatVersion "version"
+#define RSC_kKeyCrashedLastLaunch "crashedLastLaunch"
 
 // ============================================================================
 #pragma mark - Globals -
 // ============================================================================
 
 /** Location where stat file is stored. */
-static const char *bsg_g_stateFilePath;
+static const char *rsc_g_stateFilePath;
 
 /** Current state. */
-static BSG_KSCrash_State *bsg_g_state;
+static RSC_KSCrash_State *rsc_g_state;
 
 // ============================================================================
 #pragma mark - JSON Encoding -
@@ -67,10 +67,10 @@ static BSG_KSCrash_State *bsg_g_state;
 /** Callback for adding JSON data.
  */
 static
-int bsg_kscrashstate_i_addJSONData(const char *const data, const size_t length,
+int rsc_kscrashstate_i_addJSONData(const char *const data, const size_t length,
                                    void *const userData) {
-    bool success = BSG_KSFileWrite(userData, data, length);
-    return success ? BSG_KSJSON_OK : BSG_KSJSON_ERROR_CANNOT_ADD_DATA;
+    bool success = RSC_KSFileWrite(userData, data, length);
+    return success ? RSC_KSJSON_OK : RSC_KSJSON_ERROR_CANNOT_ADD_DATA;
 }
 
 // ============================================================================
@@ -85,27 +85,27 @@ int bsg_kscrashstate_i_addJSONData(const char *const data, const size_t length,
  *
  * @return true if the operation was successful.
  */
-bool bsg_kscrashstate_i_loadState(BSG_KSCrash_State *const context,
+bool rsc_kscrashstate_i_loadState(RSC_KSCrash_State *const context,
                                   const char *const path) {
     NSString *file = path ? @(path) : nil;
     if (!file) {
-        bsg_log_err(@"Invalid path: %s", path);
+        rsc_log_err(@"Invalid path: %s", path);
         return false;
     }
     NSError *error;
-    NSDictionary *dict = BSGJSONDictionaryFromFile(file, 0, &error);
+    NSDictionary *dict = RSCJSONDictionaryFromFile(file, 0, &error);
     if (!dict) {
         if (!(error.domain == NSCocoaErrorDomain &&
               error.code == NSFileReadNoSuchFileError)) {
-            bsg_log_err(@"%s: Could not load file: %@", path, error);
+            rsc_log_err(@"%s: Could not load file: %@", path, error);
         }
         return false;
     }
-    if (![dict[@ BSG_kKeyFormatVersion] isEqual:@ BSG_kFormatVersion]) {
-        bsg_log_err(@"Version mismatch");
+    if (![dict[@ RSC_kKeyFormatVersion] isEqual:@ RSC_kFormatVersion]) {
+        rsc_log_err(@"Version mismatch");
         return false;
     }
-    context->crashedLastLaunch = [dict[@ BSG_kKeyCrashedLastLaunch] boolValue];
+    context->crashedLastLaunch = [dict[@ RSC_kKeyCrashedLastLaunch] boolValue];
     return true;
 }
 
@@ -117,7 +117,7 @@ bool bsg_kscrashstate_i_loadState(BSG_KSCrash_State *const context,
  *
  * @return true if the operation was successful.
  */
-bool bsg_kscrashstate_i_saveState(const BSG_KSCrash_State *const state,
+bool rsc_kscrashstate_i_saveState(const RSC_KSCrash_State *const state,
                                   const char *const path) {
 
     // Opening an existing file fails under NSFileProtectionComplete*
@@ -125,41 +125,41 @@ bool bsg_kscrashstate_i_saveState(const BSG_KSCrash_State *const state,
 
     int fd = open(path, O_RDWR | O_CREAT | O_TRUNC, 0644);
     if (fd < 0) {
-        bsg_log_err(@"Could not open file %s for writing: %s", path, strerror(errno));
+        rsc_log_err(@"Could not open file %s for writing: %s", path, strerror(errno));
         return false;
     }
 
-    BSG_KSFile file;
+    RSC_KSFile file;
     char buffer[256];
-    BSG_KSFileInit(&file, fd, buffer, sizeof(buffer) / sizeof(*buffer));
+    RSC_KSFileInit(&file, fd, buffer, sizeof(buffer) / sizeof(*buffer));
 
-    BSG_KSJSONEncodeContext JSONContext;
-    bsg_ksjsonbeginEncode(&JSONContext, false, bsg_kscrashstate_i_addJSONData,
+    RSC_KSJSONEncodeContext JSONContext;
+    rsc_ksjsonbeginEncode(&JSONContext, false, rsc_kscrashstate_i_addJSONData,
                           &file);
 
     int result;
-    if ((result = bsg_ksjsonbeginObject(&JSONContext, NULL)) != BSG_KSJSON_OK) {
+    if ((result = rsc_ksjsonbeginObject(&JSONContext, NULL)) != RSC_KSJSON_OK) {
         goto done;
     }
-    if ((result = bsg_ksjsonaddIntegerElement(
-             &JSONContext, BSG_kKeyFormatVersion, BSG_kFormatVersion)) !=
-        BSG_KSJSON_OK) {
+    if ((result = rsc_ksjsonaddIntegerElement(
+             &JSONContext, RSC_kKeyFormatVersion, RSC_kFormatVersion)) !=
+        RSC_KSJSON_OK) {
         goto done;
     }
     // Record this launch crashed state into "crashed last launch" field.
-    if ((result = bsg_ksjsonaddBooleanElement(
-             &JSONContext, BSG_kKeyCrashedLastLaunch,
-             state->crashedThisLaunch)) != BSG_KSJSON_OK) {
+    if ((result = rsc_ksjsonaddBooleanElement(
+             &JSONContext, RSC_kKeyCrashedLastLaunch,
+             state->crashedThisLaunch)) != RSC_KSJSON_OK) {
         goto done;
     }
-    result = bsg_ksjsonendEncode(&JSONContext);
+    result = rsc_ksjsonendEncode(&JSONContext);
 
 done:
-    BSG_KSFileFlush(&file);
+    RSC_KSFileFlush(&file);
     close(fd);
 
-    if (result != BSG_KSJSON_OK) {
-        bsg_log_err(@"%s: %s", path, bsg_ksjsonstringForError(result));
+    if (result != RSC_KSJSON_OK) {
+        rsc_log_err(@"%s: %s", path, rsc_ksjsonstringForError(result));
         return false;
     }
     return true;
@@ -169,30 +169,30 @@ done:
 #pragma mark - API -
 // ============================================================================
 
-bool bsg_kscrashstate_init(const char *const stateFilePath,
-                           BSG_KSCrash_State *const state) {
-    bsg_g_stateFilePath = stateFilePath;
-    bsg_g_state = state;
+bool rsc_kscrashstate_init(const char *const stateFilePath,
+                           RSC_KSCrash_State *const state) {
+    rsc_g_stateFilePath = stateFilePath;
+    rsc_g_state = state;
 
     uint64_t timeNow = mach_absolute_time();
     memset(state, 0, sizeof(*state));
-    bsg_kscrashstate_i_loadState(state, stateFilePath);
+    rsc_kscrashstate_i_loadState(state, stateFilePath);
     state->appLaunchTime = timeNow;
     state->lastUpdateDurationsTime = timeNow;
-    state->applicationIsInForeground = bsg_runContext->isForeground;
+    state->applicationIsInForeground = rsc_runContext->isForeground;
 
-    return bsg_kscrashstate_i_saveState(state, stateFilePath);
+    return rsc_kscrashstate_i_saveState(state, stateFilePath);
 }
 
-void bsg_kscrashstate_notifyAppInForeground(const bool isInForeground) {
-    BSG_KSCrash_State *const state = bsg_g_state;
+void rsc_kscrashstate_notifyAppInForeground(const bool isInForeground) {
+    RSC_KSCrash_State *const state = rsc_g_state;
 
     if (state->applicationIsInForeground == isInForeground) {
         return;
     }
     state->applicationIsInForeground = isInForeground;
     uint64_t timeNow = mach_absolute_time();
-    double duration = bsg_ksmachtimeDifferenceInSeconds(
+    double duration = rsc_ksmachtimeDifferenceInSeconds(
         timeNow, state->lastUpdateDurationsTime);
     if (isInForeground) {
         state->backgroundDurationSinceLaunch += duration;
@@ -202,24 +202,24 @@ void bsg_kscrashstate_notifyAppInForeground(const bool isInForeground) {
     state->lastUpdateDurationsTime = timeNow;
 }
 
-void bsg_kscrashstate_notifyAppCrash(void) {
-    bsg_kscrashstate_updateDurationStats();
-    bsg_g_state->crashedThisLaunch = YES;
-    bsg_kscrashstate_i_saveState(bsg_g_state, bsg_g_stateFilePath);
+void rsc_kscrashstate_notifyAppCrash(void) {
+    rsc_kscrashstate_updateDurationStats();
+    rsc_g_state->crashedThisLaunch = YES;
+    rsc_kscrashstate_i_saveState(rsc_g_state, rsc_g_stateFilePath);
 }
 
-void bsg_kscrashstate_updateDurationStats(void) {
+void rsc_kscrashstate_updateDurationStats(void) {
     uint64_t timeNow = mach_absolute_time();
-    const double duration = bsg_ksmachtimeDifferenceInSeconds(
-        timeNow, bsg_g_state->lastUpdateDurationsTime ?: bsg_g_state->appLaunchTime);
-    if (bsg_g_state->applicationIsInForeground) {
-        bsg_g_state->foregroundDurationSinceLaunch += duration;
+    const double duration = rsc_ksmachtimeDifferenceInSeconds(
+        timeNow, rsc_g_state->lastUpdateDurationsTime ?: rsc_g_state->appLaunchTime);
+    if (rsc_g_state->applicationIsInForeground) {
+        rsc_g_state->foregroundDurationSinceLaunch += duration;
     } else {
-        bsg_g_state->backgroundDurationSinceLaunch += duration;
+        rsc_g_state->backgroundDurationSinceLaunch += duration;
     }
-    bsg_g_state->lastUpdateDurationsTime = timeNow;
+    rsc_g_state->lastUpdateDurationsTime = timeNow;
 }
 
-const BSG_KSCrash_State *bsg_kscrashstate_currentState(void) {
-    return bsg_g_state;
+const RSC_KSCrash_State *rsc_kscrashstate_currentState(void) {
+    return rsc_g_state;
 }

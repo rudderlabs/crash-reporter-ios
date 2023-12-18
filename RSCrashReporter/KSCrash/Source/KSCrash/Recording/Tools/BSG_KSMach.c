@@ -24,13 +24,13 @@
 // THE SOFTWARE.
 //
 
-#include "BSG_KSMach.h"
+#include "RSC_KSMach.h"
 
-#include "BSG_KSMachApple.h"
-#include "BSGDefines.h"
+#include "RSC_KSMachApple.h"
+#include "RSCDefines.h"
 
-//#define BSG_KSLogger_LocalLevel TRACE
-#include "BSG_KSLogger.h"
+//#define RSC_KSLogger_LocalLevel TRACE
+#include "RSC_KSLogger.h"
 
 #include <errno.h>
 #include <mach-o/arch.h>
@@ -43,7 +43,7 @@
 #pragma mark - General Information -
 // ============================================================================
 
-const char *bsg_ksmachcurrentCPUArch(void) {
+const char *rsc_ksmachcurrentCPUArch(void) {
     const NXArchInfo *archInfo = NXGetLocalArchInfo();
     return archInfo == NULL ? NULL : archInfo->name;
 }
@@ -52,7 +52,7 @@ const char *bsg_ksmachcurrentCPUArch(void) {
     case A:                                                                    \
         return #A
 
-const char *bsg_ksmachexceptionName(const exception_type_t exceptionType) {
+const char *rsc_ksmachexceptionName(const exception_type_t exceptionType) {
     switch (exceptionType) {
         RETURN_NAME_FOR_ENUM(EXC_BAD_ACCESS);
         RETURN_NAME_FOR_ENUM(EXC_BAD_INSTRUCTION);
@@ -68,7 +68,7 @@ const char *bsg_ksmachexceptionName(const exception_type_t exceptionType) {
     return NULL;
 }
 
-const char *bsg_ksmachkernelReturnCodeName(const kern_return_t returnCode) {
+const char *rsc_ksmachkernelReturnCodeName(const kern_return_t returnCode) {
     switch (returnCode) {
         RETURN_NAME_FOR_ENUM(KERN_SUCCESS);
         RETURN_NAME_FOR_ENUM(KERN_INVALID_ADDRESS);
@@ -134,8 +134,8 @@ const char *bsg_ksmachkernelReturnCodeName(const kern_return_t returnCode) {
 #pragma mark - Thread State Info -
 // ============================================================================
 
-#if BSG_HAVE_MACH_THREADS
-bool bsg_ksmachfillState(const thread_t thread, const thread_state_t state,
+#if RSC_HAVE_MACH_THREADS
+bool rsc_ksmachfillState(const thread_t thread, const thread_state_t state,
                          const thread_state_flavor_t flavor,
                          const mach_msg_type_number_t stateCount) {
     mach_msg_type_number_t stateCountBuff = stateCount;
@@ -145,20 +145,20 @@ bool bsg_ksmachfillState(const thread_t thread, const thread_state_t state,
     if (kr != KERN_SUCCESS) {
         // When running under Rosetta 2, thread_get_state() sometimes fails
         // with MACH_SEND_INVALID_DEST and returns no data.
-        BSG_KSLOG_ERROR("thread_get_state: %s", mach_error_string(kr));
+        RSC_KSLOG_ERROR("thread_get_state: %s", mach_error_string(kr));
         return false;
     }
     return true;
 }
 #endif
 
-thread_t bsg_ksmachthread_self(void) {
+thread_t rsc_ksmachthread_self(void) {
     thread_t thread_self = mach_thread_self();
     mach_port_deallocate(mach_task_self(), thread_self);
     return thread_self;
 }
 
-bool bsg_ksmachgetThreadName(const thread_t thread, char *const buffer,
+bool rsc_ksmachgetThreadName(const thread_t thread, char *const buffer,
                              size_t bufLength) {
     // WARNING: This implementation is not async-safe because
     // pthread_from_mach_thread_np() acquires an internal lock.
@@ -170,7 +170,7 @@ bool bsg_ksmachgetThreadName(const thread_t thread, char *const buffer,
     return pthread_getname_np(pthread, buffer, bufLength) == 0;
 }
 
-bool bsg_ksmachgetThreadQueueName(const thread_t thread, char *const buffer,
+bool rsc_ksmachgetThreadQueueName(const thread_t thread, char *const buffer,
                                   size_t bufLength) {
     // WARNING: This implementation is no longer async-safe!
 
@@ -181,7 +181,7 @@ bool bsg_ksmachgetThreadQueueName(const thread_t thread, char *const buffer,
 
     kr = thread_info(thread, THREAD_IDENTIFIER_INFO, info, &inOutSize);
     if (kr != KERN_SUCCESS) {
-        BSG_KSLOG_TRACE("Error getting thread_info with flavor "
+        RSC_KSLOG_TRACE("Error getting thread_info with flavor "
                         "THREAD_IDENTIFIER_INFO from mach thread : %s",
                         mach_error_string(kr));
         return false;
@@ -195,14 +195,14 @@ bool bsg_ksmachgetThreadQueueName(const thread_t thread, char *const buffer,
     // get_dispatchqueue_offset_from_proc(thread->task->bsd_info);
     if (!idInfo->dispatch_qaddr || !idInfo->thread_handle ||
         // sometimes the queue address is invalid, so avoid dereferencing
-        bsg_ksmachcopyMem((const void *)idInfo->dispatch_qaddr, &dispatch_queue,
+        rsc_ksmachcopyMem((const void *)idInfo->dispatch_qaddr, &dispatch_queue,
                           sizeof(dispatch_queue)) != KERN_SUCCESS ||
         // Sometimes dispatch_queue is invalid which causes an EXC_BAD_ACCESS
         // crash in dispatch_queue_get_label(). Check that dispatch_queue can
         // be dereferenced to work around this.
-        bsg_ksmachcopyMem((const void *)dispatch_queue, &junk,
+        rsc_ksmachcopyMem((const void *)dispatch_queue, &junk,
                           sizeof(junk)) != KERN_SUCCESS) {
-        BSG_KSLOG_TRACE(
+        RSC_KSLOG_TRACE(
             "This thread doesn't have a dispatch queue attached : %u", thread);
         return false;
     }
@@ -214,12 +214,12 @@ bool bsg_ksmachgetThreadQueueName(const thread_t thread, char *const buffer,
     const void *ptr = dispatch_queue_get_label(dispatch_queue);
 
     vm_size_t bytesRead = 0;
-    // Not using bsg_ksmachcopyMem because it does not return bytesRead
+    // Not using rsc_ksmachcopyMem because it does not return bytesRead
     kr = vm_read_overwrite(mach_task_self(),
                            (vm_address_t)ptr, (vm_size_t)bufLength - 1,
                            (vm_address_t)buffer, &bytesRead);
     if (kr != KERN_SUCCESS) {
-        BSG_KSLOG_TRACE("Error while getting dispatch queue name : %p",
+        RSC_KSLOG_TRACE("Error while getting dispatch queue name : %p",
                         dispatch_queue);
         buffer[0] = '\0';
         return false;
@@ -227,7 +227,7 @@ bool bsg_ksmachgetThreadQueueName(const thread_t thread, char *const buffer,
 
     buffer[bytesRead] = '\0';
 
-    BSG_KSLOG_TRACE("Dispatch queue name: %s", buffer);
+    RSC_KSLOG_TRACE("Dispatch queue name: %s", buffer);
 
     // Queue label must be a null terminated string.
     size_t iLabel;
@@ -238,15 +238,15 @@ bool bsg_ksmachgetThreadQueueName(const thread_t thread, char *const buffer,
     }
     if (buffer[iLabel] != 0) {
         // Found a non-null, invalid char.
-        BSG_KSLOG_TRACE("Queue label contains invalid chars");
+        RSC_KSLOG_TRACE("Queue label contains invalid chars");
         buffer[0] = '\0';
         return false;
     }
-    BSG_KSLOG_TRACE("Queue label = %s", buffer);
+    RSC_KSLOG_TRACE("Queue label = %s", buffer);
     return true;
 }
 
-integer_t bsg_ksmachgetThreadState(const thread_t thread) {
+integer_t rsc_ksmachgetThreadState(const thread_t thread) {
     integer_t infoBuffer[THREAD_BASIC_INFO_COUNT] = {0};
     thread_info_t info = infoBuffer;
     mach_msg_type_number_t inOutSize = THREAD_BASIC_INFO_COUNT;
@@ -254,7 +254,7 @@ integer_t bsg_ksmachgetThreadState(const thread_t thread) {
 
     kr = thread_info(thread, THREAD_BASIC_INFO, info, &inOutSize);
     if (kr != KERN_SUCCESS) {
-        BSG_KSLOG_TRACE("Error getting thread_info with flavor "
+        RSC_KSLOG_TRACE("Error getting thread_info with flavor "
                         "THREAD_BASIC_INFO from mach thread : %s",
                         mach_error_string(kr));
         return -1;
@@ -278,15 +278,15 @@ static inline bool isThreadInList(thread_t thread, thread_t *list,
     return false;
 }
 
-thread_t *bsg_ksmachgetAllThreads(unsigned *threadCount) {
+thread_t *rsc_ksmachgetAllThreads(unsigned *threadCount) {
     kern_return_t kr;
     const task_t thisTask = mach_task_self();
     thread_act_array_t threads;
     mach_msg_type_number_t numThreads;
 
     if ((kr = task_threads(thisTask, &threads, &numThreads)) != KERN_SUCCESS) {
-        BSG_KSLOG_ERROR("task_threads: %s", mach_error_string(kr));
-#if !BSG_KSLOG_PRINTS_AT_LEVEL(BSG_KSLogger_Level_Error)
+        RSC_KSLOG_ERROR("task_threads: %s", mach_error_string(kr));
+#if !RSC_KSLOG_PRINTS_AT_LEVEL(RSC_KSLogger_Level_Error)
         (void)kr;
 #endif
         return NULL;
@@ -296,7 +296,7 @@ thread_t *bsg_ksmachgetAllThreads(unsigned *threadCount) {
     return threads;
 }
 
-void bsg_ksmachfreeThreads(thread_t *threads, unsigned threadCount) {
+void rsc_ksmachfreeThreads(thread_t *threads, unsigned threadCount) {
     const task_t thisTask = mach_task_self();
     for (unsigned i = 0; i < threadCount; i++) {
         mach_port_deallocate(thisTask, threads[i]);
@@ -305,13 +305,13 @@ void bsg_ksmachfreeThreads(thread_t *threads, unsigned threadCount) {
                   sizeof(*threads) * threadCount);
 }
 
-void bsg_ksmachgetThreadStates(thread_t *threads, integer_t *states, unsigned threadCount) {
+void rsc_ksmachgetThreadStates(thread_t *threads, integer_t *states, unsigned threadCount) {
     for (unsigned i = 0; i < threadCount; i++) {
-        states[i] = bsg_ksmachgetThreadState(threads[i]);
+        states[i] = rsc_ksmachgetThreadState(threads[i]);
     }
 }
 
-unsigned bsg_ksmachremoveThreadsFromList(thread_t *srcThreads, unsigned srcThreadCount,
+unsigned rsc_ksmachremoveThreadsFromList(thread_t *srcThreads, unsigned srcThreadCount,
                                          thread_t *omitThreads, unsigned omitThreadsCount,
                                          thread_t *dstThreads, unsigned maxDstThreads) {
     unsigned int iDst = 0;
@@ -328,9 +328,9 @@ unsigned bsg_ksmachremoveThreadsFromList(thread_t *srcThreads, unsigned srcThrea
     return iDst;
 }
 
-#if BSG_HAVE_MACH_THREADS
-void bsg_ksmachsuspendThreads(thread_t *threads, unsigned threadsCount) {
-    const thread_t thisThread = bsg_ksmachthread_self();
+#if RSC_HAVE_MACH_THREADS
+void rsc_ksmachsuspendThreads(thread_t *threads, unsigned threadsCount) {
+    const thread_t thisThread = rsc_ksmachthread_self();
     for (unsigned i = 0; i < threadsCount; i++) {
         thread_t thread = threads[i];
         // IMPORTANT: Never suspend the current thread even if it's in the list!
@@ -341,7 +341,7 @@ void bsg_ksmachsuspendThreads(thread_t *threads, unsigned threadsCount) {
         if (kr != KERN_SUCCESS) {
             // The thread may have completed running already
             // Don't treat this as a fatal error.
-            BSG_KSLOG_DEBUG("thread_suspend (%08x): %s", thread,
+            RSC_KSLOG_DEBUG("thread_suspend (%08x): %s", thread,
                             mach_error_string(kr));
             // Suppress dead store warning when log level > debug
             (void)kr;
@@ -349,8 +349,8 @@ void bsg_ksmachsuspendThreads(thread_t *threads, unsigned threadsCount) {
     }
 }
 
-void bsg_ksmachresumeThreads(thread_t *threads, unsigned threadsCount) {
-    const thread_t thisThread = bsg_ksmachthread_self();
+void rsc_ksmachresumeThreads(thread_t *threads, unsigned threadsCount) {
+    const thread_t thisThread = rsc_ksmachthread_self();
     for (unsigned i = 0; i < threadsCount; i++) {
         thread_t thread = threads[i];
         // IMPORTANT: Never resume the current thread even if it's in the list!
@@ -361,7 +361,7 @@ void bsg_ksmachresumeThreads(thread_t *threads, unsigned threadsCount) {
         if (kr != KERN_SUCCESS) {
             // The thread may have completed running already
             // Don't treat this as a fatal error.
-            BSG_KSLOG_DEBUG("thread_resume (%08x): %s", thread,
+            RSC_KSLOG_DEBUG("thread_resume (%08x): %s", thread,
                             mach_error_string(kr));
             // Suppress dead store warning when log level > debug
             (void)kr;
@@ -370,7 +370,7 @@ void bsg_ksmachresumeThreads(thread_t *threads, unsigned threadsCount) {
 }
 #endif
 
-kern_return_t bsg_ksmachcopyMem(const void *const src, void *const dst,
+kern_return_t rsc_ksmachcopyMem(const void *const src, void *const dst,
                                 const size_t numBytes) {
     vm_size_t bytesCopied = 0;
     return vm_read_overwrite(mach_task_self(), (vm_address_t)src,
@@ -378,7 +378,7 @@ kern_return_t bsg_ksmachcopyMem(const void *const src, void *const dst,
                              &bytesCopied);
 }
 
-double bsg_ksmachtimeDifferenceInSeconds(const uint64_t endTime,
+double rsc_ksmachtimeDifferenceInSeconds(const uint64_t endTime,
                                          const uint64_t startTime) {
     // From
     // http://lists.apple.com/archives/perfoptimization-dev/2005/Jan/msg00039.html
@@ -389,7 +389,7 @@ double bsg_ksmachtimeDifferenceInSeconds(const uint64_t endTime,
         mach_timebase_info_data_t info = {0};
         kern_return_t kr = mach_timebase_info(&info);
         if (kr != KERN_SUCCESS) {
-            BSG_KSLOG_ERROR("mach_timebase_info: %s", mach_error_string(kr));
+            RSC_KSLOG_ERROR("mach_timebase_info: %s", mach_error_string(kr));
             return 0;
         }
 
@@ -403,14 +403,14 @@ double bsg_ksmachtimeDifferenceInSeconds(const uint64_t endTime,
  *
  * @return true if we're being traced.
  */
-bool bsg_ksmachisBeingTraced(void) {
+bool rsc_ksmachisBeingTraced(void) {
     struct kinfo_proc procInfo;
     size_t structSize = sizeof(procInfo);
     int mib[] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()};
 
     if (sysctl(mib, sizeof(mib) / sizeof(*mib), &procInfo, &structSize, NULL,
                0) != 0) {
-        BSG_KSLOG_ERROR("sysctl: %s", strerror(errno));
+        RSC_KSLOG_ERROR("sysctl: %s", strerror(errno));
         return false;
     }
 

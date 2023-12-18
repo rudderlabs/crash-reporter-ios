@@ -1,20 +1,20 @@
 //
-//  BugsnagUser.h
-//  Bugsnag
+//  RSCrashReporterUser.h
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 24/11/2017.
-//  Copyright © 2017 Bugsnag. All rights reserved.
+//  Copyright © 2017 RSCrashReporter. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-#import <RSCrashReporter/BugsnagDefines.h>
+#import <RSCrashReporter/RSCrashReporterDefines.h>
 
 /**
  * Information about the current user of your application.
  */
-BUGSNAG_EXTERN
-@interface BugsnagUser : NSObject
+RSCRASHREPORTER_EXTERN
+@interface RSCrashReporterUser : NSObject
 
 @property (readonly, nullable, nonatomic) NSString *id;
 

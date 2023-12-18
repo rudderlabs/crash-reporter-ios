@@ -1,21 +1,21 @@
 //
-//  BugsnagFeatureFlag.m
-//  Bugsnag
+//  RSCrashReporterFeatureFlag.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 11/11/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BugsnagFeatureFlag.h"
+#import "RSCrashReporterFeatureFlag.h"
 
-@implementation BugsnagFeatureFlag
+@implementation RSCrashReporterFeatureFlag
 
 + (instancetype)flagWithName:(NSString *)name {
-    return [[BugsnagFeatureFlag alloc] initWithName:name variant:nil];
+    return [[RSCrashReporterFeatureFlag alloc] initWithName:name variant:nil];
 }
 
 + (instancetype)flagWithName:(NSString *)name variant:(nullable NSString *)variant {
-    return [[BugsnagFeatureFlag alloc] initWithName:name variant:variant];
+    return [[RSCrashReporterFeatureFlag alloc] initWithName:name variant:variant];
 }
 
 - (instancetype)initWithName:(NSString *)name variant:(nullable NSString *)variant {
@@ -35,11 +35,11 @@
         return YES;
     }
 
-    if (![object isKindOfClass:[BugsnagFeatureFlag class]]) {
+    if (![object isKindOfClass:[RSCrashReporterFeatureFlag class]]) {
         return NO;
     }
 
-    BugsnagFeatureFlag *obj = (BugsnagFeatureFlag *)object;
+    RSCrashReporterFeatureFlag *obj = (RSCrashReporterFeatureFlag *)object;
 
     // Ignore the variant when checking for equality. We only care if the name matches
     // when checking for duplicates.

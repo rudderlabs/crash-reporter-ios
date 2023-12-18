@@ -1,27 +1,27 @@
 //
-//  BugsnagErrorTest.m
+//  RSCrashReporterErrorTest.m
 //  Tests
 //
 //  Created by Jamie Lynch on 08/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BSGKeys.h"
-#import "BugsnagError+Private.h"
-#import "BugsnagStackframe.h"
-#import "BugsnagThread+Private.h"
+#import "RSCKeys.h"
+#import "RSCrashReporterError+Private.h"
+#import "RSCrashReporterStackframe.h"
+#import "RSCrashReporterThread+Private.h"
 
-NSString *_Nonnull BSGParseErrorClass(NSDictionary *error, NSString *errorType);
+NSString *_Nonnull RSCParseErrorClass(NSDictionary *error, NSString *errorType);
 
-NSString *BSGParseErrorMessage(NSDictionary *report, NSDictionary *error, NSString *errorType);
+NSString *RSCParseErrorMessage(NSDictionary *report, NSDictionary *error, NSString *errorType);
 
-@interface BugsnagErrorTest : XCTestCase
+@interface RSCrashReporterErrorTest : XCTestCase
 @property NSDictionary *event;
 @end
 
-@implementation BugsnagErrorTest
+@implementation RSCrashReporterErrorTest
 
 - (void)setUp {
     NSDictionary *thread = @{
@@ -65,36 +65,36 @@ NSString *BSGParseErrorMessage(NSDictionary *report, NSDictionary *error, NSStri
 }
 
 - (void)testErrorLoad {
-    BugsnagThread *thread = [self findErrorReportingThread:self.event];
-    BugsnagError *error = [[BugsnagError alloc] initWithKSCrashReport:self.event stacktrace:thread.stacktrace];
+    RSCrashReporterThread *thread = [self findErrorReportingThread:self.event];
+    RSCrashReporterError *error = [[RSCrashReporterError alloc] initWithKSCrashReport:self.event stacktrace:thread.stacktrace];
     XCTAssertEqualObjects(@"Foo Exception", error.errorClass);
     XCTAssertEqualObjects(@"Foo overload", error.errorMessage);
-    XCTAssertEqual(BSGErrorTypeCocoa, error.type);
+    XCTAssertEqual(RSCErrorTypeCocoa, error.type);
 
     XCTAssertEqual(1, [error.stacktrace count]);
-    BugsnagStackframe *frame = error.stacktrace[0];
+    RSCrashReporterStackframe *frame = error.stacktrace[0];
     XCTAssertEqualObjects(@"kscrashsentry_reportUserException", frame.method);
     XCTAssertEqualObjects(@"/Users/joesmith/foo", frame.machoFile);
     XCTAssertEqualObjects(@"D0A41830-4FD2-3B02-A23B-0741AD4C7F52", frame.machoUuid);
 }
 
 - (void)testErrorFromInvalidJson {
-    BugsnagError *error;
+    RSCrashReporterError *error;
     
-    error = [BugsnagError errorFromJson:@{
+    error = [RSCrashReporterError errorFromJson:@{
         @"stacktrace": [NSNull null],
     }];
     XCTAssertEqualObjects(error.stacktrace, @[]);
     
-    error = [BugsnagError errorFromJson:@{
+    error = [RSCrashReporterError errorFromJson:@{
         @"stacktrace": @{@"foo": @"bar"},
     }];
     XCTAssertEqualObjects(error.stacktrace, @[]);
 }
 
 - (void)testToDictionary {
-    BugsnagThread *thread = [self findErrorReportingThread:self.event];
-    BugsnagError *error = [[BugsnagError alloc] initWithKSCrashReport:self.event stacktrace:thread.stacktrace];
+    RSCrashReporterThread *thread = [self findErrorReportingThread:self.event];
+    RSCrashReporterError *error = [[RSCrashReporterError alloc] initWithKSCrashReport:self.event stacktrace:thread.stacktrace];
     NSDictionary *dict = [error toDictionary];
     XCTAssertEqualObjects(@"Foo Exception", dict[@"errorClass"]);
     XCTAssertEqualObjects(@"Foo overload", dict[@"message"]);
@@ -107,12 +107,12 @@ NSString *BSGParseErrorMessage(NSDictionary *report, NSDictionary *error, NSStri
     XCTAssertEqualObjects(@"/Users/joesmith/foo", frame[@"machoFile"]);
 }
 
-- (BugsnagThread *)findErrorReportingThread:(NSDictionary *)event {
+- (RSCrashReporterThread *)findErrorReportingThread:(NSDictionary *)event {
     NSArray *binaryImages = event[@"binary_images"];
     NSArray *threadDict = [event valueForKeyPath:@"crash.threads"];
-    NSArray<BugsnagThread *> *threads = [BugsnagThread threadsFromArray:threadDict
+    NSArray<RSCrashReporterThread *> *threads = [RSCrashReporterThread threadsFromArray:threadDict
                                                            binaryImages:binaryImages];
-    for (BugsnagThread *thread in threads) {
+    for (RSCrashReporterThread *thread in threads) {
         if (thread.errorReportingThread) {
             return thread;
         }
@@ -121,22 +121,22 @@ NSString *BSGParseErrorMessage(NSDictionary *report, NSDictionary *error, NSStri
 }
 
 - (void)testErrorClassParse {
-    XCTAssertEqualObjects(@"foo", BSGParseErrorClass(@{@"cpp_exception": @{@"name": @"foo"}}, @"cpp_exception"));
-    XCTAssertEqualObjects(@"bar", BSGParseErrorClass(@{@"mach": @{@"exception_name": @"bar"}}, @"mach"));
-    XCTAssertEqualObjects(@"wham", BSGParseErrorClass(@{@"signal": @{@"name": @"wham"}}, @"signal"));
-    XCTAssertEqualObjects(@"zed", BSGParseErrorClass(@{@"nsexception": @{@"name": @"zed"}}, @"nsexception"));
-    XCTAssertEqualObjects(@"ooh", BSGParseErrorClass(@{@"user_reported": @{@"name": @"ooh"}}, @"user"));
-    XCTAssertEqualObjects(@"Exception", BSGParseErrorClass(@{}, @"some-val"));
+    XCTAssertEqualObjects(@"foo", RSCParseErrorClass(@{@"cpp_exception": @{@"name": @"foo"}}, @"cpp_exception"));
+    XCTAssertEqualObjects(@"bar", RSCParseErrorClass(@{@"mach": @{@"exception_name": @"bar"}}, @"mach"));
+    XCTAssertEqualObjects(@"wham", RSCParseErrorClass(@{@"signal": @{@"name": @"wham"}}, @"signal"));
+    XCTAssertEqualObjects(@"zed", RSCParseErrorClass(@{@"nsexception": @{@"name": @"zed"}}, @"nsexception"));
+    XCTAssertEqualObjects(@"ooh", RSCParseErrorClass(@{@"user_reported": @{@"name": @"ooh"}}, @"user"));
+    XCTAssertEqualObjects(@"Exception", RSCParseErrorClass(@{}, @"some-val"));
 }
 
 - (void)testErrorMessageParse {
-    XCTAssertEqualObjects(@"", BSGParseErrorMessage(@{}, @{}, @""));
-    XCTAssertEqualObjects(@"foo", BSGParseErrorMessage(@{}, @{@"reason": @"foo"}, @""));
+    XCTAssertEqualObjects(@"", RSCParseErrorMessage(@{}, @{}, @""));
+    XCTAssertEqualObjects(@"foo", RSCParseErrorMessage(@{}, @{@"reason": @"foo"}, @""));
 }
 
 - (void)testStacktraceOverride {
-    BugsnagThread *thread = [self findErrorReportingThread:self.event];
-    BugsnagError *error = [[BugsnagError alloc] initWithKSCrashReport:self.event stacktrace:thread.stacktrace];
+    RSCrashReporterThread *thread = [self findErrorReportingThread:self.event];
+    RSCrashReporterError *error = [[RSCrashReporterError alloc] initWithKSCrashReport:self.event stacktrace:thread.stacktrace];
     XCTAssertNotNil(error.stacktrace);
     XCTAssertEqual(1, error.stacktrace.count);
     error.stacktrace = @[];
@@ -144,7 +144,7 @@ NSString *BSGParseErrorMessage(NSDictionary *report, NSDictionary *error, NSStri
 }
 
 - (void)testUpdateWithCrashInfoMessage {
-    BugsnagError *error = [[BugsnagError alloc] initWithErrorClass:@"" errorMessage:@"" errorType:BSGErrorTypeCocoa stacktrace:nil];
+    RSCrashReporterError *error = [[RSCrashReporterError alloc] initWithErrorClass:@"" errorMessage:@"" errorType:RSCErrorTypeCocoa stacktrace:nil];
     
     // Swift fatal errors with a message.
     // The errorClass and errorMessage should be overwritten with values extracted from the crash info message.
@@ -255,7 +255,7 @@ NSString *BSGParseErrorMessage(NSDictionary *report, NSDictionary *error, NSStri
 }
 
 - (void)testUpdateWithCrashInfoMessage_Swift54 {
-    BugsnagError *error = [[BugsnagError alloc] initWithErrorClass:@"" errorMessage:@"" errorType:BSGErrorTypeCocoa stacktrace:nil];
+    RSCrashReporterError *error = [[RSCrashReporterError alloc] initWithErrorClass:@"" errorMessage:@"" errorType:RSCErrorTypeCocoa stacktrace:nil];
     
     // Swift fatal errors with a message.
     // The errorClass and errorMessage should be overwritten with values extracted from the crash info message.

@@ -1,35 +1,35 @@
 //
 // Created by Jamie Lynch on 04/12/2017.
-// Copyright (c) 2017 Bugsnag. All rights reserved.
+// Copyright (c) 2017 RSCrashReporter. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef NSString * BugsnagHTTPHeaderName NS_TYPED_ENUM;
+typedef NSString * RSCrashReporterHTTPHeaderName NS_TYPED_ENUM;
 
-static BugsnagHTTPHeaderName const BugsnagHTTPHeaderNameApiKey             = @"Bugsnag-Api-Key";
-static BugsnagHTTPHeaderName const BugsnagHTTPHeaderNameIntegrity          = @"Bugsnag-Integrity";
-static BugsnagHTTPHeaderName const BugsnagHTTPHeaderNamePayloadVersion     = @"Bugsnag-Payload-Version";
-static BugsnagHTTPHeaderName const BugsnagHTTPHeaderNameSentAt             = @"Bugsnag-Sent-At";
-static BugsnagHTTPHeaderName const BugsnagHTTPHeaderNameStacktraceTypes    = @"Bugsnag-Stacktrace-Types";
+static RSCrashReporterHTTPHeaderName const RSCrashReporterHTTPHeaderNameApiKey             = @"RSCrashReporter-Api-Key";
+static RSCrashReporterHTTPHeaderName const RSCrashReporterHTTPHeaderNameIntegrity          = @"RSCrashReporter-Integrity";
+static RSCrashReporterHTTPHeaderName const RSCrashReporterHTTPHeaderNamePayloadVersion     = @"RSCrashReporter-Payload-Version";
+static RSCrashReporterHTTPHeaderName const RSCrashReporterHTTPHeaderNameSentAt             = @"RSCrashReporter-Sent-At";
+static RSCrashReporterHTTPHeaderName const RSCrashReporterHTTPHeaderNameStacktraceTypes    = @"RSCrashReporter-Stacktrace-Types";
 
-typedef NS_ENUM(NSInteger, BSGDeliveryStatus) {
+typedef NS_ENUM(NSInteger, RSCDeliveryStatus) {
     /// The payload was delivered successfully and can be deleted.
-    BSGDeliveryStatusDelivered,
+    RSCDeliveryStatusDelivered,
     /// The payload was not delivered but can be retried, e.g. when there was a loss of connectivity.
-    BSGDeliveryStatusFailed,
+    RSCDeliveryStatusFailed,
     /// The payload cannot be delivered and should be deleted without attempting to retry.
-    BSGDeliveryStatusUndeliverable,
+    RSCDeliveryStatusUndeliverable,
 };
 
-void BSGPostJSONData(NSURLSession *URLSession,
+void RSCPostJSONData(NSURLSession *URLSession,
                      NSData *data,
-                     NSDictionary<BugsnagHTTPHeaderName, NSString *> *headers,
+                     NSDictionary<RSCrashReporterHTTPHeaderName, NSString *> *headers,
                      NSURL *url,
-                     void (^ completionHandler)(BSGDeliveryStatus status, NSError *_Nullable error));
+                     void (^ completionHandler)(RSCDeliveryStatus status, NSError *_Nullable error));
 
-NSString *_Nullable BSGIntegrityHeaderValue(NSData *_Nullable data);
+NSString *_Nullable RSCIntegrityHeaderValue(NSData *_Nullable data);
 
 NS_ASSUME_NONNULL_END

@@ -1,9 +1,9 @@
 //
-//  BugsnagInternals.h
-//  Bugsnag
+//  RSCrashReporterInternals.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 31/08/2022.
-//  Copyright © 2022 Bugsnag Inc. All rights reserved.
+//  Copyright © 2022 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <RSCrashReporter/RSCrashReporter.h>
@@ -11,18 +11,18 @@
 /**
  * ** WARNING **
  *
- * The interfaces declared in this header file are for use by Bugsnag's other
+ * The interfaces declared in this header file are for use by RSCrashReporter's other
  * platform notifiers such as bugsnag-cocos2ds, bugsnag-flutter, bugsnag-js,
  * bugsnag-unreal and bugsnag-unity.
  *
  * These interfaces may be changed, renamed or removed without warning in minor
- * or bugfix releases, and should not be used by projects outside of Bugsnag.
+ * or bugfix releases, and should not be used by projects outside of RSCrashReporter.
  */
 
-#import "BugsnagHandledState.h"
-#import "BugsnagNotifier.h"
+#import "RSCrashReporterHandledState.h"
+#import "RSCrashReporterNotifier.h"
 
-@interface BSGFeatureFlagStore : NSObject <NSCopying>
+@interface RSCFeatureFlagStore : NSObject <NSCopying>
 @end
 
 NS_ASSUME_NONNULL_BEGIN
@@ -33,15 +33,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (class, readonly, nonatomic) BOOL bugsnagReadyForInternalCalls;
 
-@property (class, readonly, nonatomic) BugsnagClient *client;
+@property (class, readonly, nonatomic) RSCrashReporterClient *client;
 
 @end
 
 #pragma mark -
 
-@interface BugsnagAppWithState ()
+@interface RSCrashReporterAppWithState ()
 
-+ (BugsnagAppWithState *)appFromJson:(NSDictionary *)json;
++ (RSCrashReporterAppWithState *)appFromJson:(NSDictionary *)json;
 
 - (NSDictionary *)toDict;
 
@@ -49,7 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark -
 
-@interface BugsnagBreadcrumb ()
+@interface RSCrashReporterBreadcrumb ()
 
 + (nullable instancetype)breadcrumbFromDict:(NSDictionary *)dict;
 
@@ -57,68 +57,68 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-BUGSNAG_EXTERN NSString * BSGBreadcrumbTypeValue(BSGBreadcrumbType type);
+RSCRASHREPORTER_EXTERN NSString * RSCBreadcrumbTypeValue(RSCBreadcrumbType type);
 
-BUGSNAG_EXTERN BSGBreadcrumbType BSGBreadcrumbTypeFromString(NSString * _Nullable value);
+RSCRASHREPORTER_EXTERN RSCBreadcrumbType RSCBreadcrumbTypeFromString(NSString * _Nullable value);
 
 #pragma mark -
 
-typedef NS_ENUM(NSInteger, BSGClientObserverEvent) {
-    BSGClientObserverAddFeatureFlag,    // value: BugsnagFeatureFlag
-    BSGClientObserverClearFeatureFlag,  // value: NSString
-    BSGClientObserverUpdateContext,     // value: NSString
-    BSGClientObserverUpdateMetadata,    // value: BugsnagMetadata
-    BSGClientObserverUpdateUser,        // value: BugsnagUser
+typedef NS_ENUM(NSInteger, RSCClientObserverEvent) {
+    RSCClientObserverAddFeatureFlag,    // value: RSCrashReporterFeatureFlag
+    RSCClientObserverClearFeatureFlag,  // value: NSString
+    RSCClientObserverUpdateContext,     // value: NSString
+    RSCClientObserverUpdateMetadata,    // value: RSCrashReporterMetadata
+    RSCClientObserverUpdateUser,        // value: RSCrashReporterUser
 };
 
-typedef void (^ BSGClientObserver)(BSGClientObserverEvent event, _Nullable id value);
+typedef void (^ RSCClientObserver)(RSCClientObserverEvent event, _Nullable id value);
 
-@interface BugsnagClient ()
+@interface RSCrashReporterClient ()
 
 @property (nullable, nonatomic) NSString *codeBundleId;
 
-@property (retain, nonatomic) BugsnagConfiguration *configuration;
+@property (retain, nonatomic) RSCrashReporterConfiguration *configuration;
 
-@property (readonly, nonatomic) BSGFeatureFlagStore *featureFlagStore;
+@property (readonly, nonatomic) RSCFeatureFlagStore *featureFlagStore;
 
-@property (strong, nonatomic) BugsnagMetadata *metadata;
+@property (strong, nonatomic) RSCrashReporterMetadata *metadata;
 
-@property (readonly, nonatomic) BugsnagNotifier *notifier;
+@property (readonly, nonatomic) RSCrashReporterNotifier *notifier;
 
-@property (nullable, nonatomic) BSGClientObserver observer;
+@property (nullable, nonatomic) RSCClientObserver observer;
 
 /// The currently active (not paused) session.
-@property (readonly, nullable, nonatomic) BugsnagSession *session;
+@property (readonly, nullable, nonatomic) RSCrashReporterSession *session;
 
 - (void)addRuntimeVersionInfo:(NSString *)info withKey:(NSString *)key;
 
-- (BugsnagAppWithState *)generateAppWithState:(NSDictionary *)systemInfo;
+- (RSCrashReporterAppWithState *)generateAppWithState:(NSDictionary *)systemInfo;
 
-- (BugsnagDeviceWithState *)generateDeviceWithState:(NSDictionary *)systemInfo;
+- (RSCrashReporterDeviceWithState *)generateDeviceWithState:(NSDictionary *)systemInfo;
 
-- (void)notifyInternal:(BugsnagEvent *)event block:(nullable BugsnagOnErrorBlock)block;
+- (void)notifyInternal:(RSCrashReporterEvent *)event block:(nullable RSCrashReporterOnErrorBlock)block;
 
-- (void)updateSession:(BugsnagSession * _Nullable (^)(BugsnagSession * _Nullable session))block;
-
-@end
-
-#pragma mark -
-
-@interface BugsnagConfiguration ()
-
-@property (nullable, nonatomic) BugsnagNotifier *notifier;
-
-@property (nonatomic) NSMutableArray<BugsnagOnBreadcrumbBlock> *onBreadcrumbBlocks;
-
-@property (nonatomic) NSMutableArray<BugsnagOnSendErrorBlock> *onSendBlocks;
-
-@property (nonatomic) NSMutableArray<BugsnagOnSessionBlock> *onSessionBlocks;
+- (void)updateSession:(RSCrashReporterSession * _Nullable (^)(RSCrashReporterSession * _Nullable session))block;
 
 @end
 
 #pragma mark -
 
-@interface BugsnagDeviceWithState ()
+@interface RSCrashReporterConfiguration ()
+
+@property (nullable, nonatomic) RSCrashReporterNotifier *notifier;
+
+@property (nonatomic) NSMutableArray<RSCrashReporterOnBreadcrumbBlock> *onBreadcrumbBlocks;
+
+@property (nonatomic) NSMutableArray<RSCrashReporterOnSendErrorBlock> *onSendBlocks;
+
+@property (nonatomic) NSMutableArray<RSCrashReporterOnSessionBlock> *onSessionBlocks;
+
+@end
+
+#pragma mark -
+
+@interface RSCrashReporterDeviceWithState ()
 
 + (instancetype)deviceFromJson:(NSDictionary *)json;
 
@@ -128,30 +128,30 @@ typedef void (^ BSGClientObserver)(BSGClientObserverEvent event, _Nullable id va
 
 #pragma mark -
 
-@interface BugsnagError ()
+@interface RSCrashReporterError ()
 
-+ (BugsnagError *)errorFromJson:(NSDictionary *)json;
++ (RSCrashReporterError *)errorFromJson:(NSDictionary *)json;
 
 - (instancetype)initWithErrorClass:(NSString *)errorClass
                       errorMessage:(nullable NSString *)errorMessage
-                         errorType:(BSGErrorType)errorType
-                        stacktrace:(nullable NSArray<BugsnagStackframe *> *)stacktrace;
+                         errorType:(RSCErrorType)errorType
+                        stacktrace:(nullable NSArray<RSCrashReporterStackframe *> *)stacktrace;
 
 @end
 
 #pragma mark -
 
-@interface BugsnagEvent ()
+@interface RSCrashReporterEvent ()
 
-- (instancetype)initWithApp:(BugsnagAppWithState *)app
-                     device:(BugsnagDeviceWithState *)device
-               handledState:(BugsnagHandledState *)handledState
-                       user:(BugsnagUser *)user
-                   metadata:(BugsnagMetadata *)metadata
-                breadcrumbs:(NSArray<BugsnagBreadcrumb *> *)breadcrumbs
-                     errors:(NSArray<BugsnagError *> *)errors
-                    threads:(NSArray<BugsnagThread *> *)threads
-                    session:(nullable BugsnagSession *)session;
+- (instancetype)initWithApp:(RSCrashReporterAppWithState *)app
+                     device:(RSCrashReporterDeviceWithState *)device
+               handledState:(RSCrashReporterHandledState *)handledState
+                       user:(RSCrashReporterUser *)user
+                   metadata:(RSCrashReporterMetadata *)metadata
+                breadcrumbs:(NSArray<RSCrashReporterBreadcrumb *> *)breadcrumbs
+                     errors:(NSArray<RSCrashReporterError *> *)errors
+                    threads:(NSArray<RSCrashReporterThread *> *)threads
+                    session:(nullable RSCrashReporterSession *)session;
 
 - (instancetype)initWithJson:(NSDictionary *)json;
 
@@ -161,13 +161,13 @@ typedef void (^ BSGClientObserver)(BSGClientObserverEvent event, _Nullable id va
 
 - (NSDictionary *)toJsonWithRedactedKeys:(nullable NSSet *)redactedKeys;
 
-@property (readwrite, strong, nonnull, nonatomic) BSGFeatureFlagStore *featureFlagStore;
+@property (readwrite, strong, nonnull, nonatomic) RSCFeatureFlagStore *featureFlagStore;
 
 @end
 
 #pragma mark -
 
-@interface BugsnagMetadata ()
+@interface RSCrashReporterMetadata ()
 
 - (instancetype)initWithDictionary:(NSDictionary *)dict;
 
@@ -179,11 +179,11 @@ typedef void (^ BSGClientObserver)(BSGClientObserverEvent event, _Nullable id va
 
 #pragma mark -
 
-@interface BugsnagSession ()
+@interface RSCrashReporterSession ()
 
-@property (readwrite, nonatomic) BugsnagApp *app;
+@property (readwrite, nonatomic) RSCrashReporterApp *app;
 
-@property (readwrite, nonatomic) BugsnagDevice *device;
+@property (readwrite, nonatomic) RSCrashReporterDevice *device;
 
 @property (nonatomic) NSUInteger handledCount;
 
@@ -193,7 +193,7 @@ typedef void (^ BSGClientObserver)(BSGClientObserverEvent event, _Nullable id va
 
 #pragma mark -
 
-@interface BugsnagStackframe ()
+@interface RSCrashReporterStackframe ()
 
 + (instancetype)frameFromJson:(NSDictionary *)json;
 
@@ -213,11 +213,11 @@ typedef void (^ BSGClientObserver)(BSGClientObserverEvent event, _Nullable id va
 
 #pragma mark -
 
-@interface BugsnagThread ()
+@interface RSCrashReporterThread ()
 
-+ (NSArray<BugsnagThread *> *)allThreads:(BOOL)allThreads callStackReturnAddresses:(NSArray<NSNumber *> *)callStackReturnAddresses;
++ (NSArray<RSCrashReporterThread *> *)allThreads:(BOOL)allThreads callStackReturnAddresses:(NSArray<NSNumber *> *)callStackReturnAddresses;
 
-+ (NSMutableArray *)serializeThreads:(nullable NSArray<BugsnagThread *> *)threads;
++ (NSMutableArray *)serializeThreads:(nullable NSArray<RSCrashReporterThread *> *)threads;
 
 + (instancetype)threadFromJson:(NSDictionary *)json;
 
@@ -225,7 +225,7 @@ typedef void (^ BSGClientObserver)(BSGClientObserverEvent event, _Nullable id va
 
 #pragma mark -
 
-@interface BugsnagUser ()
+@interface RSCrashReporterUser ()
 
 - (instancetype)initWithDictionary:(nullable NSDictionary *)dict;
 
@@ -235,10 +235,10 @@ typedef void (^ BSGClientObserver)(BSGClientObserverEvent event, _Nullable id va
 
 #pragma mark -
 
-BUGSNAG_EXTERN NSString * BSGGetDefaultDeviceId(void);
+RSCRASHREPORTER_EXTERN NSString * RSCGetDefaultDeviceId(void);
 
-BUGSNAG_EXTERN NSDictionary * BSGGetSystemInfo(void);
+RSCRASHREPORTER_EXTERN NSDictionary * RSCGetSystemInfo(void);
 
-BUGSNAG_EXTERN NSTimeInterval BSGCrashSentryDeliveryTimeout;
+RSCRASHREPORTER_EXTERN NSTimeInterval RSCCrashSentryDeliveryTimeout;
 
 NS_ASSUME_NONNULL_END

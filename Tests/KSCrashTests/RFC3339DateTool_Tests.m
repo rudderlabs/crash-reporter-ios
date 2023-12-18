@@ -24,7 +24,7 @@
 
 
 #import <XCTest/XCTest.h>
-#import "BSG_RFC3339DateTool.h"
+#import "RSC_RFC3339DateTool.h"
 
 
 @interface RFC3339DateTool_Tests : XCTestCase @end
@@ -48,8 +48,8 @@
 
 - (void)assertString:(NSString*)asString isEquivalentToString:(NSString *)encodedString andYear:(int) year month:(int)month day:(int)day hour:(int)hour minute:(int)minute second:(int)second nano:(int)nano tz:(NSString *)tz {
     NSDate *expectedDate = [self newDateWithYear:year month:month day:day hour:hour minute:minute second:second nano:nano tz:tz];
-    NSDate *actualDate = [BSG_RFC3339DateTool dateFromString:asString];
-    NSString *actualString = [BSG_RFC3339DateTool stringFromDate:expectedDate];
+    NSDate *actualDate = [RSC_RFC3339DateTool dateFromString:asString];
+    NSString *actualString = [RSC_RFC3339DateTool stringFromDate:expectedDate];
     XCTAssertEqualObjects(encodedString, actualString);
     NSString *expectedInterval = [NSString stringWithFormat:@"%f", expectedDate.timeIntervalSince1970];
     NSString *actualInterval = [NSString stringWithFormat:@"%f", actualDate.timeIntervalSince1970];
@@ -86,7 +86,7 @@
 {
     NSDate* date = [self gmtDateWithYear:2000 month:1 day:2 hour:3 minute:4 second:5];
     NSString* expected = @"2000-01-02T03:04:05.000Z";
-    NSString* actual = [BSG_RFC3339DateTool stringFromDate:date];
+    NSString* actual = [RSC_RFC3339DateTool stringFromDate:date];
 
     XCTAssertEqualObjects(actual, expected, @"");
 }
@@ -94,7 +94,7 @@
 - (void) testDateFromString
 {
     NSDate* expected = [self gmtDateWithYear:2000 month:1 day:2 hour:3 minute:4 second:5];
-    NSDate* actual = [BSG_RFC3339DateTool dateFromString:@"2000-01-02T03:04:05Z"];
+    NSDate* actual = [RSC_RFC3339DateTool dateFromString:@"2000-01-02T03:04:05Z"];
 
     XCTAssertEqualObjects(actual, expected, @"");
 }
@@ -102,7 +102,7 @@
 - (void) testDateFromStringWithTimezone
 {
     NSDate* expected = [self gmtDateWithYear:2000 month:1 day:2 hour:3 minute:4 second:5];
-    NSDate* actual = [BSG_RFC3339DateTool dateFromString:@"2000-01-02T03:04:05+0000"];
+    NSDate* actual = [RSC_RFC3339DateTool dateFromString:@"2000-01-02T03:04:05+0000"];
 
     XCTAssertEqualObjects(actual, expected, @"");
 }
@@ -110,19 +110,19 @@
 - (void) testDateFromStringWithTimezonePlus2
 {
     NSDate* expected = [self gmtDateWithYear:2000 month:1 day:2 hour:1 minute:4 second:5];
-    NSDate* actual = [BSG_RFC3339DateTool dateFromString:@"2000-01-02T03:04:05+0200"];
+    NSDate* actual = [RSC_RFC3339DateTool dateFromString:@"2000-01-02T03:04:05+0200"];
 
     XCTAssertEqualObjects(actual, expected, @"");
     
     // Convert back again to verify overall effect
-    XCTAssertEqualObjects([BSG_RFC3339DateTool stringFromDate:actual], @"2000-01-02T01:04:05.000Z");
+    XCTAssertEqualObjects([RSC_RFC3339DateTool stringFromDate:actual], @"2000-01-02T01:04:05.000Z");
 }
 
 - (void) testStringFromUnixTimestamp
 {
     NSDate* date = [self gmtDateWithYear:2000 month:1 day:2 hour:3 minute:4 second:5];
     NSString* expected = @"2000-01-02T03:04:05.000Z";
-    NSString* actual = [BSG_RFC3339DateTool stringFromUNIXTimestamp:(unsigned long long)[date timeIntervalSince1970]];
+    NSString* actual = [RSC_RFC3339DateTool stringFromUNIXTimestamp:(unsigned long long)[date timeIntervalSince1970]];
 
     XCTAssertEqualObjects(actual, expected, @"");
 }

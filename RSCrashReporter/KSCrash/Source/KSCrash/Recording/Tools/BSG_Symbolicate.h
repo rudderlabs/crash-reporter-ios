@@ -1,12 +1,12 @@
 //
-//  BSG_Symbolicate.h
-//  Bugsnag
+//  RSC_Symbolicate.h
+//  RSCrashReporter
 //
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#ifndef BSG_Symbolicate_h
-#define BSG_Symbolicate_h
+#ifndef RSC_Symbolicate_h
+#define RSC_Symbolicate_h
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,16 +14,16 @@ extern "C" {
 
 #include <stdint.h>
 
-struct bsg_symbolicate_result {
-    struct bsg_mach_image *image;
+struct rsc_symbolicate_result {
+    struct rsc_mach_image *image;
     uintptr_t function_address;
     const char *function_name;
 };
 
-void bsg_symbolicate(const uintptr_t address, struct bsg_symbolicate_result *result);
+void rsc_symbolicate(const uintptr_t address, struct rsc_symbolicate_result *result);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // BSG_Symbolicate_h
+#endif // RSC_Symbolicate_h

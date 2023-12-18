@@ -1,9 +1,9 @@
 //
-//  BugsnagClient.m
+//  RSCrashReporterClient.m
 //
 //  Created by Conrad Irwin on 2014-10-01.
 //
-//  Copyright (c) 2014 Bugsnag, Inc. All rights reserved.
+//  Copyright (c) 2014 RSCrashReporter, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,66 +24,66 @@
 // THE SOFTWARE.
 //
 
-#import "BugsnagClient+Private.h"
+#import "RSCrashReporterClient+Private.h"
 
-#import "BSGAppHangDetector.h"
-#import "BSGAppKit.h"
-#import "BSGConnectivity.h"
-#import "BSGCrashSentry.h"
-#import "BSGDefines.h"
-#import "BSGEventUploader.h"
-#import "BSGFileLocations.h"
-#import "BSGHardware.h"
-#import "BSGInternalErrorReporter.h"
-#import "BSGJSONSerialization.h"
-#import "BSGKeys.h"
-#import "BSGNetworkBreadcrumb.h"
-#import "BSGNotificationBreadcrumbs.h"
-#import "BSGRunContext.h"
-#import "BSGSerialization.h"
-#import "BSGTelemetry.h"
-#import "BSGUIKit.h"
-#import "BSGUtils.h"
-#import "BSG_KSCrashC.h"
-#import "BSG_KSSystemInfo.h"
+#import "RSCAppHangDetector.h"
+#import "RSCAppKit.h"
+#import "RSCConnectivity.h"
+#import "RSCCrashSentry.h"
+#import "RSCDefines.h"
+#import "RSCEventUploader.h"
+#import "RSCFileLocations.h"
+#import "RSCHardware.h"
+#import "RSCInternalErrorReporter.h"
+#import "RSCJSONSerialization.h"
+#import "RSCKeys.h"
+#import "RSCNetworkBreadcrumb.h"
+#import "RSCNotificationBreadcrumbs.h"
+#import "RSCRunContext.h"
+#import "RSCSerialization.h"
+#import "RSCTelemetry.h"
+#import "RSCUIKit.h"
+#import "RSCUtils.h"
+#import "RSC_KSCrashC.h"
+#import "RSC_KSSystemInfo.h"
 #import "RSCrashReporter.h"
-#import "BugsnagApp+Private.h"
-#import "BugsnagAppWithState+Private.h"
-#import "BugsnagBreadcrumb+Private.h"
-#import "BugsnagBreadcrumbs.h"
-#import "BugsnagCollections.h"
-#import "BugsnagConfiguration+Private.h"
-#import "BugsnagDeviceWithState+Private.h"
-#import "BugsnagError+Private.h"
-#import "BugsnagErrorTypes.h"
-#import "BugsnagEvent+Private.h"
-#import "BugsnagFeatureFlag.h"
-#import "BugsnagHandledState.h"
-#import "BugsnagLastRunInfo+Private.h"
-#import "BugsnagLogger.h"
-#import "BugsnagMetadata+Private.h"
-#import "BugsnagNotifier.h"
-#import "BugsnagPlugin.h"
-#import "BugsnagSession+Private.h"
-#import "BugsnagSessionTracker.h"
-#import "BugsnagStackframe+Private.h"
-#import "BugsnagSystemState.h"
-#import "BugsnagThread+Private.h"
-#import "BugsnagUser+Private.h"
+#import "RSCrashReporterApp+Private.h"
+#import "RSCrashReporterAppWithState+Private.h"
+#import "RSCrashReporterBreadcrumb+Private.h"
+#import "RSCrashReporterBreadcrumbs.h"
+#import "RSCrashReporterCollections.h"
+#import "RSCrashReporterConfiguration+Private.h"
+#import "RSCrashReporterDeviceWithState+Private.h"
+#import "RSCrashReporterError+Private.h"
+#import "RSCrashReporterErrorTypes.h"
+#import "RSCrashReporterEvent+Private.h"
+#import "RSCrashReporterFeatureFlag.h"
+#import "RSCrashReporterHandledState.h"
+#import "RSCrashReporterLastRunInfo+Private.h"
+#import "RSCrashReporterLogger.h"
+#import "RSCrashReporterMetadata+Private.h"
+#import "RSCrashReporterNotifier.h"
+#import "RSCrashReporterPlugin.h"
+#import "RSCrashReporterSession+Private.h"
+#import "RSCrashReporterSessionTracker.h"
+#import "RSCrashReporterStackframe+Private.h"
+#import "RSCrashReporterSystemState.h"
+#import "RSCrashReporterThread+Private.h"
+#import "RSCrashReporterUser+Private.h"
 
 static struct {
     // Contains the user-specified metadata, including the user tab from config.
     char *metadataJSON;
-    // Contains the Bugsnag configuration, all under the "config" tab.
+    // Contains the RSCrashReporter configuration, all under the "config" tab.
     char *configJSON;
     // Contains notifier state under "deviceState", and crash-specific
     // information under "crash".
     char *stateJSON;
-    // Usage telemetry, from BSGTelemetryCreateUsage()
+    // Usage telemetry, from RSCTelemetryCreateUsage()
     char *usageJSON;
     // User onCrash handler
-    void (*onCrash)(const BSG_KSCrashReportWriter *writer);
-} bsg_g_bugsnag_data;
+    void (*onCrash)(const RSC_KSCrashReportWriter *writer);
+} rsc_g_bugsnag_data;
 
 static char *crashSentinelPath;
 
@@ -93,39 +93,39 @@ static char *crashSentinelPath;
  *
  *  @param writer report writer which will receive updated metadata
  */
-static void BSSerializeDataCrashHandler(const BSG_KSCrashReportWriter *writer) {
+static void BSSerializeDataCrashHandler(const RSC_KSCrashReportWriter *writer) {
     BOOL isCrash = YES;
-    BSGSessionWriteCrashReport(writer);
+    RSCSessionWriteCrashReport(writer);
 
     if (isCrash) {
-        writer->addJSONElement(writer, "config", bsg_g_bugsnag_data.configJSON);
-        writer->addJSONElement(writer, "metaData", bsg_g_bugsnag_data.metadataJSON);
-        writer->addJSONElement(writer, "state", bsg_g_bugsnag_data.stateJSON);
+        writer->addJSONElement(writer, "config", rsc_g_bugsnag_data.configJSON);
+        writer->addJSONElement(writer, "metaData", rsc_g_bugsnag_data.metadataJSON);
+        writer->addJSONElement(writer, "state", rsc_g_bugsnag_data.stateJSON);
 
         writer->beginObject(writer, "app"); {
-            if (bsg_runContext->memoryLimit) {
-                writer->addUIntegerElement(writer, "freeMemory", bsg_runContext->memoryAvailable);
-                writer->addUIntegerElement(writer, "memoryLimit", bsg_runContext->memoryLimit);
+            if (rsc_runContext->memoryLimit) {
+                writer->addUIntegerElement(writer, "freeMemory", rsc_runContext->memoryAvailable);
+                writer->addUIntegerElement(writer, "memoryLimit", rsc_runContext->memoryLimit);
             }
-            if (bsg_runContext->memoryFootprint) {
-                writer->addUIntegerElement(writer, "memoryUsage", bsg_runContext->memoryFootprint);
+            if (rsc_runContext->memoryFootprint) {
+                writer->addUIntegerElement(writer, "memoryUsage", rsc_runContext->memoryFootprint);
             }
         }
         writer->endContainer(writer);
 
-#if BSG_HAVE_BATTERY
-        if (BSGIsBatteryStateKnown(bsg_runContext->batteryState)) {
-            writer->addFloatingPointElement(writer, "batteryLevel", bsg_runContext->batteryLevel);
-            writer->addBooleanElement(writer, "charging", BSGIsBatteryCharging(bsg_runContext->batteryState));
+#if RSC_HAVE_BATTERY
+        if (RSCIsBatteryStateKnown(rsc_runContext->batteryState)) {
+            writer->addFloatingPointElement(writer, "batteryLevel", rsc_runContext->batteryLevel);
+            writer->addBooleanElement(writer, "charging", RSCIsBatteryCharging(rsc_runContext->batteryState));
         }
 #endif
 #if TARGET_OS_IOS
-        writer->addIntegerElement(writer, "orientation", bsg_runContext->lastKnownOrientation);
+        writer->addIntegerElement(writer, "orientation", rsc_runContext->lastKnownOrientation);
 #endif
-        writer->addBooleanElement(writer, "isLaunching", bsg_runContext->isLaunching);
-        writer->addIntegerElement(writer, "thermalState", bsg_runContext->thermalState);
+        writer->addBooleanElement(writer, "isLaunching", rsc_runContext->isLaunching);
+        writer->addIntegerElement(writer, "thermalState", rsc_runContext->thermalState);
 
-        BugsnagBreadcrumbsWriteCrashReport(writer);
+        RSCrashReporterBreadcrumbsWriteCrashReport(writer);
 
         // Create a file to indicate that the crash has been handled by
         // the library. This exists in case the subsequent `onCrash` handler
@@ -136,12 +136,12 @@ static void BSSerializeDataCrashHandler(const BSG_KSCrashReportWriter *writer) {
         }
     }
 
-    if (bsg_g_bugsnag_data.usageJSON) {
-        writer->addJSONElement(writer, "_usage", bsg_g_bugsnag_data.usageJSON);
+    if (rsc_g_bugsnag_data.usageJSON) {
+        writer->addJSONElement(writer, "_usage", rsc_g_bugsnag_data.usageJSON);
     }
 
-    if (bsg_g_bugsnag_data.onCrash) {
-        bsg_g_bugsnag_data.onCrash(writer);
+    if (rsc_g_bugsnag_data.onCrash) {
+        rsc_g_bugsnag_data.onCrash(writer);
     }
 }
 
@@ -149,22 +149,22 @@ static void BSSerializeDataCrashHandler(const BSG_KSCrashReportWriter *writer) {
 
 // MARK: -
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BugsnagClient () <BSGBreadcrumbSink>
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCrashReporterClient () <RSCBreadcrumbSink>
 
-@property (nonatomic) BSGNotificationBreadcrumbs *notificationBreadcrumbs;
+@property (nonatomic) RSCNotificationBreadcrumbs *notificationBreadcrumbs;
 
 @property (weak, nonatomic) NSTimer *appLaunchTimer;
 
-@property (nullable, retain, nonatomic) BugsnagBreadcrumbs *breadcrumbStore;
+@property (nullable, retain, nonatomic) RSCrashReporterBreadcrumbs *breadcrumbStore;
 
-@property (readwrite, nullable, nonatomic) BugsnagLastRunInfo *lastRunInfo;
+@property (readwrite, nullable, nonatomic) RSCrashReporterLastRunInfo *lastRunInfo;
 
-@property (strong, nonatomic) BugsnagSessionTracker *sessionTracker;
+@property (strong, nonatomic) RSCrashReporterSessionTracker *sessionTracker;
 
 @end
 
-@interface BugsnagClient (/* not objc_direct */)
+@interface RSCrashReporterClient (/* not objc_direct */)
 
 - (void)appLaunchTimerFired:(NSTimer *)timer;
 
@@ -172,8 +172,8 @@ BSG_OBJC_DIRECT_MEMBERS
 
 @end
 
-#if BSG_HAVE_APP_HANG_DETECTION
-@interface BugsnagClient () <BSGAppHangDetectorDelegate>
+#if RSC_HAVE_APP_HANG_DETECTION
+@interface RSCrashReporterClient () <RSCAppHangDetectorDelegate>
 @end
 #endif
 
@@ -183,31 +183,31 @@ BSG_OBJC_DIRECT_MEMBERS
 __attribute__((annotate("oclint:suppress[long class]")))
 __attribute__((annotate("oclint:suppress[too many methods]")))
 #endif
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BugsnagClient
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCrashReporterClient
 
-- (instancetype)initWithConfiguration:(BugsnagConfiguration *)configuration delegate:(id<RSCrashReporterNotifyDelegate> _Nullable)delegate {
+- (instancetype)initWithConfiguration:(RSCrashReporterConfiguration *)configuration delegate:(id<RSCrashReporterNotifyDelegate> _Nullable)delegate {
     if ((self = [super init])) {
         // Take a shallow copy of the configuration
         _configuration = [configuration copy];
         
         if (!_configuration.user.id) { // populate with an autogenerated ID if no value set
-            [_configuration setUser:[BSG_KSSystemInfo deviceAndAppHash] withEmail:_configuration.user.email andName:_configuration.user.name];
+            [_configuration setUser:[RSC_KSSystemInfo deviceAndAppHash] withEmail:_configuration.user.email andName:_configuration.user.name];
         }
 
         _featureFlagStore = [configuration.featureFlagStore copy];
         
-        _state = [[BugsnagMetadata alloc] initWithDictionary:@{
-            BSGKeyClient: @{
-                BSGKeyContext: _configuration.context ?: [NSNull null],
-                BSGKeyFeatureFlags: BSGFeatureFlagStoreToJSON(_featureFlagStore),
+        _state = [[RSCrashReporterMetadata alloc] initWithDictionary:@{
+            RSCKeyClient: @{
+                RSCKeyContext: _configuration.context ?: [NSNull null],
+                RSCKeyFeatureFlags: RSCFeatureFlagStoreToJSON(_featureFlagStore),
             },
-            BSGKeyUser: [_configuration.user toJson] ?: @{}
+            RSCKeyUser: [_configuration.user toJson] ?: @{}
         }];
         
-        _notifier = _configuration.notifier ?: [[BugsnagNotifier alloc] init];
+        _notifier = _configuration.notifier ?: [[RSCrashReporterNotifier alloc] init];
 
-        BSGFileLocations *fileLocations = [BSGFileLocations current];
+        RSCFileLocations *fileLocations = [RSCFileLocations current];
         
         NSString *crashPath = fileLocations.flagHandledCrash;
         crashSentinelPath = strdup(crashPath.fileSystemRepresentation);
@@ -215,10 +215,10 @@ BSG_OBJC_DIRECT_MEMBERS
         self.stateEventBlocks = [NSMutableArray new];
         self.extraRuntimeInfo = [NSMutableDictionary new];
 
-        _eventUploader = [[BSGEventUploader alloc] initWithConfiguration:_configuration notifier:_notifier delegate:delegate];
-        bsg_g_bugsnag_data.onCrash = (void (*)(const BSG_KSCrashReportWriter *))self.configuration.onCrashHandler;
+        _eventUploader = [[RSCEventUploader alloc] initWithConfiguration:_configuration notifier:_notifier delegate:delegate];
+        rsc_g_bugsnag_data.onCrash = (void (*)(const RSC_KSCrashReportWriter *))self.configuration.onCrashHandler;
 
-        _breadcrumbStore = [[BugsnagBreadcrumbs alloc] initWithConfiguration:self.configuration];
+        _breadcrumbStore = [[RSCrashReporterBreadcrumbs alloc] initWithConfiguration:self.configuration];
 
         // Start with a copy of the configuration metadata
         self.metadata = [[_configuration metadata] copy];
@@ -232,47 +232,47 @@ BSG_OBJC_DIRECT_MEMBERS
     // MARK: - Rudder Commented
     // [self.configuration validate];
     
-    // MUST be called before any code that accesses bsg_runContext
-    BSGRunContextInit(BSGFileLocations.current.runContext);
+    // MUST be called before any code that accesses rsc_runContext
+    RSCRunContextInit(RSCFileLocations.current.runContext);
 
-    BSGCrashSentryInstall(self.configuration, BSSerializeDataCrashHandler);
+    RSCCrashSentryInstall(self.configuration, BSSerializeDataCrashHandler);
 
-    self.systemState = [[BugsnagSystemState alloc] initWithConfiguration:self.configuration];
+    self.systemState = [[RSCrashReporterSystemState alloc] initWithConfiguration:self.configuration];
 
     // add metadata about app/device
-    NSDictionary *systemInfo = [BSG_KSSystemInfo systemInfo];
-    [self.metadata addMetadata:BSGParseAppMetadata(@{@"system": systemInfo}) toSection:BSGKeyApp];
-    [self.metadata addMetadata:BSGParseDeviceMetadata(@{@"system": systemInfo}) toSection:BSGKeyDevice];
+    NSDictionary *systemInfo = [RSC_KSSystemInfo systemInfo];
+    [self.metadata addMetadata:RSCParseAppMetadata(@{@"system": systemInfo}) toSection:RSCKeyApp];
+    [self.metadata addMetadata:RSCParseDeviceMetadata(@{@"system": systemInfo}) toSection:RSCKeyDevice];
 
     [self computeDidCrashLastLaunch];
 
-    if (self.configuration.telemetry & BSGTelemetryInternalErrors) {
-        BSGInternalErrorReporter.sharedInstance =
-        [[BSGInternalErrorReporter alloc] initWithApiKey:self.configuration.apiKey
+    if (self.configuration.telemetry & RSCTelemetryInternalErrors) {
+        RSCInternalErrorReporter.sharedInstance =
+        [[RSCInternalErrorReporter alloc] initWithApiKey:self.configuration.apiKey
                                                 endpoint:(NSURL *_Nonnull)self.configuration.notifyURL];
     } else {
-        bsg_log_debug(@"Internal error reporting was disabled in config");
+        rsc_log_debug(@"Internal error reporting was disabled in config");
     }
 
-    NSDictionary *usage = BSGTelemetryCreateUsage(self.configuration);
+    NSDictionary *usage = RSCTelemetryCreateUsage(self.configuration);
     if (usage) {
-        bsg_g_bugsnag_data.usageJSON = BSGCStringWithData(BSGJSONDataFromDictionary(usage, NULL));
+        rsc_g_bugsnag_data.usageJSON = RSCCStringWithData(RSCJSONDataFromDictionary(usage, NULL));
     }
 
     // These files can only be overwritten once the previous contents have been read; see -generateEventForLastLaunchWithError:
-    NSData *configData = BSGJSONDataFromDictionary(self.configuration.dictionaryRepresentation, NULL);
-    [configData writeToFile:BSGFileLocations.current.configuration options:NSDataWritingAtomic error:nil];
-    bsg_g_bugsnag_data.configJSON = BSGCStringWithData(configData);
-    [self.metadata setStorageBuffer:&bsg_g_bugsnag_data.metadataJSON file:BSGFileLocations.current.metadata];
-    [self.state setStorageBuffer:&bsg_g_bugsnag_data.stateJSON file:BSGFileLocations.current.state];
+    NSData *configData = RSCJSONDataFromDictionary(self.configuration.dictionaryRepresentation, NULL);
+    [configData writeToFile:RSCFileLocations.current.configuration options:NSDataWritingAtomic error:nil];
+    rsc_g_bugsnag_data.configJSON = RSCCStringWithData(configData);
+    [self.metadata setStorageBuffer:&rsc_g_bugsnag_data.metadataJSON file:RSCFileLocations.current.metadata];
+    [self.state setStorageBuffer:&rsc_g_bugsnag_data.stateJSON file:RSCFileLocations.current.state];
     [self.breadcrumbStore removeAllBreadcrumbs];
 
     // MARK: - Rudder Commented
-/*#if BSG_HAVE_REACHABILITY
+/*#if RSC_HAVE_REACHABILITY
     [self setupConnectivityListener];
 #endif*/
 
-    self.notificationBreadcrumbs = [[BSGNotificationBreadcrumbs alloc] initWithConfiguration:self.configuration breadcrumbSink:self];
+    self.notificationBreadcrumbs = [[RSCNotificationBreadcrumbs alloc] initWithConfiguration:self.configuration breadcrumbSink:self];
     [self.notificationBreadcrumbs start];
 
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
@@ -288,23 +288,23 @@ BSG_OBJC_DIRECT_MEMBERS
 
     self.readyForInternalCalls = YES;
 
-    id<BugsnagPlugin> reactNativePlugin = [NSClassFromString(@"BugsnagReactNativePlugin") new];
+    id<RSCrashReporterPlugin> reactNativePlugin = [NSClassFromString(@"RSCrashReporterReactNativePlugin") new];
     if (reactNativePlugin) {
         [self.configuration.plugins addObject:reactNativePlugin];
     }
-    for (id<BugsnagPlugin> plugin in self.configuration.plugins) {
+    for (id<RSCrashReporterPlugin> plugin in self.configuration.plugins) {
         @try {
             [plugin load:self];
         } @catch (NSException *exception) {
-            bsg_log_err(@"Plugin %@ threw exception in -load: %@", plugin, exception);
+            rsc_log_err(@"Plugin %@ threw exception in -load: %@", plugin, exception);
         }
     }
     // MARK: - Rudder Commented
-    /*self.sessionTracker = [[BugsnagSessionTracker alloc] initWithConfig:self.configuration client:self];
-    [self.sessionTracker startWithNotificationCenter:center isInForeground:bsg_runContext->isForeground];*/
+    /*self.sessionTracker = [[RSCrashReporterSessionTracker alloc] initWithConfig:self.configuration client:self];
+    [self.sessionTracker startWithNotificationCenter:center isInForeground:rsc_runContext->isForeground];*/
 
     // Record a "Metrics Loaded" message
-    [self addAutoBreadcrumbOfType:BSGBreadcrumbTypeState withMessage:@"Metrics loaded" andMetadata:nil];
+    [self addAutoBreadcrumbOfType:RSCBreadcrumbTypeState withMessage:@"Metrics loaded" andMetadata:nil];
 
     if (self.configuration.launchDurationMillis > 0) {
         self.appLaunchTimer = [NSTimer scheduledTimerWithTimeInterval:(double)self.configuration.launchDurationMillis / 1000.0
@@ -317,15 +317,15 @@ BSG_OBJC_DIRECT_MEMBERS
     }
     
     if (self.eventFromLastLaunch) {
-        [self.eventUploader uploadEvent:(BugsnagEvent * _Nonnull)self.eventFromLastLaunch completionHandler:nil];
+        [self.eventUploader uploadEvent:(RSCrashReporterEvent * _Nonnull)self.eventFromLastLaunch completionHandler:nil];
         self.eventFromLastLaunch = nil;
     }
     
     [self.eventUploader uploadStoredEvents];
     
-#if BSG_HAVE_APP_HANG_DETECTION
+#if RSC_HAVE_APP_HANG_DETECTION
     // App hang detector deliberately started after sendLaunchCrashSynchronously (which by design may itself trigger an app hang)
-    // Note: BSGAppHangDetector itself checks configuration.enabledErrorTypes.appHangs
+    // Note: RSCAppHangDetector itself checks configuration.enabledErrorTypes.appHangs
     [self startAppHangDetector];
 #endif
     self.isStarted = YES;
@@ -336,32 +336,32 @@ BSG_OBJC_DIRECT_MEMBERS
 }
 
 - (void)markLaunchCompleted {
-    bsg_log_debug(@"App has finished launching");
+    rsc_log_debug(@"App has finished launching");
     [self.appLaunchTimer invalidate];
-    bsg_runContext->isLaunching = NO;
-    BSGRunContextUpdateTimestamp();
+    rsc_runContext->isLaunching = NO;
+    RSCRunContextUpdateTimestamp();
 }
 
 - (void)sendLaunchCrashSynchronously {
     if (self.configuration.sessionOrDefault.delegateQueue == NSOperationQueue.currentQueue) {
-        bsg_log_warn(@"Cannot send launch crash synchronously because session.delegateQueue is set to the current queue.");
+        rsc_log_warn(@"Cannot send launch crash synchronously because session.delegateQueue is set to the current queue.");
         return;
     }
-    bsg_log_info(@"Sending launch crash synchronously.");
+    rsc_log_info(@"Sending launch crash synchronously.");
     dispatch_time_t deadline = dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC);
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
     dispatch_block_t completionHandler = ^{
-        bsg_log_debug(@"Sent launch crash.");
+        rsc_log_debug(@"Sent launch crash.");
         dispatch_semaphore_signal(semaphore);
     };
     if (self.eventFromLastLaunch) {
-        [self.eventUploader uploadEvent:(BugsnagEvent * _Nonnull)self.eventFromLastLaunch completionHandler:completionHandler];
+        [self.eventUploader uploadEvent:(RSCrashReporterEvent * _Nonnull)self.eventFromLastLaunch completionHandler:completionHandler];
         self.eventFromLastLaunch = nil;
     } else {
         [self.eventUploader uploadLatestStoredEvent:completionHandler];
     }
     if (dispatch_semaphore_wait(semaphore, deadline)) {
-        bsg_log_debug(@"Timed out waiting for launch crash to be sent.");
+        rsc_log_debug(@"Timed out waiting for launch crash to be sent.");
     }
 }
 
@@ -369,30 +369,30 @@ BSG_OBJC_DIRECT_MEMBERS
     BOOL didCrash = NO;
     
     // Did the app crash in a way that was detected by KSCrash?
-    if (bsg_kscrashstate_currentState()->crashedLastLaunch || !access(crashSentinelPath, F_OK)) {
-        bsg_log_info(@"Last run terminated due to a crash.");
+    if (rsc_kscrashstate_currentState()->crashedLastLaunch || !access(crashSentinelPath, F_OK)) {
+        rsc_log_info(@"Last run terminated due to a crash.");
         unlink(crashSentinelPath);
         didCrash = YES;
     }
-#if BSG_HAVE_APP_HANG_DETECTION
+#if RSC_HAVE_APP_HANG_DETECTION
     // Was the app terminated while the main thread was hung?
     else if ((self.eventFromLastLaunch = [self loadAppHangEvent]).unhandled) {
-        bsg_log_info(@"Last run terminated during an app hang.");
+        rsc_log_info(@"Last run terminated during an app hang.");
         didCrash = YES;
     }
 #endif
 #if !TARGET_OS_WATCH
-    else if (self.configuration.autoDetectErrors && BSGRunContextWasKilled()) {
-        if (BSGRunContextWasCriticalThermalState()) {
-            bsg_log_info(@"Last run terminated during a critical thermal state.");
+    else if (self.configuration.autoDetectErrors && RSCRunContextWasKilled()) {
+        if (RSCRunContextWasCriticalThermalState()) {
+            rsc_log_info(@"Last run terminated during a critical thermal state.");
             if (self.configuration.enabledErrorTypes.thermalKills) {
                 self.eventFromLastLaunch = [self generateThermalKillEvent];
             }
             didCrash = YES;
         }
-#if BSG_HAVE_OOM_DETECTION
+#if RSC_HAVE_OOM_DETECTION
         else {
-            bsg_log_info(@"Last run terminated unexpectedly; possible Out Of Memory.");
+            rsc_log_info(@"Last run terminated unexpectedly; possible Out Of Memory.");
             if (self.configuration.enabledErrorTypes.ooms) {
                 self.eventFromLastLaunch = [self generateOutOfMemoryEvent];
             }
@@ -404,21 +404,21 @@ BSG_OBJC_DIRECT_MEMBERS
     
     self.appDidCrashLastLaunch = didCrash;
     
-    BOOL didCrashDuringLaunch = didCrash && BSGRunContextWasLaunching();
+    BOOL didCrashDuringLaunch = didCrash && RSCRunContextWasLaunching();
     if (didCrashDuringLaunch) {
         self.systemState.consecutiveLaunchCrashes++;
     } else {
         self.systemState.consecutiveLaunchCrashes = 0;
     }
     
-    self.lastRunInfo = [[BugsnagLastRunInfo alloc] initWithConsecutiveLaunchCrashes:self.systemState.consecutiveLaunchCrashes
+    self.lastRunInfo = [[RSCrashReporterLastRunInfo alloc] initWithConsecutiveLaunchCrashes:self.systemState.consecutiveLaunchCrashes
                                                                             crashed:didCrash
                                                                 crashedDuringLaunch:didCrashDuringLaunch];
 }
 
 - (void)setCodeBundleId:(NSString *)codeBundleId {
     _codeBundleId = codeBundleId;
-    [self.state addMetadata:codeBundleId withKey:BSGKeyCodeBundleId toSection:BSGKeyApp];
+    [self.state addMetadata:codeBundleId withKey:RSCKeyCodeBundleId toSection:RSCKeyApp];
     [self.systemState setCodeBundleID:codeBundleId];
     self.sessionTracker.codeBundleId = codeBundleId;
 }
@@ -429,12 +429,12 @@ BSG_OBJC_DIRECT_MEMBERS
 - (void)applicationWillTerminate:(__unused NSNotification *)notification {
     [[NSNotificationCenter defaultCenter] removeObserver:self.sessionTracker];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-#if BSG_HAVE_REACHABILITY
-    [BSGConnectivity stopMonitoring];
+#if RSC_HAVE_REACHABILITY
+    [RSCConnectivity stopMonitoring];
 #endif
 
-#if BSG_HAVE_BATTERY
-    BSGGetDevice().batteryMonitoringEnabled = FALSE;
+#if RSC_HAVE_BATTERY
+    RSCGetDevice().batteryMonitoringEnabled = FALSE;
 #endif
 
 #if TARGET_OS_IOS
@@ -458,22 +458,22 @@ BSG_OBJC_DIRECT_MEMBERS
     return [self.sessionTracker resumeSession];
 }
 
-- (BugsnagSession *)session {
+- (RSCrashReporterSession *)session {
     return self.sessionTracker.runningSession;
 }
 
-- (void)updateSession:(BugsnagSession * (^)(BugsnagSession *session))block {
+- (void)updateSession:(RSCrashReporterSession * (^)(RSCrashReporterSession *session))block {
     self.sessionTracker.currentSession =  block(self.sessionTracker.currentSession);
-    BSGSessionUpdateRunContext(self.sessionTracker.runningSession);
+    RSCSessionUpdateRunContext(self.sessionTracker.runningSession);
 }
 
 // =============================================================================
 // MARK: - Connectivity Listener
 // =============================================================================
 
-#if BSG_HAVE_REACHABILITY
+#if RSC_HAVE_REACHABILITY
 /**
- * Monitor the Bugsnag endpoint to detect changes in connectivity,
+ * Monitor the RSCrashReporter endpoint to detect changes in connectivity,
  * flush pending events when (re)connected and report connectivity
  * changes as breadcrumbs, if configured to do so.
  */
@@ -483,9 +483,9 @@ BSG_OBJC_DIRECT_MEMBERS
     // ARC Reference - 4.2 __weak Semantics
     // http://clang.llvm.org/docs/AutomaticReferenceCounting.html
     // Avoid potential strong reference cycle between the 'client' instance and
-    // the BSGConnectivity static storage.
+    // the RSCConnectivity static storage.
     __weak typeof(self) weakSelf = self;
-    [BSGConnectivity monitorURL:url
+    [RSCConnectivity monitorURL:url
                   usingCallback:^(BOOL connected, NSString *connectionType) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (connected) {
@@ -493,7 +493,7 @@ BSG_OBJC_DIRECT_MEMBERS
             [strongSelf.sessionTracker.sessionUploader processStoredSessions];
         }
 
-        [strongSelf addAutoBreadcrumbOfType:BSGBreadcrumbTypeState
+        [strongSelf addAutoBreadcrumbOfType:RSCBreadcrumbTypeState
                                 withMessage:@"Connectivity changed"
                                 andMetadata:@{@"type": connectionType}];
     }];
@@ -505,7 +505,7 @@ BSG_OBJC_DIRECT_MEMBERS
 // =============================================================================
 
 - (void)leaveBreadcrumbWithMessage:(NSString *_Nonnull)message {
-    [self leaveBreadcrumbWithMessage:message metadata:nil andType:BSGBreadcrumbTypeManual];
+    [self leaveBreadcrumbWithMessage:message metadata:nil andType:RSCBreadcrumbTypeManual];
 }
 
 - (void)leaveBreadcrumbForNotificationName:(NSString *_Nonnull)notificationName {
@@ -514,35 +514,35 @@ BSG_OBJC_DIRECT_MEMBERS
 
 - (void)leaveBreadcrumbWithMessage:(NSString *_Nonnull)message
                           metadata:(NSDictionary *_Nullable)metadata
-                           andType:(BSGBreadcrumbType)type {
-    NSDictionary *JSONMetadata = BSGJSONDictionary(metadata ?: @{});
+                           andType:(RSCBreadcrumbType)type {
+    NSDictionary *JSONMetadata = RSCJSONDictionary(metadata ?: @{});
     if (JSONMetadata != metadata && metadata) {
-        bsg_log_warn("Breadcrumb metadata is not a valid JSON object: %@", metadata);
+        rsc_log_warn("Breadcrumb metadata is not a valid JSON object: %@", metadata);
     }
     
-    BugsnagBreadcrumb *breadcrumb = [BugsnagBreadcrumb new];
+    RSCrashReporterBreadcrumb *breadcrumb = [RSCrashReporterBreadcrumb new];
     breadcrumb.message = message;
     breadcrumb.metadata = JSONMetadata ?: @{};
     breadcrumb.type = type;
     [self.breadcrumbStore addBreadcrumb:breadcrumb];
     
-    BSGRunContextUpdateTimestamp();
+    RSCRunContextUpdateTimestamp();
 }
 
 - (void)leaveNetworkRequestBreadcrumbForTask:(NSURLSessionTask *)task
                                      metrics:(NSURLSessionTaskMetrics *)metrics {
-    if (!(self.configuration.enabledBreadcrumbTypes & BSGEnabledBreadcrumbTypeRequest)) {
+    if (!(self.configuration.enabledBreadcrumbTypes & RSCEnabledBreadcrumbTypeRequest)) {
         return;
     }
-    BugsnagBreadcrumb *breadcrumb = BSGNetworkBreadcrumbWithTaskMetrics(task, metrics);
+    RSCrashReporterBreadcrumb *breadcrumb = RSCNetworkBreadcrumbWithTaskMetrics(task, metrics);
     if (!breadcrumb) {
         return;
     }
     [self.breadcrumbStore addBreadcrumb:breadcrumb];
-    BSGRunContextUpdateTimestamp();
+    RSCRunContextUpdateTimestamp();
 }
 
-- (NSArray<BugsnagBreadcrumb *> *)breadcrumbs {
+- (NSArray<RSCrashReporterBreadcrumb *> *)breadcrumbs {
     return self.breadcrumbStore.breadcrumbs ?: @[];
 }
 
@@ -550,7 +550,7 @@ BSG_OBJC_DIRECT_MEMBERS
 // MARK: - User
 // =============================================================================
 
-- (BugsnagUser *)user {
+- (RSCrashReporterUser *)user {
     @synchronized (self.configuration) {
         return self.configuration.user;
     }
@@ -559,9 +559,9 @@ BSG_OBJC_DIRECT_MEMBERS
 - (void)setUser:(NSString *)userId withEmail:(NSString *)email andName:(NSString *)name {
     @synchronized (self.configuration) {
         [self.configuration setUser:userId withEmail:email andName:name];
-        [self.state addMetadata:[self.configuration.user toJson] toSection:BSGKeyUser];
+        [self.state addMetadata:[self.configuration.user toJson] toSection:RSCKeyUser];
         if (self.observer) {
-            self.observer(BSGClientObserverUpdateUser, self.user);
+            self.observer(RSCClientObserverUpdateUser, self.user);
         }
     }
 }
@@ -570,15 +570,15 @@ BSG_OBJC_DIRECT_MEMBERS
 // MARK: - onSession
 // =============================================================================
 
-- (nonnull BugsnagOnSessionRef)addOnSessionBlock:(nonnull BugsnagOnSessionBlock)block {
+- (nonnull RSCrashReporterOnSessionRef)addOnSessionBlock:(nonnull RSCrashReporterOnSessionBlock)block {
     return [self.configuration addOnSessionBlock:block];
 }
 
-- (void)removeOnSession:(nonnull BugsnagOnSessionRef)callback {
+- (void)removeOnSession:(nonnull RSCrashReporterOnSessionRef)callback {
     [self.configuration removeOnSession:callback];
 }
 
-- (void)removeOnSessionBlock:(BugsnagOnSessionBlock _Nonnull )block {
+- (void)removeOnSessionBlock:(RSCrashReporterOnSessionBlock _Nonnull )block {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [self.configuration removeOnSessionBlock:block];
@@ -589,15 +589,15 @@ BSG_OBJC_DIRECT_MEMBERS
 // MARK: - onBreadcrumb
 // =============================================================================
 
-- (nonnull BugsnagOnBreadcrumbRef)addOnBreadcrumbBlock:(nonnull BugsnagOnBreadcrumbBlock)block {
+- (nonnull RSCrashReporterOnBreadcrumbRef)addOnBreadcrumbBlock:(nonnull RSCrashReporterOnBreadcrumbBlock)block {
     return [self.configuration addOnBreadcrumbBlock:block];
 }
 
-- (void)removeOnBreadcrumb:(nonnull BugsnagOnBreadcrumbRef)callback {
+- (void)removeOnBreadcrumb:(nonnull RSCrashReporterOnBreadcrumbRef)callback {
     [self.configuration removeOnBreadcrumb:callback];
 }
 
-- (void)removeOnBreadcrumbBlock:(BugsnagOnBreadcrumbBlock _Nonnull)block {
+- (void)removeOnBreadcrumbBlock:(RSCrashReporterOnBreadcrumbBlock _Nonnull)block {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [self.configuration removeOnBreadcrumbBlock:block];
@@ -610,9 +610,9 @@ BSG_OBJC_DIRECT_MEMBERS
 
 - (void)setContext:(nullable NSString *)context {
     self.configuration.context = context;
-    [self.state addMetadata:context withKey:BSGKeyContext toSection:BSGKeyClient];
+    [self.state addMetadata:context withKey:RSCKeyContext toSection:RSCKeyClient];
     if (self.observer) {
-        self.observer(BSGClientObserverUpdateContext, context);
+        self.observer(RSCClientObserverUpdateContext, context);
     }
 }
 
@@ -627,45 +627,45 @@ BSG_OBJC_DIRECT_MEMBERS
 // see notify:handledState:block for further info
 
 - (void)notifyError:(NSError *)error {
-    bsg_log_debug(@"%s %@", __PRETTY_FUNCTION__, error);
+    rsc_log_debug(@"%s %@", __PRETTY_FUNCTION__, error);
     [self notifyErrorOrException:error block:nil];
 }
 
-- (void)notifyError:(NSError *)error block:(BugsnagOnErrorBlock)block {
-    bsg_log_debug(@"%s %@", __PRETTY_FUNCTION__, error);
+- (void)notifyError:(NSError *)error block:(RSCrashReporterOnErrorBlock)block {
+    rsc_log_debug(@"%s %@", __PRETTY_FUNCTION__, error);
     [self notifyErrorOrException:error block:block];
 }
 
 - (void)notify:(NSException *)exception {
-    bsg_log_debug(@"%s %@", __PRETTY_FUNCTION__, exception);
+    rsc_log_debug(@"%s %@", __PRETTY_FUNCTION__, exception);
     [self notifyErrorOrException:exception block:nil];
 }
 
-- (void)notify:(NSException *)exception block:(BugsnagOnErrorBlock)block {
-    bsg_log_debug(@"%s %@", __PRETTY_FUNCTION__, exception);
+- (void)notify:(NSException *)exception block:(RSCrashReporterOnErrorBlock)block {
+    rsc_log_debug(@"%s %@", __PRETTY_FUNCTION__, exception);
     [self notifyErrorOrException:exception block:block];
 }
 
 // MARK: - Notify (Internal)
 
-- (void)notifyErrorOrException:(id)errorOrException block:(BugsnagOnErrorBlock)block {
-    NSDictionary *systemInfo = [BSG_KSSystemInfo systemInfo];
-    BugsnagMetadata *metadata = [self.metadata copy];
+- (void)notifyErrorOrException:(id)errorOrException block:(RSCrashReporterOnErrorBlock)block {
+    NSDictionary *systemInfo = [RSC_KSSystemInfo systemInfo];
+    RSCrashReporterMetadata *metadata = [self.metadata copy];
     
     NSArray<NSNumber *> *callStack = nil;
     NSString *context = self.context;
     NSString *errorClass = nil;
     NSString *errorMessage = nil;
-    BugsnagHandledState *handledState = nil;
+    RSCrashReporterHandledState *handledState = nil;
     
     if ([errorOrException isKindOfClass:[NSException class]]) {
         NSException *exception = errorOrException;
         callStack = exception.callStackReturnAddresses;
         errorClass = exception.name;
         errorMessage = exception.reason;
-        handledState = [BugsnagHandledState handledStateWithSeverityReason:HandledException];
+        handledState = [RSCrashReporterHandledState handledStateWithSeverityReason:HandledException];
         NSMutableDictionary *meta = [NSMutableDictionary dictionary];
-        NSDictionary *userInfo = exception.userInfo ? BSGJSONDictionary((NSDictionary *_Nonnull)exception.userInfo) : nil;
+        NSDictionary *userInfo = exception.userInfo ? RSCJSONDictionary((NSDictionary *_Nonnull)exception.userInfo) : nil;
         meta[@"nsexception"] = [NSDictionary dictionaryWithObjectsAndKeys:exception.name, @"name", userInfo, @"userInfo", nil];
         meta[@"reason"] = exception.reason;
         meta[@"type"] = @"nsexception";
@@ -678,16 +678,16 @@ BSG_OBJC_DIRECT_MEMBERS
         }
         errorClass = NSStringFromClass([error class]);
         errorMessage = error.localizedDescription;
-        handledState = [BugsnagHandledState handledStateWithSeverityReason:HandledError];
+        handledState = [RSCrashReporterHandledState handledStateWithSeverityReason:HandledError];
         NSMutableDictionary *meta = [NSMutableDictionary dictionary];
         meta[@"code"] = @(error.code);
         meta[@"domain"] = error.domain;
         meta[@"reason"] = error.localizedFailureReason;
-        meta[@"userInfo"] = BSGJSONDictionary(error.userInfo);
+        meta[@"userInfo"] = RSCJSONDictionary(error.userInfo);
         [metadata addMetadata:meta toSection:@"nserror"];
     }
     else {
-        bsg_log_warn(@"Unsupported error type passed to notify: %@", NSStringFromClass([errorOrException class]));
+        rsc_log_warn(@"Unsupported error type passed to notify: %@", NSStringFromClass([errorOrException class]));
         return;
     }
     
@@ -696,36 +696,36 @@ BSG_OBJC_DIRECT_MEMBERS
      * This helps remove bugsnag frames from showing in NSErrors as their
      * trace is synthesized.
      *
-     * For example, for [Bugsnag notifyError:block:], bugsnag adds the following
+     * For example, for [RSCrashReporter notifyError:block:], bugsnag adds the following
      * frames which must be removed:
      *
-     * 1. +[Bugsnag notifyError:block:]
-     * 2. -[BugsnagClient notifyError:block:]
-     * 3. -[BugsnagClient notify:handledState:block:]
+     * 1. +[RSCrashReporter notifyError:block:]
+     * 2. -[RSCrashReporterClient notifyError:block:]
+     * 3. -[RSCrashReporterClient notify:handledState:block:]
      */
     NSUInteger depth = 3;
     
     if (!callStack.count) {
         // If the NSException was not raised by the Objective-C runtime, it will be missing a call stack.
         // Use the current call stack instead.
-        callStack = BSGArraySubarrayFromIndex(NSThread.callStackReturnAddresses, depth);
+        callStack = RSCArraySubarrayFromIndex(NSThread.callStackReturnAddresses, depth);
     }
     
-#if BSG_HAVE_MACH_THREADS
-    BOOL recordAllThreads = self.configuration.sendThreads == BSGThreadSendPolicyAlways;
-    NSArray *threads = recordAllThreads ? [BugsnagThread allThreads:YES callStackReturnAddresses:callStack] : @[];
+#if RSC_HAVE_MACH_THREADS
+    BOOL recordAllThreads = self.configuration.sendThreads == RSCThreadSendPolicyAlways;
+    NSArray *threads = recordAllThreads ? [RSCrashReporterThread allThreads:YES callStackReturnAddresses:callStack] : @[];
 #else
     NSArray *threads = @[];
 #endif
     
-    NSArray<BugsnagStackframe *> *stacktrace = [BugsnagStackframe stackframesWithCallStackReturnAddresses:callStack];
+    NSArray<RSCrashReporterStackframe *> *stacktrace = [RSCrashReporterStackframe stackframesWithCallStackReturnAddresses:callStack];
     
-    BugsnagError *error = [[BugsnagError alloc] initWithErrorClass:errorClass
+    RSCrashReporterError *error = [[RSCrashReporterError alloc] initWithErrorClass:errorClass
                                                       errorMessage:errorMessage
-                                                         errorType:BSGErrorTypeCocoa
+                                                         errorType:RSCErrorTypeCocoa
                                                         stacktrace:stacktrace];
 
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithApp:[self generateAppWithState:systemInfo]
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithApp:[self generateAppWithState:systemInfo]
                                                      device:[self generateDeviceWithState:systemInfo]
                                                handledState:handledState
                                                        user:[self.user withId]
@@ -742,33 +742,33 @@ BSG_OBJC_DIRECT_MEMBERS
 }
 
 /**
- *  Notify Bugsnag of an exception. Used for user-reported (handled) errors, React Native, and Unity.
+ *  Notify RSCrashReporter of an exception. Used for user-reported (handled) errors, React Native, and Unity.
  *
  *  @param event    the event
  *  @param block     Configuration block for adding additional report information
  */
-- (void)notifyInternal:(BugsnagEvent *_Nonnull)event
-                 block:(BugsnagOnErrorBlock)block
+- (void)notifyInternal:(RSCrashReporterEvent *_Nonnull)event
+                 block:(RSCrashReporterOnErrorBlock)block
 {
     // Checks whether releaseStage is in enabledReleaseStages, blocking onError callback from running if it is not.
     if (!self.configuration.shouldSendReports || ![event shouldBeSent]) {
-        bsg_log_info("Discarding error because releaseStage '%@' not in enabledReleaseStages", self.configuration.releaseStage);
+        rsc_log_info("Discarding error because releaseStage '%@' not in enabledReleaseStages", self.configuration.releaseStage);
         return;
     }
     
     NSString *errorClass = event.errors.firstObject.errorClass;
     if ([self.configuration shouldDiscardErrorClass:errorClass]) {
-        bsg_log_info(@"Discarding event because errorClass \"%@\" matched configuration.discardClasses", errorClass);
+        rsc_log_info(@"Discarding event because errorClass \"%@\" matched configuration.discardClasses", errorClass);
         return;
     }
     
 #if TARGET_OS_WATCH
-    // Update BSGRunContext because we cannot observe battery level or state on watchOS :-(
-    bsg_runContext->batteryLevel = BSGGetDevice().batteryLevel;
-    bsg_runContext->batteryState = BSGGetDevice().batteryState;
+    // Update RSCRunContext because we cannot observe battery level or state on watchOS :-(
+    rsc_runContext->batteryLevel = RSCGetDevice().batteryLevel;
+    rsc_runContext->batteryState = RSCGetDevice().batteryState;
 #endif
-    [event.metadata addMetadata:BSGAppMetadataFromRunContext(bsg_runContext) toSection:BSGKeyApp];
-    [event.metadata addMetadata:BSGDeviceMetadataFromRunContext(bsg_runContext) toSection:BSGKeyDevice];
+    [event.metadata addMetadata:RSCAppMetadataFromRunContext(rsc_runContext) toSection:RSCKeyApp];
+    [event.metadata addMetadata:RSCDeviceMetadataFromRunContext(rsc_runContext) toSection:RSCKeyDevice];
 
     // App hang events will already contain feature flags
     if (!event.featureFlagStore.count) {
@@ -785,7 +785,7 @@ BSG_OBJC_DIRECT_MEMBERS
             return;
         }
     } @catch (NSException *exception) {
-        bsg_log_err(@"Error from onError callback: %@", exception);
+        rsc_log_err(@"Error from onError callback: %@", exception);
     }
     if (event.unhandled != originalUnhandledValue) {
         [event notifyUnhandledOverridden];
@@ -794,13 +794,13 @@ BSG_OBJC_DIRECT_MEMBERS
     [self.sessionTracker incrementEventCountUnhandled:event.handledState.unhandled];
     event.session = self.sessionTracker.runningSession;
 
-    event.usage = BSGTelemetryCreateUsage(self.configuration);
+    event.usage = RSCTelemetryCreateUsage(self.configuration);
 
     if (event.handledState.originalUnhandledValue) {
         // Unhandled Javscript exceptions from React Native result in the app being terminated shortly after the
         // call to notifyInternal, so the event needs to be persisted to disk for sending in the next session.
         // The fatal "RCTFatalException" / "Unhandled JS Exception" is explicitly ignored by
-        // BugsnagReactNativePlugin's OnSendErrorBlock.
+        // RSCrashReporterReactNativePlugin's OnSendErrorBlock.
         [self.eventUploader storeEvent:event];
         // Replicate previous delivery mechanism's behaviour of waiting 1 second before delivering the event.
         // This should prevent potential duplicate uploads of unhandled errors where the app subsequently terminates.
@@ -814,20 +814,20 @@ BSG_OBJC_DIRECT_MEMBERS
 
 // MARK: - Breadcrumbs
 
-- (void)addAutoBreadcrumbForEvent:(BugsnagEvent *)event {
+- (void)addAutoBreadcrumbForEvent:(RSCrashReporterEvent *)event {
     // A basic set of event metadata
     NSMutableDictionary *metadata = [NSMutableDictionary dictionary];
-    metadata[BSGKeyErrorClass] = event.errors[0].errorClass;
-    metadata[BSGKeyUnhandled] = @(event.handledState.unhandled);
-    metadata[BSGKeySeverity] = BSGFormatSeverity(event.severity);
+    metadata[RSCKeyErrorClass] = event.errors[0].errorClass;
+    metadata[RSCKeyUnhandled] = @(event.handledState.unhandled);
+    metadata[RSCKeySeverity] = RSCFormatSeverity(event.severity);
 
     // Only include the eventMessage if it contains something
     NSString *eventMessage = event.errors[0].errorMessage;
     if (eventMessage.length) {
-        [metadata setValue:eventMessage forKey:BSGKeyName];
+        [metadata setValue:eventMessage forKey:RSCKeyName];
     }
 
-    [self addAutoBreadcrumbOfType:BSGBreadcrumbTypeError
+    [self addAutoBreadcrumbOfType:RSCBreadcrumbTypeError
                       withMessage:event.errors[0].errorClass ?: @""
                       andMetadata:metadata];
 }
@@ -840,7 +840,7 @@ BSG_OBJC_DIRECT_MEMBERS
  * @param message The breadcrumb message
  * @param metadata The breadcrumb metadata.  If nil this is substituted by an empty dictionary.
  */
-- (void)addAutoBreadcrumbOfType:(BSGBreadcrumbType)breadcrumbType
+- (void)addAutoBreadcrumbOfType:(RSCBreadcrumbType)breadcrumbType
                     withMessage:(NSString * _Nonnull)message
                     andMetadata:(NSDictionary *)metadata
 {
@@ -853,61 +853,61 @@ BSG_OBJC_DIRECT_MEMBERS
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-// MARK: - <BugsnagFeatureFlagStore>
+// MARK: - <RSCrashReporterFeatureFlagStore>
 
 - (void)addFeatureFlagWithName:(NSString *)name variant:(nullable NSString *)variant {
     @synchronized (self.featureFlagStore) {
-        BSGFeatureFlagStoreAddFeatureFlag(self.featureFlagStore, name, variant);
-        [self.state addMetadata:BSGFeatureFlagStoreToJSON(self.featureFlagStore) withKey:BSGKeyFeatureFlags toSection:BSGKeyClient];
+        RSCFeatureFlagStoreAddFeatureFlag(self.featureFlagStore, name, variant);
+        [self.state addMetadata:RSCFeatureFlagStoreToJSON(self.featureFlagStore) withKey:RSCKeyFeatureFlags toSection:RSCKeyClient];
     }
     if (self.observer) {
-        self.observer(BSGClientObserverAddFeatureFlag, [BugsnagFeatureFlag flagWithName:name variant:variant]);
+        self.observer(RSCClientObserverAddFeatureFlag, [RSCrashReporterFeatureFlag flagWithName:name variant:variant]);
     }
 }
 
 - (void)addFeatureFlagWithName:(NSString *)name {
     @synchronized (self.featureFlagStore) {
-        BSGFeatureFlagStoreAddFeatureFlag(self.featureFlagStore, name, nil);
-        [self.state addMetadata:BSGFeatureFlagStoreToJSON(self.featureFlagStore) withKey:BSGKeyFeatureFlags toSection:BSGKeyClient];
+        RSCFeatureFlagStoreAddFeatureFlag(self.featureFlagStore, name, nil);
+        [self.state addMetadata:RSCFeatureFlagStoreToJSON(self.featureFlagStore) withKey:RSCKeyFeatureFlags toSection:RSCKeyClient];
     }
     if (self.observer) {
-        self.observer(BSGClientObserverAddFeatureFlag, [BugsnagFeatureFlag flagWithName:name]);
+        self.observer(RSCClientObserverAddFeatureFlag, [RSCrashReporterFeatureFlag flagWithName:name]);
     }
 }
 
-- (void)addFeatureFlags:(NSArray<BugsnagFeatureFlag *> *)featureFlags {
+- (void)addFeatureFlags:(NSArray<RSCrashReporterFeatureFlag *> *)featureFlags {
     @synchronized (self.featureFlagStore) {
-        BSGFeatureFlagStoreAddFeatureFlags(self.featureFlagStore, featureFlags);
-        [self.state addMetadata:BSGFeatureFlagStoreToJSON(self.featureFlagStore) withKey:BSGKeyFeatureFlags toSection:BSGKeyClient];
+        RSCFeatureFlagStoreAddFeatureFlags(self.featureFlagStore, featureFlags);
+        [self.state addMetadata:RSCFeatureFlagStoreToJSON(self.featureFlagStore) withKey:RSCKeyFeatureFlags toSection:RSCKeyClient];
     }
     if (self.observer) {
-        for (BugsnagFeatureFlag *featureFlag in featureFlags) {
-            self.observer(BSGClientObserverAddFeatureFlag, featureFlag);
+        for (RSCrashReporterFeatureFlag *featureFlag in featureFlags) {
+            self.observer(RSCClientObserverAddFeatureFlag, featureFlag);
         }
     }
 }
 
 - (void)clearFeatureFlagWithName:(NSString *)name {
     @synchronized (self.featureFlagStore) {
-        BSGFeatureFlagStoreClear(self.featureFlagStore, name);
-        [self.state addMetadata:BSGFeatureFlagStoreToJSON(self.featureFlagStore) withKey:BSGKeyFeatureFlags toSection:BSGKeyClient];
+        RSCFeatureFlagStoreClear(self.featureFlagStore, name);
+        [self.state addMetadata:RSCFeatureFlagStoreToJSON(self.featureFlagStore) withKey:RSCKeyFeatureFlags toSection:RSCKeyClient];
     }
     if (self.observer) {
-        self.observer(BSGClientObserverClearFeatureFlag, name);
+        self.observer(RSCClientObserverClearFeatureFlag, name);
     }
 }
 
 - (void)clearFeatureFlags {
     @synchronized (self.featureFlagStore) {
-        BSGFeatureFlagStoreClear(self.featureFlagStore, nil);
-        [self.state addMetadata:BSGFeatureFlagStoreToJSON(self.featureFlagStore) withKey:BSGKeyFeatureFlags toSection:BSGKeyClient];
+        RSCFeatureFlagStoreClear(self.featureFlagStore, nil);
+        [self.state addMetadata:RSCFeatureFlagStoreToJSON(self.featureFlagStore) withKey:RSCKeyFeatureFlags toSection:RSCKeyClient];
     }
     if (self.observer) {
-        self.observer(BSGClientObserverClearFeatureFlag, nil);
+        self.observer(RSCClientObserverClearFeatureFlag, nil);
     }
 }
 
-// MARK: - <BugsnagMetadataStore>
+// MARK: - <RSCrashReporterMetadataStore>
 
 - (void)addMetadata:(NSDictionary *_Nonnull)metadata
           toSection:(NSString *_Nonnull)sectionName
@@ -946,19 +946,19 @@ BSG_OBJC_DIRECT_MEMBERS
 
 // MARK: - event data population
 
-- (BugsnagAppWithState *)generateAppWithState:(NSDictionary *)systemInfo {
-    BugsnagAppWithState *app = [BugsnagAppWithState appWithDictionary:@{BSGKeySystem: systemInfo}
+- (RSCrashReporterAppWithState *)generateAppWithState:(NSDictionary *)systemInfo {
+    RSCrashReporterAppWithState *app = [RSCrashReporterAppWithState appWithDictionary:@{RSCKeySystem: systemInfo}
                                                                config:self.configuration codeBundleId:self.codeBundleId];
-    app.isLaunching = bsg_runContext->isLaunching;
+    app.isLaunching = rsc_runContext->isLaunching;
     return app;
 }
 
-- (BugsnagDeviceWithState *)generateDeviceWithState:(NSDictionary *)systemInfo {
-    BugsnagDeviceWithState *device = [BugsnagDeviceWithState deviceWithKSCrashReport:@{BSGKeySystem: systemInfo}];
+- (RSCrashReporterDeviceWithState *)generateDeviceWithState:(NSDictionary *)systemInfo {
+    RSCrashReporterDeviceWithState *device = [RSCrashReporterDeviceWithState deviceWithKSCrashReport:@{RSCKeySystem: systemInfo}];
     device.time = [NSDate date]; // default to current time for handled errors
     [device appendRuntimeInfo:self.extraRuntimeInfo];
 #if TARGET_OS_IOS
-    device.orientation = BSGStringFromDeviceOrientation(bsg_runContext->lastKnownOrientation);
+    device.orientation = RSCStringFromDeviceOrientation(rsc_runContext->lastKnownOrientation);
 #endif
     return device;
 }
@@ -972,23 +972,23 @@ BSG_OBJC_DIRECT_MEMBERS
     if (info != nil && key != nil) {
         self.extraRuntimeInfo[key] = info;
     }
-    [self.state addMetadata:self.extraRuntimeInfo withKey:BSGKeyExtraRuntimeInfo toSection:BSGKeyDevice];
+    [self.state addMetadata:self.extraRuntimeInfo withKey:RSCKeyExtraRuntimeInfo toSection:RSCKeyDevice];
 }
 
-- (void)setObserver:(BSGClientObserver)observer {
+- (void)setObserver:(RSCClientObserver)observer {
     _observer = observer;
     if (observer) {
-        observer(BSGClientObserverUpdateContext, self.context);
-        observer(BSGClientObserverUpdateUser, self.user);
+        observer(RSCClientObserverUpdateContext, self.context);
+        observer(RSCClientObserverUpdateUser, self.user);
         
-        observer(BSGClientObserverUpdateMetadata, self.metadata);
-        self.metadata.observer = ^(BugsnagMetadata *metadata) {
-            observer(BSGClientObserverUpdateMetadata, metadata);
+        observer(RSCClientObserverUpdateMetadata, self.metadata);
+        self.metadata.observer = ^(RSCrashReporterMetadata *metadata) {
+            observer(RSCClientObserverUpdateMetadata, metadata);
         };
         
         @synchronized (self.featureFlagStore) {
-            for (BugsnagFeatureFlag *flag in self.featureFlagStore.allFlags) {
-                observer(BSGClientObserverAddFeatureFlag, flag);
+            for (RSCrashReporterFeatureFlag *flag in self.featureFlagStore.allFlags) {
+                observer(RSCClientObserverAddFeatureFlag, flag);
             }
         }
     } else {
@@ -998,47 +998,47 @@ BSG_OBJC_DIRECT_MEMBERS
 
 // MARK: - App Hangs
 
-#if BSG_HAVE_APP_HANG_DETECTION
+#if RSC_HAVE_APP_HANG_DETECTION
 - (void)startAppHangDetector {
-    [NSFileManager.defaultManager removeItemAtPath:BSGFileLocations.current.appHangEvent error:nil];
+    [NSFileManager.defaultManager removeItemAtPath:RSCFileLocations.current.appHangEvent error:nil];
 
-    self.appHangDetector = [[BSGAppHangDetector alloc] init];
+    self.appHangDetector = [[RSCAppHangDetector alloc] init];
     [self.appHangDetector startWithDelegate:self];
 }
 #endif
 
-- (void)appHangDetectedAtDate:(NSDate *)date withThreads:(NSArray<BugsnagThread *> *)threads systemInfo:(NSDictionary *)systemInfo {
-#if BSG_HAVE_APP_HANG_DETECTION
+- (void)appHangDetectedAtDate:(NSDate *)date withThreads:(NSArray<RSCrashReporterThread *> *)threads systemInfo:(NSDictionary *)systemInfo {
+#if RSC_HAVE_APP_HANG_DETECTION
     NSString *message = [NSString stringWithFormat:@"The app's main thread failed to respond to an event within %d milliseconds",
                          (int)self.configuration.appHangThresholdMillis];
 
-    BugsnagError *error =
-    [[BugsnagError alloc] initWithErrorClass:@"App Hang"
+    RSCrashReporterError *error =
+    [[RSCrashReporterError alloc] initWithErrorClass:@"App Hang"
                                 errorMessage:message
-                                   errorType:BSGErrorTypeCocoa
+                                   errorType:RSCErrorTypeCocoa
                                   stacktrace:threads.firstObject.stacktrace];
 
-    BugsnagHandledState *handledState =
-    [[BugsnagHandledState alloc] initWithSeverityReason:AppHang
-                                               severity:BSGSeverityWarning
+    RSCrashReporterHandledState *handledState =
+    [[RSCrashReporterHandledState alloc] initWithSeverityReason:AppHang
+                                               severity:RSCSeverityWarning
                                               unhandled:NO
                                     unhandledOverridden:NO
                                               attrValue:nil];
 
-    BugsnagAppWithState *app = [self generateAppWithState:systemInfo];
+    RSCrashReporterAppWithState *app = [self generateAppWithState:systemInfo];
 
-    BugsnagDeviceWithState *device = [self generateDeviceWithState:systemInfo];
+    RSCrashReporterDeviceWithState *device = [self generateDeviceWithState:systemInfo];
     device.time = date;
 
-    NSArray<BugsnagBreadcrumb *> *breadcrumbs = [self.breadcrumbStore breadcrumbsBeforeDate:date];
+    NSArray<RSCrashReporterBreadcrumb *> *breadcrumbs = [self.breadcrumbStore breadcrumbsBeforeDate:date];
 
-    BugsnagMetadata *metadata = [self.metadata copy];
+    RSCrashReporterMetadata *metadata = [self.metadata copy];
 
-    [metadata addMetadata:BSGAppMetadataFromRunContext(bsg_runContext) toSection:BSGKeyApp];
-    [metadata addMetadata:BSGDeviceMetadataFromRunContext(bsg_runContext) toSection:BSGKeyDevice];
+    [metadata addMetadata:RSCAppMetadataFromRunContext(rsc_runContext) toSection:RSCKeyApp];
+    [metadata addMetadata:RSCDeviceMetadataFromRunContext(rsc_runContext) toSection:RSCKeyDevice];
 
     self.appHangEvent =
-    [[BugsnagEvent alloc] initWithApp:app
+    [[RSCrashReporterEvent alloc] initWithApp:app
                                device:device
                          handledState:handledState
                                  user:[self.user withId]
@@ -1058,47 +1058,47 @@ BSG_OBJC_DIRECT_MEMBERS
     
     NSError *writeError = nil;
     NSDictionary *json = [self.appHangEvent toJsonWithRedactedKeys:self.configuration.redactedKeys];
-    if (!BSGJSONWriteToFileAtomically(json, BSGFileLocations.current.appHangEvent, &writeError)) {
-        bsg_log_err(@"Could not write app_hang.json: %@", writeError);
+    if (!RSCJSONWriteToFileAtomically(json, RSCFileLocations.current.appHangEvent, &writeError)) {
+        rsc_log_err(@"Could not write app_hang.json: %@", writeError);
     }
 #endif
 }
 
 - (void)appHangEnded {
-#if BSG_HAVE_APP_HANG_DETECTION
+#if RSC_HAVE_APP_HANG_DETECTION
     NSError *error = nil;
-    if (![NSFileManager.defaultManager removeItemAtPath:BSGFileLocations.current.appHangEvent error:&error]) {
-        bsg_log_err(@"Could not delete app_hang.json: %@", error);
+    if (![NSFileManager.defaultManager removeItemAtPath:RSCFileLocations.current.appHangEvent error:&error]) {
+        rsc_log_err(@"Could not delete app_hang.json: %@", error);
     }
 
-    const BOOL fatalOnly = self.configuration.appHangThresholdMillis == BugsnagAppHangThresholdFatalOnly;
+    const BOOL fatalOnly = self.configuration.appHangThresholdMillis == RSCrashReporterAppHangThresholdFatalOnly;
     if (!fatalOnly && self.appHangEvent) {
-        [self notifyInternal:(BugsnagEvent * _Nonnull)self.appHangEvent block:nil];
+        [self notifyInternal:(RSCrashReporterEvent * _Nonnull)self.appHangEvent block:nil];
     }
     self.appHangEvent = nil;
 #endif
 }
 
-#if BSG_HAVE_APP_HANG_DETECTION
-- (nullable BugsnagEvent *)loadAppHangEvent {
+#if RSC_HAVE_APP_HANG_DETECTION
+- (nullable RSCrashReporterEvent *)loadAppHangEvent {
     NSError *error = nil;
-    NSDictionary *json = BSGJSONDictionaryFromFile(BSGFileLocations.current.appHangEvent, 0, &error);
+    NSDictionary *json = RSCJSONDictionaryFromFile(RSCFileLocations.current.appHangEvent, 0, &error);
     if (!json) {
         if (!(error.domain == NSCocoaErrorDomain && error.code == NSFileReadNoSuchFileError)) {
-            bsg_log_err(@"Could not read app_hang.json: %@", error);
+            rsc_log_err(@"Could not read app_hang.json: %@", error);
         }
         return nil;
     }
 
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithJson:json];
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithJson:json];
     if (!event) {
-        bsg_log_err(@"Could not parse app_hang.json");
+        rsc_log_err(@"Could not parse app_hang.json");
         return nil;
     }
 
     // Receipt of the willTerminateNotification indicates that an app hang was not the cause of the termination, so treat as non-fatal.
-    if (BSGRunContextWasTerminating()) {
-        if (self.configuration.appHangThresholdMillis == BugsnagAppHangThresholdFatalOnly) {
+    if (RSCRunContextWasTerminating()) {
+        if (self.configuration.appHangThresholdMillis == RSCrashReporterAppHangThresholdFatalOnly) {
             return nil;
         }
         event.session.handledCount++;
@@ -1108,8 +1108,8 @@ BSG_OBJC_DIRECT_MEMBERS
     // Update event to reflect that the app hang was fatal.
     event.errors.firstObject.errorMessage = @"The app was terminated while unresponsive";
     // Cannot set event.severity directly because that sets severityReason.type to "userCallbackSetSeverity"
-    event.handledState = [[BugsnagHandledState alloc] initWithSeverityReason:AppHang
-                                                                    severity:BSGSeverityError
+    event.handledState = [[RSCrashReporterHandledState alloc] initWithSeverityReason:AppHang
+                                                                    severity:RSCSeverityError
                                                                    unhandled:YES
                                                          unhandledOverridden:NO
                                                                    attrValue:nil];
@@ -1121,75 +1121,75 @@ BSG_OBJC_DIRECT_MEMBERS
 
 // MARK: - Event generation
 
-- (nullable BugsnagEvent *)generateOutOfMemoryEvent {
+- (nullable RSCrashReporterEvent *)generateOutOfMemoryEvent {
     return [self generateEventForLastLaunchWithError:
-            [[BugsnagError alloc] initWithErrorClass:@"Out Of Memory"
+            [[RSCrashReporterError alloc] initWithErrorClass:@"Out Of Memory"
                                         errorMessage:@"The app was likely terminated by the operating system while in the foreground"
-                                           errorType:BSGErrorTypeCocoa
+                                           errorType:RSCErrorTypeCocoa
                                           stacktrace:nil]
-                                        handledState:[BugsnagHandledState handledStateWithSeverityReason:LikelyOutOfMemory]];
+                                        handledState:[RSCrashReporterHandledState handledStateWithSeverityReason:LikelyOutOfMemory]];
 }
 
-- (nullable BugsnagEvent *)generateThermalKillEvent {
+- (nullable RSCrashReporterEvent *)generateThermalKillEvent {
     return [self generateEventForLastLaunchWithError:
-            [[BugsnagError alloc] initWithErrorClass:@"Thermal Kill"
+            [[RSCrashReporterError alloc] initWithErrorClass:@"Thermal Kill"
                                         errorMessage:@"The app was terminated by the operating system due to a critical thermal state"
-                                           errorType:BSGErrorTypeCocoa
+                                           errorType:RSCErrorTypeCocoa
                                           stacktrace:nil]
-                                        handledState:[BugsnagHandledState handledStateWithSeverityReason:ThermalKill]];
+                                        handledState:[RSCrashReporterHandledState handledStateWithSeverityReason:ThermalKill]];
 }
 
-- (nullable BugsnagEvent *)generateEventForLastLaunchWithError:(BugsnagError *)error handledState:(BugsnagHandledState *)handledState {
-    if (!bsg_lastRunContext) {
+- (nullable RSCrashReporterEvent *)generateEventForLastLaunchWithError:(RSCrashReporterError *)error handledState:(RSCrashReporterHandledState *)handledState {
+    if (!rsc_lastRunContext) {
         return nil;
     }
     
-    NSDictionary *stateDict = BSGJSONDictionaryFromFile(BSGFileLocations.current.state, 0, nil);
+    NSDictionary *stateDict = RSCJSONDictionaryFromFile(RSCFileLocations.current.state, 0, nil);
 
     NSDictionary *appDict = self.systemState.lastLaunchState[SYSTEMSTATE_KEY_APP];
-    BugsnagAppWithState *app = [BugsnagAppWithState appFromJson:appDict];
-    app.dsymUuid = appDict[BSGKeyMachoUUID];
-    app.inForeground = bsg_lastRunContext->isForeground;
-    app.isLaunching = bsg_lastRunContext->isLaunching;
+    RSCrashReporterAppWithState *app = [RSCrashReporterAppWithState appFromJson:appDict];
+    app.dsymUuid = appDict[RSCKeyMachoUUID];
+    app.inForeground = rsc_lastRunContext->isForeground;
+    app.isLaunching = rsc_lastRunContext->isLaunching;
 
-    NSDictionary *configDict = BSGJSONDictionaryFromFile(BSGFileLocations.current.configuration, 0, nil);
+    NSDictionary *configDict = RSCJSONDictionaryFromFile(RSCFileLocations.current.configuration, 0, nil);
     if (configDict) {
-        [app setValuesFromConfiguration:[[BugsnagConfiguration alloc] initWithDictionaryRepresentation:configDict]];
+        [app setValuesFromConfiguration:[[RSCrashReporterConfiguration alloc] initWithDictionaryRepresentation:configDict]];
     }
 
     NSDictionary *deviceDict = self.systemState.lastLaunchState[SYSTEMSTATE_KEY_DEVICE];
-    BugsnagDeviceWithState *device = [BugsnagDeviceWithState deviceFromJson:deviceDict];
+    RSCrashReporterDeviceWithState *device = [RSCrashReporterDeviceWithState deviceFromJson:deviceDict];
     device.manufacturer = @"Apple";
 #if TARGET_OS_IOS
-    device.orientation = BSGStringFromDeviceOrientation(bsg_lastRunContext->lastKnownOrientation);
+    device.orientation = RSCStringFromDeviceOrientation(rsc_lastRunContext->lastKnownOrientation);
 #endif
-    if (bsg_lastRunContext->timestamp > 0) {
-        device.time = [NSDate dateWithTimeIntervalSinceReferenceDate:bsg_lastRunContext->timestamp];
+    if (rsc_lastRunContext->timestamp > 0) {
+        device.time = [NSDate dateWithTimeIntervalSinceReferenceDate:rsc_lastRunContext->timestamp];
     }
-    device.freeMemory = @(bsg_lastRunContext->hostMemoryFree);
+    device.freeMemory = @(rsc_lastRunContext->hostMemoryFree);
 
-    NSDictionary *metadataDict = BSGJSONDictionaryFromFile(BSGFileLocations.current.metadata, 0, nil);
-    BugsnagMetadata *metadata = [[BugsnagMetadata alloc] initWithDictionary:metadataDict ?: @{}];
+    NSDictionary *metadataDict = RSCJSONDictionaryFromFile(RSCFileLocations.current.metadata, 0, nil);
+    RSCrashReporterMetadata *metadata = [[RSCrashReporterMetadata alloc] initWithDictionary:metadataDict ?: @{}];
     
-    [metadata addMetadata:BSGAppMetadataFromRunContext((const struct BSGRunContext *_Nonnull)bsg_lastRunContext) toSection:BSGKeyApp];
-    [metadata addMetadata:BSGDeviceMetadataFromRunContext((const struct BSGRunContext *_Nonnull)bsg_lastRunContext) toSection:BSGKeyDevice];
+    [metadata addMetadata:RSCAppMetadataFromRunContext((const struct RSCRunContext *_Nonnull)rsc_lastRunContext) toSection:RSCKeyApp];
+    [metadata addMetadata:RSCDeviceMetadataFromRunContext((const struct RSCRunContext *_Nonnull)rsc_lastRunContext) toSection:RSCKeyDevice];
     
-#if BSG_HAVE_OOM_DETECTION
-    if (BSGRunContextWasMemoryWarning()) {
+#if RSC_HAVE_OOM_DETECTION
+    if (RSCRunContextWasMemoryWarning()) {
         [metadata addMetadata:@YES
-                      withKey:BSGKeyLowMemoryWarning
-                    toSection:BSGKeyDevice];
+                      withKey:RSCKeyLowMemoryWarning
+                    toSection:RSCKeyDevice];
     }
 #endif
 
-    NSDictionary *userDict = stateDict[BSGKeyUser];
-    BugsnagUser *user = [[BugsnagUser alloc] initWithDictionary:userDict];
+    NSDictionary *userDict = stateDict[RSCKeyUser];
+    RSCrashReporterUser *user = [[RSCrashReporterUser alloc] initWithDictionary:userDict];
 
-    BugsnagSession *session = BSGSessionFromLastRunContext(app, device, user);
+    RSCrashReporterSession *session = RSCSessionFromLastRunContext(app, device, user);
     session.unhandledCount += 1;
 
-    BugsnagEvent *event =
-    [[BugsnagEvent alloc] initWithApp:app
+    RSCrashReporterEvent *event =
+    [[RSCrashReporterEvent alloc] initWithApp:app
                                device:device
                          handledState:handledState
                                  user:user
@@ -1199,10 +1199,10 @@ BSG_OBJC_DIRECT_MEMBERS
                               threads:@[]
                               session:session];
 
-    event.context = stateDict[BSGKeyClient][BSGKeyContext];
+    event.context = stateDict[RSCKeyClient][RSCKeyContext];
 
-    id featureFlags = stateDict[BSGKeyClient][BSGKeyFeatureFlags];
-    event.featureFlagStore = BSGFeatureFlagStoreFromJSON(featureFlags);
+    id featureFlags = stateDict[RSCKeyClient][RSCKeyFeatureFlags];
+    event.featureFlagStore = RSCFeatureFlagStoreFromJSON(featureFlags);
 
     return event;
 }

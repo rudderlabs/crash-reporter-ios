@@ -1,16 +1,16 @@
 //
-//  BSGUtils.m
-//  Bugsnag
+//  RSCUtils.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 18/06/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGUtils.h"
+#import "RSCUtils.h"
 
-#import "BugsnagLogger.h"
+#import "RSCrashReporterLogger.h"
 
-char *_Nullable BSGCStringWithData(NSData *_Nullable data) {
+char *_Nullable RSCCStringWithData(NSData *_Nullable data) {
     char *buffer;
     if (data.length && (buffer = calloc(1, data.length + 1))) {
         [data getBytes:buffer length:data.length];
@@ -19,7 +19,7 @@ char *_Nullable BSGCStringWithData(NSData *_Nullable data) {
     return NULL;
 }
 
-BOOL BSGDisableNSFileProtectionComplete(NSString *path) {
+BOOL RSCDisableNSFileProtectionComplete(NSString *path) {
     // Using NSFileProtection* causes run-time link errors on older versions of macOS.
     // NSURLFileProtectionKey is unavailable in macOS SDKs prior to 11.0
 #if !TARGET_OS_OSX || defined(__MAC_11_0)
@@ -36,10 +36,10 @@ BOOL BSGDisableNSFileProtectionComplete(NSString *path) {
         NSError *error = nil;
         if (![url setResourceValue:NSURLFileProtectionCompleteUnlessOpen
                             forKey:NSURLFileProtectionKey error:&error]) {
-            bsg_log_warn(@"BSGDisableFileProtection: %@", error);
+            rsc_log_warn(@"RSCDisableFileProtection: %@", error);
             return NO;
         }
-        bsg_log_debug(@"Set NSFileProtectionCompleteUnlessOpen for %@", path);
+        rsc_log_debug(@"Set NSFileProtectionCompleteUnlessOpen for %@", path);
     }
 #else
     (void)(path);
@@ -47,7 +47,7 @@ BOOL BSGDisableNSFileProtectionComplete(NSString *path) {
     return YES;
 }
 
-dispatch_queue_t BSGGetFileSystemQueue(void) {
+dispatch_queue_t RSCGetFileSystemQueue(void) {
     static dispatch_once_t onceToken;
     static dispatch_queue_t queue;
     dispatch_once(&onceToken, ^{
@@ -58,7 +58,7 @@ dispatch_queue_t BSGGetFileSystemQueue(void) {
 
 #if TARGET_OS_IOS
 
-NSString *_Nullable BSGStringFromDeviceOrientation(UIDeviceOrientation orientation) {
+NSString *_Nullable RSCStringFromDeviceOrientation(UIDeviceOrientation orientation) {
     switch (orientation) {
         case UIDeviceOrientationPortraitUpsideDown: return @"portraitupsidedown";
         case UIDeviceOrientationPortrait:           return @"portrait";
@@ -73,7 +73,7 @@ NSString *_Nullable BSGStringFromDeviceOrientation(UIDeviceOrientation orientati
 
 #endif
 
-NSString *_Nullable BSGStringFromThermalState(NSProcessInfoThermalState thermalState) {
+NSString *_Nullable RSCStringFromThermalState(NSProcessInfoThermalState thermalState) {
     switch (thermalState) {
         case NSProcessInfoThermalStateNominal:  return @"nominal";
         case NSProcessInfoThermalStateFair:     return @"fair";

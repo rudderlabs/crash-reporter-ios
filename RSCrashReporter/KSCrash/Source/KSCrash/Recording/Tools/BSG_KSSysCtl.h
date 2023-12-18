@@ -27,8 +27,8 @@
 /* Convenience wrapper functions for sysctl calls.
  */
 
-#ifndef HDR_BSG_KSSysCtl_h
-#define HDR_BSG_KSSysCtl_h
+#ifndef HDR_RSC_KSSysCtl_h
+#define HDR_RSC_KSSysCtl_h
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,7 +45,7 @@ extern "C" {
  *
  * @return The value returned by sysctl.
  */
-int32_t bsg_kssysctl_int32ForName(const char *name);
+int32_t rsc_kssysctl_int32ForName(const char *name);
 
 /** Get a string value via sysctl by name.
  *
@@ -59,7 +59,7 @@ int32_t bsg_kssysctl_int32ForName(const char *name);
  * @return The number of bytes written (or that would have been written if
  *         value is NULL).
  */
-size_t bsg_kssysctl_stringForName(const char *name, char *value,
+size_t rsc_kssysctl_stringForName(const char *name, char *value,
                                   size_t maxSize);
 
 /** Get the MAC address of the specified interface.
@@ -71,7 +71,7 @@ size_t bsg_kssysctl_stringForName(const char *name, char *value,
  *
  * @return true if the address was successfully retrieved.
  */
-bool bsg_kssysctl_getMacAddress(const char *name, char *macAddressBuffer);
+bool rsc_kssysctl_getMacAddress(const char *name, char *macAddressBuffer);
 
 #ifdef __cplusplus
 }

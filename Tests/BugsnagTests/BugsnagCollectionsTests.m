@@ -1,69 +1,69 @@
 //
-//  BugsnagCollectionsTests.m
+//  RSCrashReporterCollectionsTests.m
 //  Tests
 //
 //  Created by Paul Zabelin on 7/1/19.
-//  Copyright © 2019 Bugsnag. All rights reserved.
+//  Copyright © 2019 RSCrashReporter. All rights reserved.
 //
 
 @import XCTest;
-#import "BugsnagCollections.h"
+#import "RSCrashReporterCollections.h"
 
-@interface BugsnagCollectionsTests : XCTestCase
+@interface RSCrashReporterCollectionsTests : XCTestCase
 @end
 
-@interface BugsnagCollectionsTests_DummyObject : NSObject
+@interface RSCrashReporterCollectionsTests_DummyObject : NSObject
 @end
 
-@implementation BugsnagCollectionsTests
+@implementation RSCrashReporterCollectionsTests
 
-// MARK: BSGDictMergeTest
+// MARK: RSCDictMergeTest
 
 - (void)testSubarrayFromIndex {
-    XCTAssertEqualObjects(BSGArraySubarrayFromIndex(@[@"foo", @"bar"], 0), (@[@"foo", @"bar"]));
-    XCTAssertEqualObjects(BSGArraySubarrayFromIndex(@[@"foo", @"bar"], 1), @[@"bar"]);
-    XCTAssertEqualObjects(BSGArraySubarrayFromIndex(@[@"foo", @"bar"], 2), @[]);
-    XCTAssertEqualObjects(BSGArraySubarrayFromIndex(@[@"foo", @"bar"], 42), @[]);
-    XCTAssertEqualObjects(BSGArraySubarrayFromIndex(@[@"foo", @"bar"], -1), @[]);
+    XCTAssertEqualObjects(RSCArraySubarrayFromIndex(@[@"foo", @"bar"], 0), (@[@"foo", @"bar"]));
+    XCTAssertEqualObjects(RSCArraySubarrayFromIndex(@[@"foo", @"bar"], 1), @[@"bar"]);
+    XCTAssertEqualObjects(RSCArraySubarrayFromIndex(@[@"foo", @"bar"], 2), @[]);
+    XCTAssertEqualObjects(RSCArraySubarrayFromIndex(@[@"foo", @"bar"], 42), @[]);
+    XCTAssertEqualObjects(RSCArraySubarrayFromIndex(@[@"foo", @"bar"], -1), @[]);
 }
 
 - (void)testBasicMerge {
     NSDictionary *combined = @{@"a": @"one",
                                @"b": @"two"};
-    XCTAssertEqualObjects(combined, BSGDictMerge(@{@"a": @"one"}, @{@"b": @"two"}), @"should combine");
+    XCTAssertEqualObjects(combined, RSCDictMerge(@{@"a": @"one"}, @{@"b": @"two"}), @"should combine");
 }
 
 - (void)testOverwrite {
     id src = @{@"a": @"one"};
-    XCTAssertEqualObjects(src, BSGDictMerge(src, @{@"a": @"two"}), @"should overwrite");
+    XCTAssertEqualObjects(src, RSCDictMerge(src, @{@"a": @"two"}), @"should overwrite");
 }
 
 - (void)testSrcEmpty {
     id dst = @{@"b": @"two"};
-    XCTAssertEqualObjects(dst, BSGDictMerge(@{}, dst), @"should copy");
+    XCTAssertEqualObjects(dst, RSCDictMerge(@{}, dst), @"should copy");
 }
 
 - (void)testDstEmpty {
     id src = @{@"a": @"one"};
-    XCTAssertEqualObjects(src, BSGDictMerge(src, @{}), @"should copy");
+    XCTAssertEqualObjects(src, RSCDictMerge(src, @{}), @"should copy");
 }
 
 - (void)testDstNil {
     id src = @{@"a": @"one"};
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnonnull"
-    XCTAssertEqualObjects(src, BSGDictMerge(src, nil), @"should copy");
+    XCTAssertEqualObjects(src, RSCDictMerge(src, nil), @"should copy");
 #pragma clang diagnostic pop
 }
 
 - (void)testSrcDict {
     id src = @{@"a": @{@"x": @"blah"}};
-    XCTAssertEqualObjects(src, BSGDictMerge(src, @{@"a": @"two"}), @"should not overwrite");
+    XCTAssertEqualObjects(src, RSCDictMerge(src, @{@"a": @"two"}), @"should not overwrite");
 }
 
 - (void)testDstDict {
     id src = @{@"a": @"one"};
-    XCTAssertEqualObjects(src, BSGDictMerge(src, @{@"a": @{@"x": @"blah"}}), @"should not overwrite");
+    XCTAssertEqualObjects(src, RSCDictMerge(src, @{@"a": @{@"x": @"blah"}}), @"should not overwrite");
 }
 
 - (void)testSrcDstDict {
@@ -71,15 +71,15 @@
     id dst = @{@"a": @{@"y": @"something"}};
     NSDictionary* expected = @{@"a": @{@"x": @"blah",
                                        @"y": @"something"}};
-    XCTAssertEqualObjects(expected, BSGDictMerge(src, dst), @"should combine");
+    XCTAssertEqualObjects(expected, RSCDictMerge(src, dst), @"should combine");
 }
 
-// MARK: BSGJSONDictionary
+// MARK: RSCJSONDictionary
 
-- (void)testBSGJSONDictionary {
+- (void)testRSCJSONDictionary {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnonnull"
-    XCTAssertNil(BSGJSONDictionary(nil));
+    XCTAssertNil(RSCJSONDictionary(nil));
 #pragma clang diagnostic pop
 
     id validDictionary = @{
@@ -87,21 +87,21 @@
         @"count": @1,
         @"userInfo": @{@"extra": @"hello"}
     };
-    XCTAssertEqualObjects(BSGJSONDictionary(validDictionary), validDictionary);
+    XCTAssertEqualObjects(RSCJSONDictionary(validDictionary), validDictionary);
     
     id invalidDictionary = @{
         @123: @"invalid key; should be ignored",
         @[]: @"this is backwards",
         @{}: @""
     };
-    XCTAssertEqualObjects(BSGJSONDictionary(invalidDictionary), @{});
+    XCTAssertEqualObjects(RSCJSONDictionary(invalidDictionary), @{});
     
     id mixedDictionary = @{
         @"count": @42,
-        @"dict": @{@"object": [[BugsnagCollectionsTests_DummyObject alloc] init]},
+        @"dict": @{@"object": [[RSCrashReporterCollectionsTests_DummyObject alloc] init]},
         @123: @"invalid key; should be ignored"
     };
-    XCTAssertEqualObjects(BSGJSONDictionary(mixedDictionary),
+    XCTAssertEqualObjects(RSCJSONDictionary(mixedDictionary),
                           (@{@"count": @42,
                              @"dict": @{@"object": @"Dummy object"}}));
 }
@@ -110,7 +110,7 @@
 
 // MARK: -
 
-@implementation BugsnagCollectionsTests_DummyObject
+@implementation RSCrashReporterCollectionsTests_DummyObject
 
 - (NSString *)description {
     return @"Dummy object";

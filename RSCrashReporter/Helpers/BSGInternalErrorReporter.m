@@ -1,31 +1,31 @@
 //
-//  BSGInternalErrorReporter.m
-//  Bugsnag
+//  RSCInternalErrorReporter.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 06/05/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGInternalErrorReporter.h"
+#import "RSCInternalErrorReporter.h"
 
-#import "BSGKeys.h"
-#import "BSG_KSCrashReportFields.h"
-#import "BSG_KSSysCtl.h"
-#import "BSG_RFC3339DateTool.h"
-#import "BugsnagApiClient.h"
-#import "BugsnagCollections.h"
-#import "BugsnagError+Private.h"
-#import "BugsnagEvent+Private.h"
-#import "BugsnagHandledState.h"
-#import "BugsnagInternals.h"
-#import "BugsnagLogger.h"
-#import "BugsnagMetadata+Private.h"
-#import "BugsnagNotifier.h"
-#import "BugsnagStackframe+Private.h"
-#import "BugsnagUser+Private.h"
+#import "RSCKeys.h"
+#import "RSC_KSCrashReportFields.h"
+#import "RSC_KSSysCtl.h"
+#import "RSC_RFC3339DateTool.h"
+#import "RSCrashReporterApiClient.h"
+#import "RSCrashReporterCollections.h"
+#import "RSCrashReporterError+Private.h"
+#import "RSCrashReporterEvent+Private.h"
+#import "RSCrashReporterHandledState.h"
+#import "RSCrashReporterInternals.h"
+#import "RSCrashReporterLogger.h"
+#import "RSCrashReporterMetadata+Private.h"
+#import "RSCrashReporterNotifier.h"
+#import "RSCrashReporterStackframe+Private.h"
+#import "RSCrashReporterUser+Private.h"
 
 #if TARGET_OS_IOS || TARGET_OS_TV
-#import "BSGUIKit.h"
+#import "RSCUIKit.h"
 #elif TARGET_OS_WATCH
 #import <WatchKit/WatchKit.h>
 #endif
@@ -34,12 +34,12 @@
 
 static NSString * const EventPayloadVersion = @"4.0";
 
-static NSString * const BugsnagDiagnosticsKey = @"BugsnagDiagnostics";
+static NSString * const RSCrashReporterDiagnosticsKey = @"RSCrashReporterDiagnostics";
 
-static BugsnagHTTPHeaderName const BugsnagHTTPHeaderNameInternalError = @"Bugsnag-Internal-Error";
+static RSCrashReporterHTTPHeaderName const RSCrashReporterHTTPHeaderNameInternalError = @"RSCrashReporter-Internal-Error";
 
 
-NSString *BSGErrorDescription(NSError *error) {
+NSString *RSCErrorDescription(NSError *error) {
     return error ? [NSString stringWithFormat:@"%@ %ld: %@", error.domain, (long)error.code,
                     error.userInfo[NSDebugDescriptionErrorKey] ?: error.localizedDescription] : nil;
 }
@@ -51,8 +51,8 @@ static NSString * Sysctl(const char *name);
 
 // MARK: -
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSGInternalErrorReporter ()
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCInternalErrorReporter ()
 
 @property (nonatomic) NSString *apiKey;
 @property (nonatomic) NSURL *endpoint;
@@ -61,17 +61,17 @@ BSG_OBJC_DIRECT_MEMBERS
 @end
 
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BSGInternalErrorReporter
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCInternalErrorReporter
 
-static BSGInternalErrorReporter *sharedInstance_;
-static void (^ startupBlock_)(BSGInternalErrorReporter *);
+static RSCInternalErrorReporter *sharedInstance_;
+static void (^ startupBlock_)(RSCInternalErrorReporter *);
 
-+ (BSGInternalErrorReporter *)sharedInstance {
++ (RSCInternalErrorReporter *)sharedInstance {
     return sharedInstance_;
 }
 
-+ (void)setSharedInstance:(BSGInternalErrorReporter *)sharedInstance {
++ (void)setSharedInstance:(RSCInternalErrorReporter *)sharedInstance {
     sharedInstance_ = sharedInstance;
     if (startupBlock_ && sharedInstance_) {
         startupBlock_(sharedInstance_);
@@ -79,7 +79,7 @@ static void (^ startupBlock_)(BSGInternalErrorReporter *);
     }
 }
 
-+ (void)performBlock:(void (^)(BSGInternalErrorReporter *))block {
++ (void)performBlock:(void (^)(RSCInternalErrorReporter *))block {
     if (sharedInstance_) {
         block(sharedInstance_);
     } else {
@@ -103,12 +103,12 @@ static void (^ startupBlock_)(BSGInternalErrorReporter *);
                      message:(nullable NSString *)message
                  diagnostics:(nullable NSDictionary<NSString *, id> *)diagnostics {
     @try {
-        BugsnagEvent *event = [self eventWithErrorClass:errorClass context:context message:message diagnostics:diagnostics];
+        RSCrashReporterEvent *event = [self eventWithErrorClass:errorClass context:context message:message diagnostics:diagnostics];
         if (event) {
             [self sendEvent:event];
         }
     } @catch (NSException *exception) {
-        bsg_log_err(@"%@", exception);
+        rsc_log_err(@"%@", exception);
     }
 }
 
@@ -117,99 +117,99 @@ static void (^ startupBlock_)(BSGInternalErrorReporter *);
            groupingHash:(nullable NSString *)groupingHash {
     // MARK: - Rudder Commented
     /*@try {
-        BugsnagEvent *event = [self eventWithException:exception diagnostics:diagnostics groupingHash:groupingHash];
+        RSCrashReporterEvent *event = [self eventWithException:exception diagnostics:diagnostics groupingHash:groupingHash];
         if (event) {
             [self sendEvent:event];
         }
     } @catch (NSException *exception) {
-        bsg_log_err(@"%@", exception);
+        rsc_log_err(@"%@", exception);
     }*/
 }
 
 - (void)reportRecrash:(NSDictionary *)recrashReport {
     @try {
-        BugsnagEvent *event = [self eventWithRecrashReport:recrashReport];
+        RSCrashReporterEvent *event = [self eventWithRecrashReport:recrashReport];
         if (event) {
             [self sendEvent:event];
         }
     } @catch (NSException *exception) {
-        bsg_log_err(@"%@", exception);
+        rsc_log_err(@"%@", exception);
     }
 }
 
 // MARK: Private API
 
-- (nullable BugsnagEvent *)eventWithErrorClass:(NSString *)errorClass
+- (nullable RSCrashReporterEvent *)eventWithErrorClass:(NSString *)errorClass
                                        context:(nullable NSString *)context
                                        message:(nullable NSString *)message
                                    diagnostics:(nullable NSDictionary<NSString *, id> *)diagnostics {
     
-    BugsnagError *error =
-    [[BugsnagError alloc] initWithErrorClass:errorClass
+    RSCrashReporterError *error =
+    [[RSCrashReporterError alloc] initWithErrorClass:errorClass
                                 errorMessage:message
-                                   errorType:BSGErrorTypeCocoa
+                                   errorType:RSCErrorTypeCocoa
                                   stacktrace:nil];
     
     return [self eventWithError:error context:context diagnostics:diagnostics groupingHash:nil];
 }
 
-- (nullable BugsnagEvent *)eventWithException:(NSException *)exception
+- (nullable RSCrashReporterEvent *)eventWithException:(NSException *)exception
                                   diagnostics:(nullable NSDictionary<NSString *, id> *)diagnostics
                                  groupingHash:(nullable NSString *)groupingHash {
     
-    NSArray<BugsnagStackframe *> *stacktrace = [BugsnagStackframe stackframesWithCallStackReturnAddresses:exception.callStackReturnAddresses];
+    NSArray<RSCrashReporterStackframe *> *stacktrace = [RSCrashReporterStackframe stackframesWithCallStackReturnAddresses:exception.callStackReturnAddresses];
     
-    BugsnagError *error =
-    [[BugsnagError alloc] initWithErrorClass:exception.name
+    RSCrashReporterError *error =
+    [[RSCrashReporterError alloc] initWithErrorClass:exception.name
                                 errorMessage:exception.reason
-                                   errorType:BSGErrorTypeCocoa
+                                   errorType:RSCErrorTypeCocoa
                                   stacktrace:stacktrace];
     
     return [self eventWithError:error context:nil diagnostics:diagnostics groupingHash:groupingHash];
 }
 
-- (nullable BugsnagEvent *)eventWithRecrashReport:(NSDictionary *)recrashReport {
-    NSString *reportType = recrashReport[@ BSG_KSCrashField_Report][@ BSG_KSCrashField_Type];
-    if (![reportType isEqualToString:@ BSG_KSCrashReportType_Minimal]) {
+- (nullable RSCrashReporterEvent *)eventWithRecrashReport:(NSDictionary *)recrashReport {
+    NSString *reportType = recrashReport[@ RSC_KSCrashField_Report][@ RSC_KSCrashField_Type];
+    if (![reportType isEqualToString:@ RSC_KSCrashReportType_Minimal]) {
         return nil;
     }
     
-    NSDictionary *crash = recrashReport[@ BSG_KSCrashField_Crash];
-    NSDictionary *crashedThread = crash[@ BSG_KSCrashField_CrashedThread];
+    NSDictionary *crash = recrashReport[@ RSC_KSCrashField_Crash];
+    NSDictionary *crashedThread = crash[@ RSC_KSCrashField_CrashedThread];
     
-    NSArray *backtrace = crashedThread[@ BSG_KSCrashField_Backtrace][@ BSG_KSCrashField_Contents];
-    NSArray *binaryImages = recrashReport[@ BSG_KSCrashField_BinaryImages];
-    NSArray<BugsnagStackframe *> *stacktrace = BSGDeserializeArrayOfObjects(backtrace, ^BugsnagStackframe *(NSDictionary *dict) {
-        return [BugsnagStackframe frameFromDict:dict withImages:binaryImages];
+    NSArray *backtrace = crashedThread[@ RSC_KSCrashField_Backtrace][@ RSC_KSCrashField_Contents];
+    NSArray *binaryImages = recrashReport[@ RSC_KSCrashField_BinaryImages];
+    NSArray<RSCrashReporterStackframe *> *stacktrace = RSCDeserializeArrayOfObjects(backtrace, ^RSCrashReporterStackframe *(NSDictionary *dict) {
+        return [RSCrashReporterStackframe frameFromDict:dict withImages:binaryImages];
     });
     
-    NSDictionary *errorDict = crash[@ BSG_KSCrashField_Error];
-    BugsnagError *error =
-    [[BugsnagError alloc] initWithErrorClass:@"Crash handler crashed"
-                                errorMessage:BSGParseErrorClass(errorDict, (id)errorDict[@ BSG_KSCrashField_Type])
-                                   errorType:BSGErrorTypeCocoa
+    NSDictionary *errorDict = crash[@ RSC_KSCrashField_Error];
+    RSCrashReporterError *error =
+    [[RSCrashReporterError alloc] initWithErrorClass:@"Crash handler crashed"
+                                errorMessage:RSCParseErrorClass(errorDict, (id)errorDict[@ RSC_KSCrashField_Type])
+                                   errorType:RSCErrorTypeCocoa
                                   stacktrace:stacktrace];
     
-    BugsnagEvent *event = [self eventWithError:error context:nil diagnostics:recrashReport groupingHash:nil];
-    event.handledState = [BugsnagHandledState handledStateWithSeverityReason:Signal];
+    RSCrashReporterEvent *event = [self eventWithError:error context:nil diagnostics:recrashReport groupingHash:nil];
+    event.handledState = [RSCrashReporterHandledState handledStateWithSeverityReason:Signal];
     return event;
 }
 
-- (nullable BugsnagEvent *)eventWithError:(BugsnagError *)error
+- (nullable RSCrashReporterEvent *)eventWithError:(RSCrashReporterError *)error
                                   context:(nullable NSString *)context
                               diagnostics:(nullable NSDictionary<NSString *, id> *)diagnostics
                              groupingHash:(nullable NSString *)groupingHash {
     
-    BugsnagMetadata *metadata = [[BugsnagMetadata alloc] init];
+    RSCrashReporterMetadata *metadata = [[RSCrashReporterMetadata alloc] init];
     if (diagnostics) {
-        [metadata addMetadata:(NSDictionary * _Nonnull)diagnostics toSection:BugsnagDiagnosticsKey];
+        [metadata addMetadata:(NSDictionary * _Nonnull)diagnostics toSection:RSCrashReporterDiagnosticsKey];
     }
-    [metadata addMetadata:self.apiKey withKey:BSGKeyApiKey toSection:BugsnagDiagnosticsKey];
+    [metadata addMetadata:self.apiKey withKey:RSCKeyApiKey toSection:RSCrashReporterDiagnosticsKey];
     
     NSDictionary *systemVersion = [NSDictionary dictionaryWithContentsOfFile:
                                    @"/System/Library/CoreServices/SystemVersion.plist"];
     
-    BugsnagDeviceWithState *device = [BugsnagDeviceWithState new];
+    RSCrashReporterDeviceWithState *device = [RSCrashReporterDeviceWithState new];
     device.id           = nil; //DeviceId();
     device.manufacturer = @"Apple";
     device.osName       = systemVersion[@"ProductName"];
@@ -222,11 +222,11 @@ static void (^ startupBlock_)(BSGInternalErrorReporter *);
     device.modelNumber  = Sysctl("hw.model");
 #endif
     
-    BugsnagEvent *event =
-    [[BugsnagEvent alloc] initWithApp:[BugsnagAppWithState new]
+    RSCrashReporterEvent *event =
+    [[RSCrashReporterEvent alloc] initWithApp:[RSCrashReporterAppWithState new]
                                device:device
-                         handledState:[BugsnagHandledState handledStateWithSeverityReason:HandledError]
-                                 user:[[BugsnagUser alloc] init]
+                         handledState:[RSCrashReporterHandledState handledStateWithSeverityReason:HandledError]
+                                 user:[[RSCrashReporterUser alloc] init]
                              metadata:metadata
                           breadcrumbs:@[]
                                errors:@[error]
@@ -241,11 +241,11 @@ static void (^ startupBlock_)(BSGInternalErrorReporter *);
 
 // MARK: Delivery
 
-- (NSURLRequest *)requestForEvent:(nonnull BugsnagEvent *)event error:(NSError * __autoreleasing *)errorPtr {
+- (NSURLRequest *)requestForEvent:(nonnull RSCrashReporterEvent *)event error:(NSError * __autoreleasing *)errorPtr {
     NSMutableDictionary *requestPayload = [NSMutableDictionary dictionary];
-    requestPayload[BSGKeyEvents] = @[[event toJsonWithRedactedKeys:nil]];
-    requestPayload[BSGKeyNotifier] = [[[BugsnagNotifier alloc] init] toDict];
-    requestPayload[BSGKeyPayloadVersion] = EventPayloadVersion;
+    requestPayload[RSCKeyEvents] = @[[event toJsonWithRedactedKeys:nil]];
+    requestPayload[RSCKeyNotifier] = [[[RSCrashReporterNotifier alloc] init] toDict];
+    requestPayload[RSCKeyPayloadVersion] = EventPayloadVersion;
     
     NSData *data = [NSJSONSerialization dataWithJSONObject:requestPayload options:0 error:errorPtr];
     if (!data) {
@@ -254,10 +254,10 @@ static void (^ startupBlock_)(BSGInternalErrorReporter *);
     
     NSMutableDictionary *headers = [NSMutableDictionary dictionary];
     headers[@"Content-Type"] = @"application/json";
-    headers[BugsnagHTTPHeaderNameIntegrity] = BSGIntegrityHeaderValue(data);
-    headers[BugsnagHTTPHeaderNameInternalError] = @"bugsnag-cocoa";
-    headers[BugsnagHTTPHeaderNamePayloadVersion] = EventPayloadVersion;
-    headers[BugsnagHTTPHeaderNameSentAt] = [BSG_RFC3339DateTool stringFromDate:[NSDate date]];
+    headers[RSCrashReporterHTTPHeaderNameIntegrity] = RSCIntegrityHeaderValue(data);
+    headers[RSCrashReporterHTTPHeaderNameInternalError] = @"bugsnag-cocoa";
+    headers[RSCrashReporterHTTPHeaderNamePayloadVersion] = EventPayloadVersion;
+    headers[RSCrashReporterHTTPHeaderNameSentAt] = [RSC_RFC3339DateTool stringFromDate:[NSDate date]];
     
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.endpoint];
     request.allHTTPHeaderFields = headers;
@@ -267,12 +267,12 @@ static void (^ startupBlock_)(BSGInternalErrorReporter *);
     return request;
 }
 
-- (void)sendEvent:(nonnull BugsnagEvent *)event {
+- (void)sendEvent:(nonnull RSCrashReporterEvent *)event {
     // MARK: - Rudder Commented
     /*NSError *error = nil;
     NSURLRequest *request = [self requestForEvent:event error:&error];
     if (!request) {
-        bsg_log_err(@"%@", error);
+        rsc_log_err(@"%@", error);
         return;
     }
     [[self.session dataTaskWithRequest:request] resume];*/
@@ -283,7 +283,7 @@ static void (^ startupBlock_)(BSGInternalErrorReporter *);
 
 // MARK: -
 
-// Intentionally differs from +[BSG_KSSystemInfo deviceAndAppHash]
+// Intentionally differs from +[RSC_KSSystemInfo deviceAndAppHash]
 // See ROAD-1488
 /*static NSString * DeviceId(void) {
     CC_SHA1_CTX ctx;
@@ -291,7 +291,7 @@ static void (^ startupBlock_)(BSGInternalErrorReporter *);
 
 #if TARGET_OS_OSX
     char mac[6] = {0};
-    bsg_kssysctl_getMacAddress(BSGKeyDefaultMacName, mac);
+    rsc_kssysctl_getMacAddress(RSCKeyDefaultMacName, mac);
     CC_SHA1_Update(&ctx, mac, sizeof(mac));
 #elif TARGET_OS_IOS || TARGET_OS_TV
     uuid_t uuid = {0};
@@ -324,7 +324,7 @@ static void (^ startupBlock_)(BSGInternalErrorReporter *);
 
 static NSString * Sysctl(const char *name) {
     char buffer[32] = {0};
-    if (bsg_kssysctl_stringForName(name, buffer, sizeof buffer - 1)) {
+    if (rsc_kssysctl_stringForName(name, buffer, sizeof buffer - 1)) {
         return @(buffer);
     } else {
         return nil;

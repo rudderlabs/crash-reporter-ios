@@ -1,21 +1,21 @@
 //
-//  BSGRunContext.m
-//  Bugsnag
+//  RSCRunContext.m
+//  RSCrashReporter
 //
-//  Copyright © 2022 Bugsnag Inc. All rights reserved.
+//  Copyright © 2022 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGRunContext.h"
+#import "RSCRunContext.h"
 
-#import "BSGAppKit.h"
-#import "BSGHardware.h"
-#import "BSGUIKit.h"
-#import "BSGUtils.h"
-#import "BSGWatchKit.h"
-#import "BSG_KSLogger.h"
-#import "BSG_KSMach.h"
-#import "BSG_KSMachHeaders.h"
-#import "BSG_KSSystemInfo.h"
+#import "RSCAppKit.h"
+#import "RSCHardware.h"
+#import "RSCUIKit.h"
+#import "RSCUtils.h"
+#import "RSCWatchKit.h"
+#import "RSC_KSLogger.h"
+#import "RSC_KSMach.h"
+#import "RSC_KSMachHeaders.h"
+#import "RSC_KSSystemInfo.h"
 
 #import <Foundation/Foundation.h>
 #import <stdatomic.h>
@@ -48,46 +48,46 @@ static void InstallTimer(void);
 
 #pragma mark - Initial setup
 
-/// Populates `bsg_runContext`
+/// Populates `rsc_runContext`
 static void InitRunContext(void) {
-    bsg_runContext->isDebuggerAttached = bsg_ksmachisBeingTraced();
+    rsc_runContext->isDebuggerAttached = rsc_ksmachisBeingTraced();
     
-    bsg_runContext->isLaunching = YES;
+    rsc_runContext->isLaunching = YES;
     
     // On iOS/tvOS, the app may have launched in the background due to a fetch
     // event or notification (or prewarming on iOS 15+)
-    bsg_runContext->isForeground = GetIsForeground();
+    rsc_runContext->isForeground = GetIsForeground();
     
     if (@available(iOS 11.0, tvOS 11.0, watchOS 4.0, *)) {
-        bsg_runContext->thermalState = NSProcessInfo.processInfo.thermalState;
+        rsc_runContext->thermalState = NSProcessInfo.processInfo.thermalState;
     }
     
-    bsg_runContext->bootTime = GetBootTime();
+    rsc_runContext->bootTime = GetBootTime();
     
-    BSG_Mach_Header_Info *image = bsg_mach_headers_get_main_image();
+    RSC_Mach_Header_Info *image = rsc_mach_headers_get_main_image();
     if (image && image->uuid) {
-        uuid_copy(bsg_runContext->machoUUID, image->uuid);
+        uuid_copy(rsc_runContext->machoUUID, image->uuid);
     }
     
     if ([NSThread isMainThread]) {
-        bsg_runContext->isActive = GetIsActive();
+        rsc_runContext->isActive = GetIsActive();
     } else {
         dispatch_async(dispatch_get_main_queue(), ^{
-            bsg_runContext->isActive = GetIsActive();
+            rsc_runContext->isActive = GetIsActive();
         });
     }
     
-    BSGRunContextUpdateTimestamp();
-    BSGRunContextUpdateMemory();
-    if (!bsg_runContext->memoryLimit) {
-        bsg_log_debug(@"Cannot query `memoryLimit` on this device");
+    RSCRunContextUpdateTimestamp();
+    RSCRunContextUpdateMemory();
+    if (!rsc_runContext->memoryLimit) {
+        rsc_log_debug(@"Cannot query `memoryLimit` on this device");
     }
 
     InstallTimer();
     
-    // Set `structVersion` last so that BSGRunContextLoadLast() will reject data
+    // Set `structVersion` last so that RSCRunContextLoadLast() will reject data
     // that is not fully initialised.
-    bsg_runContext->structVersion = BSGRUNCONTEXT_VERSION;
+    rsc_runContext->structVersion = RSCRUNCONTEXT_VERSION;
 }
 
 static uint64_t GetBootTime(void) {
@@ -140,7 +140,7 @@ static bool GetIsForeground(void) {
             return true;
         }
     } else {
-        bsg_log_err(@"task_policy_get failed: %s", mach_error_string(kr));
+        rsc_log_err(@"task_policy_get failed: %s", mach_error_string(kr));
     }
 #endif
 
@@ -176,7 +176,7 @@ static bool GetIsForeground(void) {
 
 static UIApplication * GetUIApplication(void) {
     // +sharedApplication is unavailable to app extensions
-    if ([BSG_KSSystemInfo isRunningInAppExtension]) {
+    if ([RSC_KSSystemInfo isRunningInAppExtension]) {
         return nil;
     }
     // Using performSelector: to avoid a compile-time check that
@@ -198,8 +198,8 @@ static void InstallTimer(void) {
                               /* leeway */   NSEC_PER_SEC / 4);
     
     dispatch_source_set_event_handler(timer, ^{
-        BSGRunContextUpdateTimestamp();
-        BSGRunContextUpdateMemory();
+        RSCRunContextUpdateTimestamp();
+        RSCRunContextUpdateMemory();
     });
     
     dispatch_resume(timer);
@@ -215,9 +215,9 @@ static void NoteAppActive(__unused CFNotificationCenterRef center,
                           __unused CFNotificationName name,
                           __unused const void *object,
                           __unused CFDictionaryRef userInfo) {
-    bsg_runContext->isActive = YES;
-    bsg_runContext->isForeground = YES;
-    BSGRunContextUpdateTimestamp();
+    rsc_runContext->isActive = YES;
+    rsc_runContext->isForeground = YES;
+    RSCRunContextUpdateTimestamp();
 }
 
 static void NoteAppBackground(__unused CFNotificationCenterRef center,
@@ -225,9 +225,9 @@ static void NoteAppBackground(__unused CFNotificationCenterRef center,
                               __unused CFNotificationName name,
                               __unused const void *object,
                               __unused CFDictionaryRef userInfo) {
-    bsg_runContext->isActive = NO;
-    bsg_runContext->isForeground = NO;
-    BSGRunContextUpdateTimestamp();
+    rsc_runContext->isActive = NO;
+    rsc_runContext->isForeground = NO;
+    RSCRunContextUpdateTimestamp();
 }
 
 #if !TARGET_OS_OSX
@@ -236,9 +236,9 @@ static void NoteAppInactive(__unused CFNotificationCenterRef center,
                             __unused CFNotificationName name,
                             __unused const void *object,
                             __unused CFDictionaryRef userInfo) {
-    bsg_runContext->isActive = NO;
-    bsg_runContext->isForeground = YES;
-    BSGRunContextUpdateTimestamp();
+    rsc_runContext->isActive = NO;
+    rsc_runContext->isForeground = YES;
+    RSCRunContextUpdateTimestamp();
 }
 #endif
 
@@ -247,8 +247,8 @@ static void NoteAppWillTerminate(__unused CFNotificationCenterRef center,
                                  __unused CFNotificationName name,
                                  __unused const void *object,
                                  __unused CFDictionaryRef userInfo) {
-    bsg_runContext->isTerminating = YES;
-    BSGRunContextUpdateTimestamp();
+    rsc_runContext->isTerminating = YES;
+    RSCRunContextUpdateTimestamp();
 }
 
 #endif
@@ -260,7 +260,7 @@ static void NoteBatteryLevel(__unused CFNotificationCenterRef center,
                              __unused CFNotificationName name,
                              __unused const void *object,
                              __unused CFDictionaryRef userInfo) {
-    bsg_runContext->batteryLevel = BSGGetDevice().batteryLevel;
+    rsc_runContext->batteryLevel = RSCGetDevice().batteryLevel;
 }
 
 static void NoteBatteryState(__unused CFNotificationCenterRef center,
@@ -268,7 +268,7 @@ static void NoteBatteryState(__unused CFNotificationCenterRef center,
                              __unused CFNotificationName name,
                              __unused const void *object,
                              __unused CFDictionaryRef userInfo) {
-    bsg_runContext->batteryState = BSGGetDevice().batteryState;
+    rsc_runContext->batteryState = RSCGetDevice().batteryState;
 }
 
 static void NoteOrientation(__unused CFNotificationCenterRef center,
@@ -278,9 +278,9 @@ static void NoteOrientation(__unused CFNotificationCenterRef center,
                             __unused CFDictionaryRef userInfo) {
     UIDeviceOrientation orientation = [UIDEVICE currentDevice].orientation;
     if (orientation != UIDeviceOrientationUnknown) {
-        bsg_runContext->lastKnownOrientation = orientation;
+        rsc_runContext->lastKnownOrientation = orientation;
     }
-    BSGRunContextUpdateTimestamp();
+    RSCRunContextUpdateTimestamp();
 }
 
 #endif
@@ -296,13 +296,13 @@ static void NoteThermalState(__unused CFNotificationCenterRef center,
         // causing recursion and a crash via _os_unfair_lock_recursive_abort().
         // To avoid this, grab the new thermal state asynchronously.
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            bsg_runContext->thermalState = ((__bridge NSProcessInfo *)object).thermalState;
-            BSGRunContextUpdateTimestamp();
+            rsc_runContext->thermalState = ((__bridge NSProcessInfo *)object).thermalState;
+            RSCRunContextUpdateTimestamp();
         });
     }
 }
 
-#if BSG_HAVE_OOM_DETECTION
+#if RSC_HAVE_OOM_DETECTION
 
 static void ObserveMemoryPressure(void) {
     // DISPATCH_SOURCE_TYPE_MEMORYPRESSURE arrives slightly sooner than
@@ -316,9 +316,9 @@ static void ObserveMemoryPressure(void) {
                            // running before OS kills the app.
                            dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0));
     dispatch_source_set_event_handler(source, ^{
-        bsg_runContext->memoryPressure = dispatch_source_get_data(source);
-        BSGRunContextUpdateTimestamp();
-        BSGRunContextUpdateMemory();
+        rsc_runContext->memoryPressure = dispatch_source_get_data(source);
+        RSCRunContextUpdateTimestamp();
+        RSCRunContextUpdateMemory();
     });
     dispatch_resume(source);
 }
@@ -350,22 +350,22 @@ static void AddObservers(void) {
         OBSERVE(NSProcessInfoThermalStateDidChangeNotification, NoteThermalState);
     }
     
-#if BSG_HAVE_BATTERY
-    BSGGetDevice().batteryMonitoringEnabled = YES;
-    bsg_runContext->batteryLevel = BSGGetDevice().batteryLevel;
-    bsg_runContext->batteryState = BSGGetDevice().batteryState;
+#if RSC_HAVE_BATTERY
+    RSCGetDevice().batteryMonitoringEnabled = YES;
+    rsc_runContext->batteryLevel = RSCGetDevice().batteryLevel;
+    rsc_runContext->batteryState = RSCGetDevice().batteryState;
 #endif
 
 #if TARGET_OS_IOS
     UIDevice *currentDevice = [UIDEVICE currentDevice];
     [currentDevice beginGeneratingDeviceOrientationNotifications];
-    bsg_runContext->lastKnownOrientation = currentDevice.orientation;
+    rsc_runContext->lastKnownOrientation = currentDevice.orientation;
     OBSERVE(UIDeviceOrientationDidChangeNotification, NoteOrientation);
     OBSERVE(UIDeviceBatteryLevelDidChangeNotification, NoteBatteryLevel);
     OBSERVE(UIDeviceBatteryStateDidChangeNotification, NoteBatteryState);
 #endif
 
-#if BSG_HAVE_OOM_DETECTION
+#if RSC_HAVE_OOM_DETECTION
     ObserveMemoryPressure();
 #endif
 }
@@ -373,11 +373,11 @@ static void AddObservers(void) {
 
 #pragma mark - Misc
 
-void BSGRunContextUpdateTimestamp(void) {
-    ATOMIC_SET(bsg_runContext->timestamp, CFAbsoluteTimeGetCurrent());
+void RSCRunContextUpdateTimestamp(void) {
+    ATOMIC_SET(rsc_runContext->timestamp, CFAbsoluteTimeGetCurrent());
 }
 
-size_t bsg_getHostMemory(void) {
+size_t rsc_getHostMemory(void) {
     static _Atomic mach_port_t host_atomic = 0;
     mach_port_t host = atomic_load(&host_atomic);
     if (!host) {
@@ -390,7 +390,7 @@ size_t bsg_getHostMemory(void) {
     kern_return_t kr = host_statistics(host, HOST_VM_INFO,
                                        (host_info_t)&host_vm, &count);
     if (kr != KERN_SUCCESS) {
-        bsg_log_debug(@"host_statistics: %d", kr);
+        rsc_log_debug(@"host_statistics: %d", kr);
         return 0;
     }
 
@@ -398,16 +398,16 @@ size_t bsg_getHostMemory(void) {
 }
 
 static void UpdateHostMemory(void) {
-    size_t hostMemoryFree = bsg_getHostMemory();
+    size_t hostMemoryFree = rsc_getHostMemory();
     if (hostMemoryFree > 0) {
-        ATOMIC_SET(bsg_runContext->hostMemoryFree, hostMemoryFree);
+        ATOMIC_SET(rsc_runContext->hostMemoryFree, hostMemoryFree);
     }
 }
 
 void setMemoryUsage(uint64_t footprint, uint64_t available) {
     uint64_t limit = footprint + available;
-    ATOMIC_SET(bsg_runContext->memoryAvailable, available);
-    ATOMIC_SET(bsg_runContext->memoryLimit, limit);
+    ATOMIC_SET(rsc_runContext->memoryAvailable, available);
+    ATOMIC_SET(rsc_runContext->memoryLimit, limit);
 }
 
 static void UpdateTaskMemory(void) {
@@ -416,12 +416,12 @@ static void UpdateTaskMemory(void) {
     kern_return_t kr = task_info(current_task(), TASK_VM_INFO,
                                  (task_info_t)&task_vm, &count);
     if (kr != KERN_SUCCESS) {
-        bsg_log_debug(@"task_info: %d", kr);
+        rsc_log_debug(@"task_info: %d", kr);
         return;
     }
     
     unsigned long long footprint = task_vm.phys_footprint;
-    ATOMIC_SET(bsg_runContext->memoryFootprint, footprint);
+    ATOMIC_SET(rsc_runContext->memoryFootprint, footprint);
     
     // Since limit_bytes_remaining was added in iOS 13 (xnu-6153)
     // this code must be compiled out when building with older SDKs.
@@ -438,7 +438,7 @@ static void UpdateTaskMemory(void) {
 #endif
 }
 
-void BSGRunContextUpdateMemory(void) {
+void RSCRunContextUpdateMemory(void) {
     UpdateTaskMemory();
     UpdateHostMemory();
 }
@@ -448,44 +448,44 @@ void BSGRunContextUpdateMemory(void) {
 
 #if !TARGET_OS_WATCH
 
-bool BSGRunContextWasKilled(void) {
+bool RSCRunContextWasKilled(void) {
     // App extensions have a different lifecycle and the heuristic used for
     // finding app terminations rooted in fixable code does not apply
-    if ([BSG_KSSystemInfo isRunningInAppExtension]) {
+    if ([RSC_KSSystemInfo isRunningInAppExtension]) {
         return NO;
     }
     
-    if (!bsg_lastRunContext) {
+    if (!rsc_lastRunContext) {
         return NO;
     }
     
-    if (bsg_lastRunContext->isTerminating) {
+    if (rsc_lastRunContext->isTerminating) {
         return NO; // The app terminated normally
     }
     
-    if (bsg_lastRunContext->isDebuggerAttached) {
+    if (rsc_lastRunContext->isDebuggerAttached) {
         return NO; // The debugger may have killed the app
     }
     
-    if (bsg_lastRunContext->bootTime != bsg_runContext->bootTime) {
+    if (rsc_lastRunContext->bootTime != rsc_runContext->bootTime) {
         return NO; // The app may have been terminated due to the reboot
     }
     
     // Ignore unexpected terminations due to the app being upgraded
-    if (uuid_compare(bsg_lastRunContext->machoUUID, bsg_runContext->machoUUID)) {
+    if (uuid_compare(rsc_lastRunContext->machoUUID, rsc_runContext->machoUUID)) {
         return NO;
     }
     
     // Once the app is in the background we cannot determine between good (user
     // closed from the app switcher) and bad (OS killed the app) terminations.
-    if (!bsg_lastRunContext->isForeground) {
-        bsg_log_debug(@"Ignoring kill that occurred while in background");
+    if (!rsc_lastRunContext->isForeground) {
+        rsc_log_debug(@"Ignoring kill that occurred while in background");
         return NO;
     }
     
     // PLAT-3259: Do not report OOMs from UIApplicationStateInactive.
-    if (!bsg_lastRunContext->isActive) {
-        bsg_log_debug(@"Ignoring kill that occurred while inactive");
+    if (!rsc_lastRunContext->isActive) {
+        rsc_log_debug(@"Ignoring kill that occurred while inactive");
         return NO;
     }
     
@@ -497,25 +497,25 @@ bool BSGRunContextWasKilled(void) {
 
 #pragma mark - File handling & memory mapping
 
-#define SIZEOF_STRUCT sizeof(struct BSGRunContext)
+#define SIZEOF_STRUCT sizeof(struct RSCRunContext)
 
-static struct BSGRunContext fallback;
-struct BSGRunContext *bsg_runContext = &fallback;
+static struct RSCRunContext fallback;
+struct RSCRunContext *rsc_runContext = &fallback;
 
-const struct BSGRunContext *bsg_lastRunContext;
+const struct RSCRunContext *rsc_lastRunContext;
 
 /// Opens the file and disables content protection, returning -1 on error.
 static int OpenFile(NSString *_Nonnull path) {
     int fd = open(path.fileSystemRepresentation, O_RDWR | O_CREAT, 0600);
     if (fd == -1) {
-        bsg_log_warn(@"Could not open %@", path);
+        rsc_log_warn(@"Could not open %@", path);
         return -1;
     }
     
     // NSFileProtectionComplete invalidates mappings 10 seconds after device is
     // locked, so must be disabled to prevent segfaults when accessing 
-    // bsg_runContext
-    if (!BSGDisableNSFileProtectionComplete(path)) {
+    // rsc_runContext
+    if (!RSCDisableNSFileProtectionComplete(path)) {
         close(fd);
         return -1;
     }
@@ -524,26 +524,26 @@ static int OpenFile(NSString *_Nonnull path) {
 }
 
 /// Loads the contents of the state file into memory and sets the
-/// `bsg_lastRunContext` pointer if the contents are valid.
+/// `rsc_lastRunContext` pointer if the contents are valid.
 static void LoadLastRunContext(int fd) {
     struct stat sb;
     // Only expose previous state if size matches...
     if (fstat(fd, &sb) == 0 && sb.st_size == SIZEOF_STRUCT) {
-        static struct BSGRunContext context;
+        static struct RSCRunContext context;
         if (read(fd, &context, SIZEOF_STRUCT) == SIZEOF_STRUCT &&
             // ...and so does the structVersion
-            context.structVersion == BSGRUNCONTEXT_VERSION) {
-            bsg_lastRunContext = &context;
+            context.structVersion == RSCRUNCONTEXT_VERSION) {
+            rsc_lastRunContext = &context;
         }
     }
 }
 
-/// Truncates or extends the file to the size of struct BSGRunContext,
-/// maps it into memory, and sets the `bsg_runContext` pointer.
+/// Truncates or extends the file to the size of struct RSCRunContext,
+/// maps it into memory, and sets the `rsc_runContext` pointer.
 static void ResizeAndMapFile(int fd) {
     // Note: ftruncate fills the file with zeros when extending.
     if (ftruncate(fd, SIZEOF_STRUCT) != 0) {
-        bsg_log_warn(@"ftruncate failed: %d", errno);
+        rsc_log_warn(@"ftruncate failed: %d", errno);
         return;
     }
     
@@ -551,16 +551,16 @@ static void ResizeAndMapFile(int fd) {
     const int flags = MAP_FILE | MAP_SHARED;
     void *ptr = mmap(0, SIZEOF_STRUCT, prot, flags, fd, 0);
     if (ptr == MAP_FAILED) {
-        bsg_log_warn(@"mmap failed: %d", errno);
+        rsc_log_warn(@"mmap failed: %d", errno);
         return;
     }
     
     memset(ptr, 0, SIZEOF_STRUCT);
     mlock(ptr, SIZEOF_STRUCT);
-    bsg_runContext = ptr;
+    rsc_runContext = ptr;
 }
 
-void BSGRunContextInit(NSString *_Nonnull path) {
+void RSCRunContextInit(NSString *_Nonnull path) {
     int fd = OpenFile(path);
     LoadLastRunContext(fd);
     ResizeAndMapFile(fd);

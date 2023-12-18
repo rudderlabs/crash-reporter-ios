@@ -1,31 +1,31 @@
 //
-//  BSGJSONSerializationTests.m
-//  Bugsnag
+//  RSCJSONSerializationTests.m
+//  RSCrashReporter
 //
 //  Created by Karl Stenerud on 03.09.20.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BSGJSONSerialization.h"
+#import "RSCJSONSerialization.h"
 
-@interface BSGJSONSerializationTests : XCTestCase
+@interface RSCJSONSerializationTests : XCTestCase
 @end
 
-@implementation BSGJSONSerializationTests
+@implementation RSCJSONSerializationTests
 
 - (void)testBadJSONKey {
     id badDict = @{@123: @"string"};
     NSData* badJSONData = [@"{123=\"test\"}" dataUsingEncoding:NSUTF8StringEncoding];
     id result;
     NSError* error;
-    result = BSGJSONDataFromDictionary(badDict, &error);
+    result = RSCJSONDataFromDictionary(badDict, &error);
     XCTAssertNotNil(error);
     XCTAssertNil(result);
     error = nil;
     
-    result = BSGJSONDictionaryFromData(badJSONData, 0, &error);
+    result = RSCJSONDictionaryFromData(badJSONData, 0, &error);
     XCTAssertNotNil(error);
     XCTAssertNil(result);
     error = nil;
@@ -37,28 +37,28 @@
     
     NSString *file = [NSTemporaryDirectory() stringByAppendingPathComponent:@(__PRETTY_FUNCTION__)];
     
-    XCTAssertTrue(BSGJSONWriteToFileAtomically(validJSON, file, nil));
+    XCTAssertTrue(RSCJSONWriteToFileAtomically(validJSON, file, nil));
 
-    XCTAssertEqualObjects(BSGJSONDictionaryFromFile(file, 0, nil), @{@"foo": @"bar"});
+    XCTAssertEqualObjects(RSCJSONDictionaryFromFile(file, 0, nil), @{@"foo": @"bar"});
     
     [[NSFileManager defaultManager] removeItemAtPath:file error:nil];
     
     NSError *error = nil;
-    XCTAssertFalse(BSGJSONWriteToFileAtomically(invalidJSON, file, &error));
+    XCTAssertFalse(RSCJSONWriteToFileAtomically(invalidJSON, file, &error));
     XCTAssertNotNil(error);
     
     error = nil;
-    XCTAssertNil(BSGJSONDictionaryFromFile(file, 0, &error));
+    XCTAssertNil(RSCJSONDictionaryFromFile(file, 0, &error));
     XCTAssertNotNil(error);
 
     NSString *unwritablePath = @"/System/Library/foobar";
     
     error = nil;
-    XCTAssertFalse(BSGJSONWriteToFileAtomically(validJSON, unwritablePath, &error));
+    XCTAssertFalse(RSCJSONWriteToFileAtomically(validJSON, unwritablePath, &error));
     XCTAssertNotNil(error);
     
     error = nil;
-    XCTAssertNil(BSGJSONDictionaryFromFile(file, 0, &error));
+    XCTAssertNil(RSCJSONDictionaryFromFile(file, 0, &error));
     XCTAssertNotNil(error);
 }
 
@@ -66,7 +66,7 @@
     NSError *error = nil;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnonnull"
-    XCTAssertNil(BSGJSONDictionaryFromData(nil, 0, &error));
+    XCTAssertNil(RSCJSONDictionaryFromData(nil, 0, &error));
 #pragma clang diagnostic pop
     XCTAssertNotNil(error);
     id underlyingError = error.userInfo[NSUnderlyingErrorKey];

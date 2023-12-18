@@ -1,19 +1,19 @@
 //
-//  BSGStorageMigratorV0V1.h
-//  Bugsnag
+//  RSCStorageMigratorV0V1.h
+//  RSCrashReporter
 //
 //  Created by Karl Stenerud on 04.01.21.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-#import "BSGDefines.h"
+#import "RSCDefines.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSGStorageMigratorV0V1 : NSObject
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCStorageMigratorV0V1 : NSObject
 
 + (BOOL) migrate;
 

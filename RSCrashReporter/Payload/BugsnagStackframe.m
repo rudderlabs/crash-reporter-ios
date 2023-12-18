@@ -1,22 +1,22 @@
 //
-//  BugsnagStackframe.m
-//  Bugsnag
+//  RSCrashReporterStackframe.m
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 01/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
-#import "BugsnagStackframe+Private.h"
+#import "RSCrashReporterStackframe+Private.h"
 
-#import "BSGKeys.h"
-#import "BSG_KSBacktrace.h"
-#import "BSG_KSCrashReportFields.h"
-#import "BSG_KSMachHeaders.h"
-#import "BSG_Symbolicate.h"
-#import "BugsnagCollections.h"
-#import "BugsnagLogger.h"
+#import "RSCKeys.h"
+#import "RSC_KSBacktrace.h"
+#import "RSC_KSCrashReportFields.h"
+#import "RSC_KSMachHeaders.h"
+#import "RSC_Symbolicate.h"
+#import "RSCrashReporterCollections.h"
+#import "RSCrashReporterLogger.h"
 
-BugsnagStackframeType const BugsnagStackframeTypeCocoa = @"cocoa";
+RSCrashReporterStackframeType const RSCrashReporterStackframeTypeCocoa = @"cocoa";
 
 
 static NSString * _Nullable FormatMemoryAddress(NSNumber * _Nullable address) {
@@ -26,35 +26,35 @@ static NSString * _Nullable FormatMemoryAddress(NSNumber * _Nullable address) {
 
 // MARK: -
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BugsnagStackframe
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCrashReporterStackframe
 
 static NSDictionary * _Nullable FindImage(NSArray *images, uintptr_t addr) {
     for (NSDictionary *image in images) {
-        if ([(NSNumber *)image[@ BSG_KSCrashField_ImageAddress] unsignedLongValue] == addr) {
+        if ([(NSNumber *)image[@ RSC_KSCrashField_ImageAddress] unsignedLongValue] == addr) {
             return image;
         }
     }
     return nil;
 }
 
-+ (BugsnagStackframe *)frameFromJson:(NSDictionary *)json {
-    BugsnagStackframe *frame = [BugsnagStackframe new];
-    frame.machoFile = BSGDeserializeString(json[BSGKeyMachoFile]);
-    frame.method = BSGDeserializeString(json[BSGKeyMethod]);
-    frame.isPc = BSGDeserializeNumber(json[BSGKeyIsPC]).boolValue;
-    frame.isLr = BSGDeserializeNumber(json[BSGKeyIsLR]).boolValue;
-    frame.machoUuid = BSGDeserializeString(json[BSGKeyMachoUUID]);
-    frame.machoVmAddress = [self readInt:json key:BSGKeyMachoVMAddress];
-    frame.frameAddress = [self readInt:json key:BSGKeyFrameAddress];
-    frame.symbolAddress = [self readInt:json key:BSGKeySymbolAddr];
-    frame.machoLoadAddress = [self readInt:json key:BSGKeyMachoLoadAddr];
-    frame.type = BSGDeserializeString(json[BSGKeyType]);
-    frame.codeIdentifier = BSGDeserializeString(json[@"codeIdentifier"]);
-    frame.columnNumber = BSGDeserializeNumber(json[@"columnNumber"]);
-    frame.file = BSGDeserializeString(json[@"file"]);
-    frame.inProject = BSGDeserializeNumber(json[@"inProject"]);
-    frame.lineNumber = BSGDeserializeNumber(json[@"lineNumber"]);
++ (RSCrashReporterStackframe *)frameFromJson:(NSDictionary *)json {
+    RSCrashReporterStackframe *frame = [RSCrashReporterStackframe new];
+    frame.machoFile = RSCDeserializeString(json[RSCKeyMachoFile]);
+    frame.method = RSCDeserializeString(json[RSCKeyMethod]);
+    frame.isPc = RSCDeserializeNumber(json[RSCKeyIsPC]).boolValue;
+    frame.isLr = RSCDeserializeNumber(json[RSCKeyIsLR]).boolValue;
+    frame.machoUuid = RSCDeserializeString(json[RSCKeyMachoUUID]);
+    frame.machoVmAddress = [self readInt:json key:RSCKeyMachoVMAddress];
+    frame.frameAddress = [self readInt:json key:RSCKeyFrameAddress];
+    frame.symbolAddress = [self readInt:json key:RSCKeySymbolAddr];
+    frame.machoLoadAddress = [self readInt:json key:RSCKeyMachoLoadAddr];
+    frame.type = RSCDeserializeString(json[RSCKeyType]);
+    frame.codeIdentifier = RSCDeserializeString(json[@"codeIdentifier"]);
+    frame.columnNumber = RSCDeserializeNumber(json[@"columnNumber"]);
+    frame.file = RSCDeserializeString(json[@"file"]);
+    frame.inProject = RSCDeserializeNumber(json[@"inProject"]);
+    frame.lineNumber = RSCDeserializeNumber(json[@"lineNumber"]);
     return frame;
 }
 
@@ -67,27 +67,27 @@ static NSDictionary * _Nullable FindImage(NSArray *images, uintptr_t addr) {
 }
 
 + (instancetype)frameFromDict:(NSDictionary<NSString *, id> *)dict withImages:(NSArray<NSDictionary<NSString *, id> *> *)binaryImages {
-    NSNumber *frameAddress = dict[@ BSG_KSCrashField_InstructionAddr];
+    NSNumber *frameAddress = dict[@ RSC_KSCrashField_InstructionAddr];
     if (frameAddress.unsignedLongLongValue == 1) {
         // We sometimes get a frame address of 0x1 at the bottom of the call stack.
         // It's not a valid stack frame and causes E2E tests to fail, so should be ignored.
         return nil;
     }
 
-    BugsnagStackframe *frame = [BugsnagStackframe new];
+    RSCrashReporterStackframe *frame = [RSCrashReporterStackframe new];
     frame.frameAddress = frameAddress;
-    frame.machoFile = dict[@ BSG_KSCrashField_ObjectName]; // last path component
-    frame.machoLoadAddress = dict[@ BSG_KSCrashField_ObjectAddr];
-    frame.method = dict[@ BSG_KSCrashField_SymbolName];
-    frame.symbolAddress = dict[@ BSG_KSCrashField_SymbolAddr];
-    frame.isPc = [dict[BSGKeyIsPC] boolValue];
-    frame.isLr = [dict[BSGKeyIsLR] boolValue];
+    frame.machoFile = dict[@ RSC_KSCrashField_ObjectName]; // last path component
+    frame.machoLoadAddress = dict[@ RSC_KSCrashField_ObjectAddr];
+    frame.method = dict[@ RSC_KSCrashField_SymbolName];
+    frame.symbolAddress = dict[@ RSC_KSCrashField_SymbolAddr];
+    frame.isPc = [dict[RSCKeyIsPC] boolValue];
+    frame.isLr = [dict[RSCKeyIsLR] boolValue];
 
     NSDictionary *image = FindImage(binaryImages, (uintptr_t)frame.machoLoadAddress.unsignedLongLongValue);
     if (image != nil) {
-        frame.machoFile = image[@ BSG_KSCrashField_Name]; // full path
-        frame.machoUuid = image[@ BSG_KSCrashField_UUID];
-        frame.machoVmAddress = image[@ BSG_KSCrashField_ImageVmAddress];
+        frame.machoFile = image[@ RSC_KSCrashField_Name]; // full path
+        frame.machoUuid = image[@ RSC_KSCrashField_UUID];
+        frame.machoVmAddress = image[@ RSC_KSCrashField_ImageVmAddress];
     } else if (frame.isPc) {
         // If the program counter's value isn't in any known image, the crash may have been due to a bad function pointer.
         // Ignore these frames to prevent the dashboard grouping on the address.
@@ -97,14 +97,14 @@ static NSDictionary * _Nullable FindImage(NSArray *images, uintptr_t addr) {
         // For EXC_BREAKPOINT mach exceptions the link register does not contain an instruction address.
         return nil;
     } else if (/* Don't warn for recrash reports */ binaryImages.count > 1) {
-        bsg_log_warn(@"BugsnagStackframe: no image found for address %@", FormatMemoryAddress(frame.machoLoadAddress));
+        rsc_log_warn(@"RSCrashReporterStackframe: no image found for address %@", FormatMemoryAddress(frame.machoLoadAddress));
     }
     
     return frame;
 }
 
-+ (NSArray<BugsnagStackframe *> *)stackframesWithBacktrace:(uintptr_t *)backtrace length:(NSUInteger)length {
-    NSMutableArray<BugsnagStackframe *> *frames = [NSMutableArray array];
++ (NSArray<RSCrashReporterStackframe *> *)stackframesWithBacktrace:(uintptr_t *)backtrace length:(NSUInteger)length {
+    NSMutableArray<RSCrashReporterStackframe *> *frames = [NSMutableArray array];
     
     for (NSUInteger i = 0; i < length; i++) {
         uintptr_t address = backtrace[i];
@@ -114,22 +114,22 @@ static NSDictionary * _Nullable FindImage(NSArray *images, uintptr_t addr) {
             continue;
         }
         
-        [frames addObject:[[BugsnagStackframe alloc] initWithAddress:address]];
+        [frames addObject:[[RSCrashReporterStackframe alloc] initWithAddress:address]];
     }
     
     return frames;
 }
 
-+ (NSArray<BugsnagStackframe *> *)stackframesWithCallStackReturnAddresses:(NSArray<NSNumber *> *)callStackReturnAddresses {
++ (NSArray<RSCrashReporterStackframe *> *)stackframesWithCallStackReturnAddresses:(NSArray<NSNumber *> *)callStackReturnAddresses {
     NSUInteger length = callStackReturnAddresses.count;
     uintptr_t addresses[length];
     for (NSUInteger i = 0; i < length; i++) {
         addresses[i] = (uintptr_t)callStackReturnAddresses[i].unsignedLongLongValue;
     }
-    return [BugsnagStackframe stackframesWithBacktrace:addresses length:length];
+    return [RSCrashReporterStackframe stackframesWithBacktrace:addresses length:length];
 }
 
-+ (NSArray<BugsnagStackframe *> *)stackframesWithCallStackSymbols:(NSArray<NSString *> *)callStackSymbols {
++ (NSArray<RSCrashReporterStackframe *> *)stackframesWithCallStackSymbols:(NSArray<NSString *> *)callStackSymbols {
     NSString *pattern = (@"^(\\d+)"             // Capture the leading frame number
                          @" +"                  // Skip whitespace
                          @"([\\S ]+?)"          // Image name (may contain spaces)
@@ -147,11 +147,11 @@ static NSDictionary * _Nullable FindImage(NSArray *images, uintptr_t addr) {
     NSRegularExpression *regex =
     [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:&error];
     if (!regex) {
-        bsg_log_err(@"%@", error);
+        rsc_log_err(@"%@", error);
         return nil;
     }
     
-    NSMutableArray<BugsnagStackframe *> *frames = [NSMutableArray array];
+    NSMutableArray<RSCrashReporterStackframe *> *frames = [NSMutableArray array];
     
     for (NSString *string in callStackSymbols) {
         NSTextCheckingResult *match = [regex firstMatchInString:string options:0 range:NSMakeRange(0, string.length)];
@@ -171,7 +171,7 @@ static NSDictionary * _Nullable FindImage(NSArray *images, uintptr_t addr) {
             sscanf(frameAddress.UTF8String, "%lx", &address);
         }
         
-        BugsnagStackframe *frame = [[BugsnagStackframe alloc] initWithAddress:address];
+        RSCrashReporterStackframe *frame = [[RSCrashReporterStackframe alloc] initWithAddress:address];
         frame.machoFile = imageName;
         frame.method = symbolName ?: frameAddress;
         [frames addObject:frame];
@@ -184,7 +184,7 @@ static NSDictionary * _Nullable FindImage(NSArray *images, uintptr_t addr) {
     if ((self = [super init])) {
         _frameAddress = @(address);
         _needsSymbolication = YES;
-        BSG_Mach_Header_Info *header = bsg_mach_headers_image_at_address(address);
+        RSC_Mach_Header_Info *header = rsc_mach_headers_image_at_address(address);
         if (header) {
             _machoFile = header->name ? @(header->name) : nil;
             _machoLoadAddress = @((uintptr_t)header->header);
@@ -203,8 +203,8 @@ static NSDictionary * _Nullable FindImage(NSArray *images, uintptr_t addr) {
     
     uintptr_t frameAddress = self.frameAddress.unsignedIntegerValue;
     uintptr_t instructionAddress = self.isPc ? frameAddress: CALL_INSTRUCTION_FROM_RETURN_ADDRESS(frameAddress);
-    struct bsg_symbolicate_result result;
-    bsg_symbolicate(instructionAddress, &result);
+    struct rsc_symbolicate_result result;
+    rsc_symbolicate(instructionAddress, &result);
     
     if (result.function_address) {
         self.symbolAddress = @(result.function_address);
@@ -216,16 +216,16 @@ static NSDictionary * _Nullable FindImage(NSArray *images, uintptr_t addr) {
 
 - (NSDictionary *)toDictionary {
     NSMutableDictionary *dict = [NSMutableDictionary new];
-    dict[BSGKeyMachoFile] = self.machoFile;
-    dict[BSGKeyMethod] = self.method;
-    dict[BSGKeyMachoUUID] = self.machoUuid;
-    dict[BSGKeyFrameAddress] = FormatMemoryAddress(self.frameAddress);
-    dict[BSGKeySymbolAddr] = FormatMemoryAddress(self.symbolAddress);
-    dict[BSGKeyMachoLoadAddr] = FormatMemoryAddress(self.machoLoadAddress);
-    dict[BSGKeyMachoVMAddress] = FormatMemoryAddress(self.machoVmAddress);
-    dict[BSGKeyIsPC] = self.isPc ? @YES : nil;
-    dict[BSGKeyIsLR] = self.isLr ? @YES : nil;
-    dict[BSGKeyType] = self.type;
+    dict[RSCKeyMachoFile] = self.machoFile;
+    dict[RSCKeyMethod] = self.method;
+    dict[RSCKeyMachoUUID] = self.machoUuid;
+    dict[RSCKeyFrameAddress] = FormatMemoryAddress(self.frameAddress);
+    dict[RSCKeySymbolAddr] = FormatMemoryAddress(self.symbolAddress);
+    dict[RSCKeyMachoLoadAddr] = FormatMemoryAddress(self.machoLoadAddress);
+    dict[RSCKeyMachoVMAddress] = FormatMemoryAddress(self.machoVmAddress);
+    dict[RSCKeyIsPC] = self.isPc ? @YES : nil;
+    dict[RSCKeyIsLR] = self.isLr ? @YES : nil;
+    dict[RSCKeyType] = self.type;
     dict[@"codeIdentifier"] = self.codeIdentifier;
     dict[@"columnNumber"] = self.columnNumber;
     dict[@"file"] = self.file;

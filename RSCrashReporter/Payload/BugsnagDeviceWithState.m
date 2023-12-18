@@ -1,31 +1,31 @@
 //
-//  BugsnagDeviceWithState.m
-//  Bugsnag
+//  RSCrashReporterDeviceWithState.m
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 01/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
-#import "BugsnagDeviceWithState.h"
+#import "RSCrashReporterDeviceWithState.h"
 
-#import "BSGHardware.h"
-#import "BSGRunContext.h"
-#import "BSGUtils.h"
-#import "BSG_KSCrashReportFields.h"
-#import "BSG_KSSystemInfo.h"
-#import "BSG_RFC3339DateTool.h"
+#import "RSCHardware.h"
+#import "RSCRunContext.h"
+#import "RSCUtils.h"
+#import "RSC_KSCrashReportFields.h"
+#import "RSC_KSSystemInfo.h"
+#import "RSC_RFC3339DateTool.h"
 #import "RSCrashReporter.h"
-#import "BugsnagCollections.h"
-#import "BugsnagDevice+Private.h"
-#import "BugsnagLogger.h"
-#import "BugsnagSystemState.h"
+#import "RSCrashReporterCollections.h"
+#import "RSCrashReporterDevice+Private.h"
+#import "RSCrashReporterLogger.h"
+#import "RSCrashReporterSystemState.h"
 
-NSMutableDictionary *BSGParseDeviceMetadata(NSDictionary *event) {
+NSMutableDictionary *RSCParseDeviceMetadata(NSDictionary *event) {
     NSMutableDictionary *device = [NSMutableDictionary new];
     NSDictionary *state = [event valueForKeyPath:@"user.state.deviceState"];
     [device addEntriesFromDictionary:state];
-    device[@"timezone"] = [event valueForKeyPath:@"system." BSG_KSSystemField_TimeZone];
-    device[@"macCatalystiOSVersion"] = [event valueForKeyPath:@"system." BSG_KSSystemField_iOSSupportVersion];
+    device[@"timezone"] = [event valueForKeyPath:@"system." RSC_KSSystemField_TimeZone];
+    device[@"macCatalystiOSVersion"] = [event valueForKeyPath:@"system." RSC_KSSystemField_iOSSupportVersion];
 
 #if TARGET_OS_SIMULATOR
     device[@"simulator"] = @YES;
@@ -37,23 +37,23 @@ NSMutableDictionary *BSGParseDeviceMetadata(NSDictionary *event) {
     return device;
 }
 
-NSDictionary * BSGDeviceMetadataFromRunContext(const struct BSGRunContext *context) {
+NSDictionary * RSCDeviceMetadataFromRunContext(const struct RSCRunContext *context) {
     NSMutableDictionary *device = [NSMutableDictionary dictionary];
-#if BSG_HAVE_BATTERY
-    device[BSGKeyBatteryLevel] = @(context->batteryLevel);
+#if RSC_HAVE_BATTERY
+    device[RSCKeyBatteryLevel] = @(context->batteryLevel);
     // Our intepretation of "charging" really means "plugged in"
-    device[BSGKeyCharging] = BSGIsBatteryCharging(context->batteryState) ? @YES : @NO;
+    device[RSCKeyCharging] = RSCIsBatteryCharging(context->batteryState) ? @YES : @NO;
 #endif
     if (@available(iOS 11.0, tvOS 11.0, watchOS 4.0, *)) {
-        device[BSGKeyThermalState] = BSGStringFromThermalState(context->thermalState);
+        device[RSCKeyThermalState] = RSCStringFromThermalState(context->thermalState);
     }
     return device;
 }
 
-@implementation BugsnagDeviceWithState
+@implementation RSCrashReporterDeviceWithState
 
-+ (BugsnagDeviceWithState *) deviceFromJson:(NSDictionary *)json {
-    BugsnagDeviceWithState *device = [BugsnagDeviceWithState new];
++ (RSCrashReporterDeviceWithState *) deviceFromJson:(NSDictionary *)json {
+    RSCrashReporterDeviceWithState *device = [RSCrashReporterDeviceWithState new];
     device.id = nil;
     device.freeMemory = json[@"freeMemory"];
     device.freeDisk = json[@"freeDisk"];
@@ -74,22 +74,22 @@ NSDictionary * BSGDeviceMetadataFromRunContext(const struct BSGRunContext *conte
 
     id time = json[@"time"];
     if ([time isKindOfClass:[NSString class]]) {
-        device.time = [BSG_RFC3339DateTool dateFromString:time];
+        device.time = [RSC_RFC3339DateTool dateFromString:time];
     }
     return device;
 }
 
-+ (BugsnagDeviceWithState *)deviceWithKSCrashReport:(NSDictionary *)event {
-    BugsnagDeviceWithState *device = [BugsnagDeviceWithState new];
++ (RSCrashReporterDeviceWithState *)deviceWithKSCrashReport:(NSDictionary *)event {
+    RSCrashReporterDeviceWithState *device = [RSCrashReporterDeviceWithState new];
     [self populateFields:device dictionary:event];
     device.orientation = [event valueForKeyPath:@"user.state.deviceState.orientation"];
-    device.freeMemory = [event valueForKeyPath:@"system." BSG_KSSystemField_Memory "." BSG_KSCrashField_Free];
-    device.freeDisk = [event valueForKeyPath:@"system." BSG_KSSystemField_Disk "." BSG_KSCrashField_Free];
+    device.freeMemory = [event valueForKeyPath:@"system." RSC_KSSystemField_Memory "." RSC_KSCrashField_Free];
+    device.freeDisk = [event valueForKeyPath:@"system." RSC_KSSystemField_Disk "." RSC_KSCrashField_Free];
 
     NSString *val = [event valueForKeyPath:@"report.timestamp"];
 
     if (val != nil) {
-        device.time = [BSG_RFC3339DateTool dateFromString:val];
+        device.time = [RSC_RFC3339DateTool dateFromString:val];
     }
 
     NSDictionary *extraRuntimeInfo = [event valueForKeyPath:@"user.state.device.extraRuntimeInfo"];
@@ -106,7 +106,7 @@ NSDictionary * BSGDeviceMetadataFromRunContext(const struct BSGRunContext *conte
     dict[@"freeDisk"] = self.freeDisk;
     dict[@"freeMemory"] = self.freeMemory;
     dict[@"orientation"] = self.orientation;
-    dict[@"time"] = self.time ? [BSG_RFC3339DateTool stringFromDate:self.time] : nil;
+    dict[@"time"] = self.time ? [RSC_RFC3339DateTool stringFromDate:self.time] : nil;
     return dict;
 }
 

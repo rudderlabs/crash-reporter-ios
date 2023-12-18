@@ -1,28 +1,28 @@
 //
-//  BugsnagNotifierTest.m
+//  RSCrashReporterNotifierTest.m
 //  Tests
 //
 //  Created by Jamie Lynch on 29/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
-#import "BugsnagNotifier.h"
+#import "RSCrashReporterNotifier.h"
 
-@interface BugsnagNotifierTest : XCTestCase
-@property BugsnagNotifier *notifier;
+@interface RSCrashReporterNotifierTest : XCTestCase
+@property RSCrashReporterNotifier *notifier;
 @end
 
-@implementation BugsnagNotifierTest
+@implementation RSCrashReporterNotifierTest
 
 - (void)setUp {
-    self.notifier = [BugsnagNotifier new];
+    self.notifier = [RSCrashReporterNotifier new];
     self.notifier.name = @"Foo Notifier";
     self.notifier.version = @"6.0.0";
 }
 
 - (void)testDefaultValues {
-    self.notifier = [BugsnagNotifier new];
+    self.notifier = [RSCrashReporterNotifier new];
     XCTAssertEqualObjects(@"https://github.com/bugsnag/bugsnag-cocoa", self.notifier.url);
     XCTAssertNotNil(self.notifier.name);
     XCTAssertNotNil(self.notifier.version);
@@ -39,7 +39,7 @@
 }
 
 - (void)testDependencySerialization {
-    BugsnagNotifier *dep = [BugsnagNotifier new];
+    RSCrashReporterNotifier *dep = [RSCrashReporterNotifier new];
     dep.name = @"COBOL Notifier";
     dep.version = @"1.0.0";
     dep.url = @"https://github.com/bugsnag/bugsnag-cobol";

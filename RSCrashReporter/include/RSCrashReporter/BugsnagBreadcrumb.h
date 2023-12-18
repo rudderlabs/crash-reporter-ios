@@ -1,9 +1,9 @@
 //
-//  BugsnagBreadcrumb.h
+//  RSCrashReporterBreadcrumb.h
 //
 //  Created by Delisa Mason on 9/16/15.
 //
-//  Copyright (c) 2015 Bugsnag, Inc. All rights reserved.
+//  Copyright (c) 2015 RSCrashReporter, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,74 +25,74 @@
 //
 #import <Foundation/Foundation.h>
 
-#import <RSCrashReporter/BugsnagDefines.h>
+#import <RSCrashReporter/RSCrashReporterDefines.h>
 
 /**
  * Types of breadcrumbs
  */
-typedef NS_ENUM(NSUInteger, BSGBreadcrumbType) {
+typedef NS_ENUM(NSUInteger, RSCBreadcrumbType) {
     /**
-     *  Any breadcrumb sent via Bugsnag.leaveBreadcrumb()
+     *  Any breadcrumb sent via RSCrashReporter.leaveBreadcrumb()
      */
-    BSGBreadcrumbTypeManual,
+    RSCBreadcrumbTypeManual,
     /**
-     *  A call to Bugsnag.notify() (internal use only)
+     *  A call to RSCrashReporter.notify() (internal use only)
      */
-    BSGBreadcrumbTypeError,
+    RSCBreadcrumbTypeError,
     /**
      *  A log message
      */
-    BSGBreadcrumbTypeLog,
+    RSCBreadcrumbTypeLog,
     /**
      *  A navigation action, such as pushing a view controller or dismissing an alert
      */
-    BSGBreadcrumbTypeNavigation,
+    RSCBreadcrumbTypeNavigation,
     /**
      *  A background process, such performing a database query
      */
-    BSGBreadcrumbTypeProcess,
+    RSCBreadcrumbTypeProcess,
     /**
      *  A network request
      */
-    BSGBreadcrumbTypeRequest,
+    RSCBreadcrumbTypeRequest,
     /**
      *  Change in application or view state
      */
-    BSGBreadcrumbTypeState,
+    RSCBreadcrumbTypeState,
     /**
      *  A user event, such as authentication or control events
      */
-    BSGBreadcrumbTypeUser,
+    RSCBreadcrumbTypeUser,
 };
 
 /**
  * Types of breadcrumbs which can be reported
  */
-typedef NS_OPTIONS(NSUInteger, BSGEnabledBreadcrumbType) {
-    BSGEnabledBreadcrumbTypeNone       = 0,
-    BSGEnabledBreadcrumbTypeState      = 1 << 1,
-    BSGEnabledBreadcrumbTypeUser       = 1 << 2,
-    BSGEnabledBreadcrumbTypeLog        = 1 << 3,
-    BSGEnabledBreadcrumbTypeNavigation = 1 << 4,
-    BSGEnabledBreadcrumbTypeRequest    = 1 << 5,
-    BSGEnabledBreadcrumbTypeProcess    = 1 << 6,
-    BSGEnabledBreadcrumbTypeError      = 1 << 7,
-    BSGEnabledBreadcrumbTypeAll = BSGEnabledBreadcrumbTypeState
-                                | BSGEnabledBreadcrumbTypeUser
-                                | BSGEnabledBreadcrumbTypeLog
-                                | BSGEnabledBreadcrumbTypeNavigation
-                                | BSGEnabledBreadcrumbTypeRequest
-                                | BSGEnabledBreadcrumbTypeProcess
-                                | BSGEnabledBreadcrumbTypeError,
+typedef NS_OPTIONS(NSUInteger, RSCEnabledBreadcrumbType) {
+    RSCEnabledBreadcrumbTypeNone       = 0,
+    RSCEnabledBreadcrumbTypeState      = 1 << 1,
+    RSCEnabledBreadcrumbTypeUser       = 1 << 2,
+    RSCEnabledBreadcrumbTypeLog        = 1 << 3,
+    RSCEnabledBreadcrumbTypeNavigation = 1 << 4,
+    RSCEnabledBreadcrumbTypeRequest    = 1 << 5,
+    RSCEnabledBreadcrumbTypeProcess    = 1 << 6,
+    RSCEnabledBreadcrumbTypeError      = 1 << 7,
+    RSCEnabledBreadcrumbTypeAll = RSCEnabledBreadcrumbTypeState
+                                | RSCEnabledBreadcrumbTypeUser
+                                | RSCEnabledBreadcrumbTypeLog
+                                | RSCEnabledBreadcrumbTypeNavigation
+                                | RSCEnabledBreadcrumbTypeRequest
+                                | RSCEnabledBreadcrumbTypeProcess
+                                | RSCEnabledBreadcrumbTypeError,
 };
 
 /**
  * A short log message, representing an action that occurred in your app, to aid with debugging.
  */
-@class BugsnagBreadcrumb;
+@class RSCrashReporterBreadcrumb;
 
-BUGSNAG_EXTERN
-@interface BugsnagBreadcrumb : NSObject
+RSCRASHREPORTER_EXTERN
+@interface RSCrashReporterBreadcrumb : NSObject
 
 /**
  * The date when the breadcrumb was left
@@ -102,7 +102,7 @@ BUGSNAG_EXTERN
 /**
  * The type of breadcrumb
  */
-@property (readwrite, nonatomic) BSGBreadcrumbType type;
+@property (readwrite, nonatomic) RSCBreadcrumbType type;
 
 /**
  * The description of the breadcrumb
@@ -123,9 +123,9 @@ BUGSNAG_EXTERN
 /// Internal protocol, not for public use.
 /// Will be removed from public headers in next major release.
 /// :nodoc:
-@protocol BSGBreadcrumbSink <NSObject>
+@protocol RSCBreadcrumbSink <NSObject>
 
-- (void)leaveBreadcrumbWithMessage:(nonnull NSString *)message metadata:(nullable NSDictionary *)metadata andType:(BSGBreadcrumbType)type
+- (void)leaveBreadcrumbWithMessage:(nonnull NSString *)message metadata:(nullable NSDictionary *)metadata andType:(RSCBreadcrumbType)type
 NS_SWIFT_NAME(leaveBreadcrumb(_:metadata:type:));
 
 @end

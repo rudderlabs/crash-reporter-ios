@@ -1,48 +1,48 @@
 //
-//  BugsnagSessionTracker.m
-//  Bugsnag
+//  RSCrashReporterSessionTracker.m
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 24/11/2017.
-//  Copyright © 2017 Bugsnag. All rights reserved.
+//  Copyright © 2017 RSCrashReporter. All rights reserved.
 //
 
-#import "BugsnagSessionTracker.h"
+#import "RSCrashReporterSessionTracker.h"
 
-#import "BSGAppKit.h"
-#import "BSGDefines.h"
-#import "BSGUIKit.h"
-#import "BSGWatchKit.h"
-#import "BSG_KSSystemInfo.h"
-#import "BugsnagApp+Private.h"
-#import "BugsnagClient+Private.h"
-#import "BugsnagCollections.h"
-#import "BugsnagConfiguration+Private.h"
-#import "BugsnagDevice+Private.h"
-#import "BugsnagLogger.h"
-#import "BugsnagSession+Private.h"
-#import "BugsnagUser+Private.h"
+#import "RSCAppKit.h"
+#import "RSCDefines.h"
+#import "RSCUIKit.h"
+#import "RSCWatchKit.h"
+#import "RSC_KSSystemInfo.h"
+#import "RSCrashReporterApp+Private.h"
+#import "RSCrashReporterClient+Private.h"
+#import "RSCrashReporterCollections.h"
+#import "RSCrashReporterConfiguration+Private.h"
+#import "RSCrashReporterDevice+Private.h"
+#import "RSCrashReporterLogger.h"
+#import "RSCrashReporterSession+Private.h"
+#import "RSCrashReporterUser+Private.h"
 
 /**
  Number of seconds in background required to make a new session
  */
-static NSTimeInterval const BSGNewSessionBackgroundDuration = 30;
+static NSTimeInterval const RSCNewSessionBackgroundDuration = 30;
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BugsnagSessionTracker ()
-@property (strong, nonatomic) BugsnagConfiguration *config;
-@property (weak, nonatomic) BugsnagClient *client;
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCrashReporterSessionTracker ()
+@property (strong, nonatomic) RSCrashReporterConfiguration *config;
+@property (weak, nonatomic) RSCrashReporterClient *client;
 @property (strong, nonatomic) NSDate *backgroundStartTime;
 @property (nonatomic) NSMutableDictionary *extraRuntimeInfo;
 @end
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BugsnagSessionTracker
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCrashReporterSessionTracker
 
-- (instancetype)initWithConfig:(BugsnagConfiguration *)config client:(BugsnagClient *)client {
+- (instancetype)initWithConfig:(RSCrashReporterConfiguration *)config client:(RSCrashReporterClient *)client {
     if ((self = [super init])) {
         _config = config;
         _client = client;
-        _sessionUploader = [[BSGSessionUploader alloc] initWithConfig:config notifier:client.notifier];
+        _sessionUploader = [[RSCSessionUploader alloc] initWithConfig:config notifier:client.notifier];
         _extraRuntimeInfo = [NSMutableDictionary new];
     }
     return self;
@@ -50,11 +50,11 @@ BSG_OBJC_DIRECT_MEMBERS
 
 - (void)startWithNotificationCenter:(NSNotificationCenter *)notificationCenter isInForeground:(BOOL)isInForeground {
 #if !TARGET_OS_WATCH
-    if ([BSG_KSSystemInfo isRunningInAppExtension]) {
+    if ([RSC_KSSystemInfo isRunningInAppExtension]) {
         // UIApplication lifecycle notifications and UIApplicationState, which the automatic session tracking logic
         // depends on, are not available in app extensions.
         if (self.config.autoTrackSessions) {
-            bsg_log_info(@"Automatic session tracking is not supported in app extensions");
+            rsc_log_info(@"Automatic session tracking is not supported in app extensions");
         }
         return;
     }
@@ -63,7 +63,7 @@ BSG_OBJC_DIRECT_MEMBERS
     if (isInForeground) {
         [self startNewSessionIfAutoCaptureEnabled];
     } else {
-        bsg_log_debug(@"Not starting session because app is not in the foreground");
+        rsc_log_debug(@"Not starting session because app is not in the foreground");
     }
 
 #if TARGET_OS_OSX
@@ -119,11 +119,11 @@ BSG_OBJC_DIRECT_MEMBERS
 - (void)pauseSession {
     self.currentSession.stopped = YES;
 
-    BSGSessionUpdateRunContext(nil);
+    RSCSessionUpdateRunContext(nil);
 }
 
 - (BOOL)resumeSession {
-    BugsnagSession *session = self.currentSession;
+    RSCrashReporterSession *session = self.currentSession;
 
     if (session == nil) {
         [self startNewSession];
@@ -131,13 +131,13 @@ BSG_OBJC_DIRECT_MEMBERS
     } else {
         BOOL stopped = session.isStopped;
         session.stopped = NO;
-        BSGSessionUpdateRunContext(session);
+        RSCSessionUpdateRunContext(session);
         return stopped;
     }
 }
 
-- (BugsnagSession *)runningSession {
-    BugsnagSession *session = self.currentSession;
+- (RSCrashReporterSession *)runningSession {
+    RSCrashReporterSession *session = self.currentSession;
 
     if (session == nil || session.isStopped) {
         return nil;
@@ -157,36 +157,36 @@ BSG_OBJC_DIRECT_MEMBERS
         return;
     }
     if (self.config.sessionURL == nil) {
-        bsg_log_err(@"The session tracking endpoint has not been set. Session tracking is disabled");
+        rsc_log_err(@"The session tracking endpoint has not been set. Session tracking is disabled");
         return;
     }
 
-    NSDictionary *systemInfo = [BSG_KSSystemInfo systemInfo];
-    BugsnagApp *app = [BugsnagApp appWithDictionary:@{@"system": systemInfo}
+    NSDictionary *systemInfo = [RSC_KSSystemInfo systemInfo];
+    RSCrashReporterApp *app = [RSCrashReporterApp appWithDictionary:@{@"system": systemInfo}
                                              config:self.config
                                        codeBundleId:self.codeBundleId];
-    BugsnagDevice *device = [BugsnagDevice deviceWithKSCrashReport:@{@"system": systemInfo}];
+    RSCrashReporterDevice *device = [RSCrashReporterDevice deviceWithKSCrashReport:@{@"system": systemInfo}];
     [device appendRuntimeInfo:self.extraRuntimeInfo];
 
-    BugsnagSession *newSession = [[BugsnagSession alloc] initWithId:[[NSUUID UUID] UUIDString]
+    RSCrashReporterSession *newSession = [[RSCrashReporterSession alloc] initWithId:[[NSUUID UUID] UUIDString]
                                                           startedAt:[NSDate date]
                                                                user:[self.client.user withId]
                                                                 app:app
                                                              device:device];
 
-    for (BugsnagOnSessionBlock onSessionBlock in self.config.onSessionBlocks) {
+    for (RSCrashReporterOnSessionBlock onSessionBlock in self.config.onSessionBlocks) {
         @try {
             if (!onSessionBlock(newSession)) {
                 return;
             }
         } @catch (NSException *exception) {
-            bsg_log_err(@"Error from onSession callback: %@", exception);
+            rsc_log_err(@"Error from onSession callback: %@", exception);
         }
     }
 
     self.currentSession = newSession;
 
-    BSGSessionUpdateRunContext(newSession);
+    RSCSessionUpdateRunContext(newSession);
 
     [self.sessionUploader uploadSession:newSession];
 }
@@ -206,14 +206,14 @@ BSG_OBJC_DIRECT_MEMBERS
 
 - (void)handleAppForegroundEvent {
     if (!self.currentSession ||
-        (self.backgroundStartTime && [[NSDate date] timeIntervalSinceDate:self.backgroundStartTime] >= BSGNewSessionBackgroundDuration)) {
+        (self.backgroundStartTime && [[NSDate date] timeIntervalSinceDate:self.backgroundStartTime] >= RSCNewSessionBackgroundDuration)) {
         [self startNewSessionIfAutoCaptureEnabled];
     }
     self.backgroundStartTime = nil;
 }
 
 - (void)incrementEventCountUnhandled:(BOOL)unhandled {
-    BugsnagSession *session = [self runningSession];
+    RSCrashReporterSession *session = [self runningSession];
 
     if (session == nil) {
         return;
@@ -225,7 +225,7 @@ BSG_OBJC_DIRECT_MEMBERS
         } else {
             session.handledCount++;
         }
-        BSGSessionUpdateRunContext(session);
+        RSCSessionUpdateRunContext(session);
     }
 }
 

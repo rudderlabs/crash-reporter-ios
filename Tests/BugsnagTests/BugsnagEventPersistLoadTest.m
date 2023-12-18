@@ -1,38 +1,38 @@
 //
-//  BugsnagEventPersistenceTest.m
+//  RSCrashReporterEventPersistenceTest.m
 //  Tests
 //
 //  Created by Jamie Lynch on 11/05/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BugsnagEvent+Private.h"
-#import "BugsnagAppWithState.h"
-#import "BugsnagUser.h"
-#import "BugsnagDeviceWithState+Private.h"
-#import "BugsnagError.h"
-#import "BugsnagStackframe.h"
-#import "BugsnagBreadcrumb.h"
-#import "BugsnagHandledState.h"
+#import "RSCrashReporterEvent+Private.h"
+#import "RSCrashReporterAppWithState.h"
+#import "RSCrashReporterUser.h"
+#import "RSCrashReporterDeviceWithState+Private.h"
+#import "RSCrashReporterError.h"
+#import "RSCrashReporterStackframe.h"
+#import "RSCrashReporterBreadcrumb.h"
+#import "RSCrashReporterHandledState.h"
 #import "RSCrashReporter.h"
-#import "BugsnagError.h"
-#import "BugsnagSession+Private.h"
-#import "BugsnagStackframe.h"
-#import "BugsnagThread.h"
+#import "RSCrashReporterError.h"
+#import "RSCrashReporterSession+Private.h"
+#import "RSCrashReporterStackframe.h"
+#import "RSCrashReporterThread.h"
 
-@interface BugsnagEventPersistLoadTest : XCTestCase
+@interface RSCrashReporterEventPersistLoadTest : XCTestCase
 @property NSDictionary *eventData;
 @end
 
 /**
- * Verifies that a BugsnagEvent can load information persisted from a handled error.
+ * Verifies that a RSCrashReporterEvent can load information persisted from a handled error.
  *
  * Handled errors store information in the user section of the KSCrashReport. The
  * stored information matches the JSON schema of an Error Reporting API payload.
  */
-@implementation BugsnagEventPersistLoadTest
+@implementation RSCrashReporterEventPersistLoadTest
 
 - (void)setUp {
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
@@ -47,52 +47,52 @@
 }
 
 /**
- * Constructs JSON data used to build a BugsnagEvent from a KSCrashReport
+ * Constructs JSON data used to build a RSCrashReporterEvent from a KSCrashReport
  * @param overrides the overrides that would be persisted in the user section of the report
  * @return a representation of the persisted JSON
  */
-- (BugsnagEvent *)generateEventWithOverrides:(NSDictionary *)overrides {
+- (RSCrashReporterEvent *)generateEventWithOverrides:(NSDictionary *)overrides {
     NSMutableDictionary *event = [self.eventData mutableCopy];
     if (overrides != nil) {
         event[@"user"] = [event[@"user"] mutableCopy];
         event[@"user"][@"event"] = overrides;
     }
-    return [[BugsnagEvent alloc] initWithKSReport:event];
+    return [[RSCrashReporterEvent alloc] initWithKSReport:event];
 }
 
 - (void)testNilDict {
-    BugsnagEvent *event = [self generateEventWithOverrides:nil];
+    RSCrashReporterEvent *event = [self generateEventWithOverrides:nil];
     XCTAssertNotNil(event);
 }
 
 - (void)testEmptyDict {
-    BugsnagEvent *event = [self generateEventWithOverrides:@{}];
+    RSCrashReporterEvent *event = [self generateEventWithOverrides:@{}];
     XCTAssertNotNil(event);
 }
 
 - (void)testContextOverride {
-    BugsnagEvent *event = [self generateEventWithOverrides:@{
+    RSCrashReporterEvent *event = [self generateEventWithOverrides:@{
             @"context": @"Making network request"
     }];
     XCTAssertEqualObjects(@"Making network request", event.context);
 }
 
 - (void)testApiKeyOverride {
-    BugsnagEvent *event = [self generateEventWithOverrides:@{
+    RSCrashReporterEvent *event = [self generateEventWithOverrides:@{
             @"apiKey": @"f0ab0192837465afbecd0192837465af"
     }];
     XCTAssertEqualObjects(@"f0ab0192837465afbecd0192837465af", event.apiKey);
 }
 
 - (void)testGroupingHashOverride {
-    BugsnagEvent *event = [self generateEventWithOverrides:@{
+    RSCrashReporterEvent *event = [self generateEventWithOverrides:@{
             @"groupingHash": @"509adf9c"
     }];
     XCTAssertEqualObjects(@"509adf9c", event.groupingHash);
 }
 
 /*- (void)testUserOverride {
-    BugsnagEvent *event = [self generateEventWithOverrides:@{
+    RSCrashReporterEvent *event = [self generateEventWithOverrides:@{
             @"user": @{
                     @"id": @"958",
                     @"email": @"ishmael@yahoo.com",
@@ -105,7 +105,7 @@
 }*/
 
 - (void)testAppFieldsOverride {
-    BugsnagEvent *event = [self generateEventWithOverrides:@{
+    RSCrashReporterEvent *event = [self generateEventWithOverrides:@{
             @"app": @{
                     @"duration": @5092,
                     @"durationInForeground": @4293,
@@ -119,7 +119,7 @@
                     @"version": @"2.3.4"
             }
     }];
-    BugsnagAppWithState *app = event.app;
+    RSCrashReporterAppWithState *app = event.app;
     XCTAssertEqual(@5092, app.duration);
     XCTAssertEqual(@4293, app.durationInForeground);
     XCTAssertFalse(app.inForeground);
@@ -133,7 +133,7 @@
 }
 
 - (void)testDeviceFieldsOverride {
-    BugsnagEvent *event = [self generateEventWithOverrides:@{
+    RSCrashReporterEvent *event = [self generateEventWithOverrides:@{
             @"device": @{
                     @"freeDisk": @920234094,
                     @"freeMemory": @5092340923,
@@ -158,7 +158,7 @@
     formatter.dateFormat = @"yyyy'-'MM'-'dd'T'HH':'mm':'ssZZZ";
     formatter.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
 
-    BugsnagDeviceWithState *device = event.device;
+    RSCrashReporterDeviceWithState *device = event.device;
     XCTAssertEqualObjects(@920234094, device.freeDisk);
     XCTAssertEqualObjects(@5092340923, device.freeMemory);
     XCTAssertEqualObjects(@92092340923, device.totalMemory);
@@ -180,15 +180,15 @@
 }
 
 - (void)testErrorsOverride {
-    BugsnagEvent *event = [self generateEventWithOverrides:@{
+    RSCrashReporterEvent *event = [self generateEventWithOverrides:@{
             @"exceptions": @[@{
                     @"errorClass": @"InvalidNetworkError",
                     @"message": @"No network connection",
                     @"type": @"reactnativejs",
                     @"stacktrace": @[
                             @{
-                                    @"machoFile": @"/Users/foo/Bugsnag.h",
-                                    @"method": @"-[BugsnagClient notify:handledState:block:]",
+                                    @"machoFile": @"/Users/foo/RSCrashReporter.h",
+                                    @"method": @"-[RSCrashReporterClient notify:handledState:block:]",
                                     @"machoUUID": @"B6D80CB5-A772-3D2F-B5A1-A3A137B8B58F",
                                     @"frameAddress": @"0x10b5756bf",
                                     @"symbolAddress": @"0x10b574fa0",
@@ -200,18 +200,18 @@
                     ]
             }]
     }];
-    BugsnagError *error = event.errors[0];
+    RSCrashReporterError *error = event.errors[0];
     XCTAssertNotNil(error);
     XCTAssertEqual(1, [event.errors count]);
     XCTAssertEqualObjects(@"InvalidNetworkError", error.errorClass);
     XCTAssertEqualObjects(@"No network connection", error.errorMessage);
-    XCTAssertEqual(BSGErrorTypeReactNativeJs, error.type);
+    XCTAssertEqual(RSCErrorTypeReactNativeJs, error.type);
 
-    BugsnagStackframe *frame = error.stacktrace[0];
+    RSCrashReporterStackframe *frame = error.stacktrace[0];
     XCTAssertNotNil(frame);
     XCTAssertEqual(1, [error.stacktrace count]);
-    XCTAssertEqualObjects(@"-[BugsnagClient notify:handledState:block:]", frame.method);
-    XCTAssertEqualObjects(@"/Users/foo/Bugsnag.h", frame.machoFile);
+    XCTAssertEqualObjects(@"-[RSCrashReporterClient notify:handledState:block:]", frame.method);
+    XCTAssertEqualObjects(@"/Users/foo/RSCrashReporter.h", frame.machoFile);
     XCTAssertEqualObjects(@"B6D80CB5-A772-3D2F-B5A1-A3A137B8B58F", frame.machoUuid);
     XCTAssertEqualObjects(@0x102340922, frame.machoVmAddress);
     XCTAssertEqualObjects(@0x10b574fa0, frame.symbolAddress);
@@ -222,7 +222,7 @@
 }
 
 - (void)testMetadataOverride {
-    BugsnagEvent *event = [self generateEventWithOverrides:@{
+    RSCrashReporterEvent *event = [self generateEventWithOverrides:@{
             @"metaData": @{
                     @"custom": @{
                             @"foo": @"bar"
@@ -233,7 +233,7 @@
 }
 
 - (void)testBreadcrumbsOverride {
-    BugsnagEvent *event = [self generateEventWithOverrides:@{
+    RSCrashReporterEvent *event = [self generateEventWithOverrides:@{
             @"breadcrumbs": @[
                     @{
                             @"type": @"manual",
@@ -246,10 +246,10 @@
                     }
                     }]
     }];
-    BugsnagBreadcrumb *breadcrumb = event.breadcrumbs[0];
+    RSCrashReporterBreadcrumb *breadcrumb = event.breadcrumbs[0];
     XCTAssertNotNil(breadcrumb);
     XCTAssertEqual(1, [event.breadcrumbs count]);
-    XCTAssertEqual(BSGBreadcrumbTypeManual, breadcrumb.type);
+    XCTAssertEqual(RSCBreadcrumbTypeManual, breadcrumb.type);
     XCTAssertEqualObjects(@"installed NDK", breadcrumb.message);
     
     NSDateFormatter *formatter = [NSDateFormatter new];
@@ -265,7 +265,7 @@
 }
 
 - (void)testSeverityReasonOverride {
-    BugsnagEvent *event = [self generateEventWithOverrides:@{
+    RSCrashReporterEvent *event = [self generateEventWithOverrides:@{
             @"severityReason": @{
                     @"type": @"log",
                     @"attributes": @{
@@ -278,13 +278,13 @@
     XCTAssertEqualObjects(@"level", event.handledState.attrKey);
     XCTAssertEqualObjects(@"info", event.handledState.attrValue);
     XCTAssertEqual(LogMessage, event.handledState.severityReasonType);
-    XCTAssertEqual(BSGSeverityInfo, event.handledState.originalSeverity);
-    XCTAssertEqual(BSGSeverityInfo, event.handledState.currentSeverity);
+    XCTAssertEqual(RSCSeverityInfo, event.handledState.originalSeverity);
+    XCTAssertEqual(RSCSeverityInfo, event.handledState.currentSeverity);
     XCTAssertTrue(event.unhandled);
 }
 
 - (void)testThreadsOverride {
-    BugsnagEvent *event = [self generateEventWithOverrides:@{
+    RSCrashReporterEvent *event = [self generateEventWithOverrides:@{
             @"threads": @[
                     @{
                             @"id": @"13",
@@ -293,8 +293,8 @@
                             @"type": @"reactnativejs",
                             @"stacktrace": @[
                             @{
-                                    @"machoFile": @"/Users/foo/Bugsnag.h",
-                                    @"method": @"-[BugsnagClient notify:handledState:block:]",
+                                    @"machoFile": @"/Users/foo/RSCrashReporter.h",
+                                    @"method": @"-[RSCrashReporterClient notify:handledState:block:]",
                                     @"machoUUID": @"B6D80CB5-A772-3D2F-B5A1-A3A137B8B58F",
                                     @"frameAddress": @"0x10b5756bf",
                                     @"symbolAddress": @"0x10b574fa0",
@@ -306,19 +306,19 @@
                     ]}
             ]
     }];
-    BugsnagThread *thread = event.threads[0];
+    RSCrashReporterThread *thread = event.threads[0];
     XCTAssertNotNil(thread);
     XCTAssertEqual(1, [event.threads count]);
     XCTAssertEqualObjects(@"13", thread.id);
     XCTAssertEqualObjects(@"thread-id-1", thread.name);
     XCTAssertTrue(thread.errorReportingThread);
-    XCTAssertEqual(BSGThreadTypeReactNativeJs, thread.type);
+    XCTAssertEqual(RSCThreadTypeReactNativeJs, thread.type);
 
-    BugsnagStackframe *frame = thread.stacktrace[0];
+    RSCrashReporterStackframe *frame = thread.stacktrace[0];
     XCTAssertNotNil(frame);
     XCTAssertEqual(1, [thread.stacktrace count]);
-    XCTAssertEqualObjects(@"-[BugsnagClient notify:handledState:block:]", frame.method);
-    XCTAssertEqualObjects(@"/Users/foo/Bugsnag.h", frame.machoFile);
+    XCTAssertEqualObjects(@"-[RSCrashReporterClient notify:handledState:block:]", frame.method);
+    XCTAssertEqualObjects(@"/Users/foo/RSCrashReporter.h", frame.machoFile);
     XCTAssertEqualObjects(@"B6D80CB5-A772-3D2F-B5A1-A3A137B8B58F", frame.machoUuid);
     XCTAssertEqualObjects(@0x102340922, frame.machoVmAddress);
     XCTAssertEqualObjects(@0x10b574fa0, frame.symbolAddress);
@@ -329,7 +329,7 @@
 }
 
 /*- (void)testSessionOverride {
-    BugsnagEvent *event = [self generateEventWithOverrides:@{
+    RSCrashReporterEvent *event = [self generateEventWithOverrides:@{
             @"session": @{
                     @"startedAt": @"2020-05-18T13:13:24Z",
                     @"id": @"123",
@@ -354,7 +354,7 @@
     NSURL *url = [[NSBundle bundleForClass:[self class]] URLForResource:@"report-react-native-promise-rejection" withExtension:@"json"];
     NSDictionary *userData = [NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfURL:url] options:0 error:nil];
     XCTAssertEqualObjects([userData valueForKeyPath:@"user.event.exceptions.@count"], @(2));
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:userData];
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:userData];
     XCTAssertEqual(event.errors.count, 2);
     XCTAssertEqualObjects([[event toJsonWithRedactedKeys:nil] valueForKeyPath:@"exceptions.@count"], @(2),
                           @"JSON representation of event should have the same number of errors / exceptions");

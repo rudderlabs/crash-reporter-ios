@@ -1,35 +1,35 @@
 //
-//  BSGEventUploadObjectOperation.m
-//  Bugsnag
+//  RSCEventUploadObjectOperation.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 17/02/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGEventUploadObjectOperation.h"
+#import "RSCEventUploadObjectOperation.h"
 
-#import "BugsnagEvent+Private.h"
-#import "BugsnagInternals.h"
-#import "BugsnagLogger.h"
+#import "RSCrashReporterEvent+Private.h"
+#import "RSCrashReporterInternals.h"
+#import "RSCrashReporterLogger.h"
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BSGEventUploadObjectOperation
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCEventUploadObjectOperation
 
-- (instancetype)initWithEvent:(BugsnagEvent *)event delegate:(id<BSGEventUploadOperationDelegate>)delegate {
+- (instancetype)initWithEvent:(RSCrashReporterEvent *)event delegate:(id<RSCEventUploadOperationDelegate>)delegate {
     if ((self = [super initWithDelegate:delegate])) {
         _event = event;
     }
     return self;
 }
 
-- (BugsnagEvent *)loadEventAndReturnError:(__unused NSError * __autoreleasing *)errorPtr {
+- (RSCrashReporterEvent *)loadEventAndReturnError:(__unused NSError * __autoreleasing *)errorPtr {
     [self.event symbolicateIfNeeded];
     return self.event;
 }
 
 - (void)prepareForRetry:(NSDictionary *)payload HTTPBodySize:(NSUInteger)HTTPBodySize {
     if (HTTPBodySize > MaxPersistedSize) {
-        bsg_log_debug(@"Not persisting %@ because HTTP body size (%lu bytes) exceeds MaxPersistedSize",
+        rsc_log_debug(@"Not persisting %@ because HTTP body size (%lu bytes) exceeds MaxPersistedSize",
                       self.name, (unsigned long)HTTPBodySize);
         return;
     }

@@ -1,31 +1,31 @@
 //
-//  BSGSessionUploader.h
-//  Bugsnag
+//  RSCSessionUploader.h
+//  RSCrashReporter
 //
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-#import "BSGDefines.h"
+#import "RSCDefines.h"
 
-@class BugsnagConfiguration;
-@class BugsnagNotifier;
-@class BugsnagSession;
+@class RSCrashReporterConfiguration;
+@class RSCrashReporterNotifier;
+@class RSCrashReporterSession;
 
 NS_ASSUME_NONNULL_BEGIN
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSGSessionUploader : NSObject
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCSessionUploader : NSObject
 
-- (instancetype)initWithConfig:(BugsnagConfiguration *)configuration notifier:(BugsnagNotifier *)notifier;
+- (instancetype)initWithConfig:(RSCrashReporterConfiguration *)configuration notifier:(RSCrashReporterNotifier *)notifier;
 
 /// Scans previously persisted sessions and either discards or attempts upload.
 - (void)processStoredSessions;
 
-- (void)uploadSession:(BugsnagSession *)session;
+- (void)uploadSession:(RSCrashReporterSession *)session;
 
-@property (nonatomic) BugsnagNotifier *notifier;
+@property (nonatomic) RSCrashReporterNotifier *notifier;
 
 @end
 

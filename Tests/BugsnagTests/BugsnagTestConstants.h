@@ -1,13 +1,13 @@
 //
-//  BugsnagTestConstants.h
-//  Bugsnag
+//  RSCrashReporterTestConstants.h
+//  RSCrashReporter
 //
 //  Created by Robin Macharg on 22/01/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
-#ifndef BugsnagTestConstants_h
-#define BugsnagTestConstants_h
+#ifndef RSCrashReporterTestConstants_h
+#define RSCrashReporterTestConstants_h
 
 /**
  * Dummy apiKey values of various lengths
@@ -22,4 +22,4 @@ static NSString * _Nonnull const DUMMY_APIKEY_32CHAR_4 = @"98765432109876543210a
 static NSString * _Nonnull const DUMMY_APIKEY_16CHAR   = @"0192837465afbecd"; // too short
 static NSString * _Nonnull const DUMMY_APIKEY_48CHAR   = @"0192837465afbecd0192837465afbecd0192837465afbecd"; // too long
 
-#endif /* BugsnagTestConstants_h */
+#endif /* RSCrashReporterTestConstants_h */

@@ -1,13 +1,13 @@
 //
-//  BSG_KSCrashStringConversion.h
-//  Bugsnag
+//  RSC_KSCrashStringConversion.h
+//  RSCrashReporter
 //
 //  Created by Karl Stenerud on 31.05.22.
-//  Copyright © 2022 Bugsnag Inc. All rights reserved.
+//  Copyright © 2022 RSCrashReporter Inc. All rights reserved.
 //
 
-#ifndef BSG_KSCrashStringConversion_h
-#define BSG_KSCrashStringConversion_h
+#ifndef RSC_KSCrashStringConversion_h
+#define RSC_KSCrashStringConversion_h
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,7 +23,7 @@ extern "C" {
  *
  * Returns the length of the string written to dst (not including the NUL).
  */
-size_t bsg_uint64_to_string(uint64_t value, char* dst);
+size_t rsc_uint64_to_string(uint64_t value, char* dst);
 
 /**
  * Convert an integer to a string.
@@ -31,7 +31,7 @@ size_t bsg_uint64_to_string(uint64_t value, char* dst);
  *
  * Returns the length of the string written to dst (not including the null termination byte).
  */
-size_t bsg_int64_to_string(int64_t value, char* dst);
+size_t rsc_int64_to_string(int64_t value, char* dst);
 
 /**
  * Convert an unsigned integer to a hex string.
@@ -42,7 +42,7 @@ size_t bsg_int64_to_string(int64_t value, char* dst);
  *
  * Returns the length of the string written to dst (not including the NUL).
  */
-size_t bsg_uint64_to_hex(uint64_t value, char* dst, int min_digits);
+size_t rsc_uint64_to_hex(uint64_t value, char* dst, int min_digits);
 
 /**
  * Convert a positive double to a string, allowing up to max_sig_digits.
@@ -64,11 +64,11 @@ size_t bsg_uint64_to_hex(uint64_t value, char* dst, int min_digits);
  *
  * Returns the length of the string written to dst (not including the NUL).
  */
-size_t bsg_double_to_string(double value, char* dst, int max_sig_digits);
+size_t rsc_double_to_string(double value, char* dst, int max_sig_digits);
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* BSG_KSCrashStringConversion_h */
+#endif /* RSC_KSCrashStringConversion_h */

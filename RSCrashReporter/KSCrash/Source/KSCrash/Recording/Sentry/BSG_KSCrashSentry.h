@@ -1,5 +1,5 @@
 //
-//  BSG_KSCrashSentry.h
+//  RSC_KSCrashSentry.h
 //
 //  Created by Karl Stenerud on 2012-02-12.
 //
@@ -27,15 +27,15 @@
 /** Keeps watch for crashes and informs via callback when on occurs.
  */
 
-#ifndef HDR_BSG_KSCrashSentry_h
-#define HDR_BSG_KSCrashSentry_h
+#ifndef HDR_RSC_KSCrashSentry_h
+#define HDR_RSC_KSCrashSentry_h
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "BSG_KSArchSpecific.h"
-#include "BSG_KSCrashType.h"
+#include "RSC_KSArchSpecific.h"
+#include "RSC_KSCrashType.h"
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <mach/mach_types.h>
@@ -46,19 +46,19 @@ extern "C" {
 // Note: Memory usage = 16 bytes per thread, pre-allocated once.
 #define MAX_CAPTURED_THREADS 1000
 
-typedef CF_ENUM(unsigned, BSG_KSCrashReservedTheadType) {
-    BSG_KSCrashReservedThreadTypeMachPrimary,
-    BSG_KSCrashReservedThreadTypeMachSecondary,
-    BSG_KSCrashReservedThreadTypeCount
+typedef CF_ENUM(unsigned, RSC_KSCrashReservedTheadType) {
+    RSC_KSCrashReservedThreadTypeMachPrimary,
+    RSC_KSCrashReservedThreadTypeMachSecondary,
+    RSC_KSCrashReservedThreadTypeCount
 };
 
-typedef struct BSG_KSCrash_SentryContext {
+typedef struct RSC_KSCrash_SentryContext {
     // Caller defined values. Caller must fill these out prior to installation.
 
     /** Called by the crash handler when a crash is detected. */
     void (*onCrash)(void *);
 
-    /** BSGCrashSentryAttemptyDelivery */
+    /** RSCCrashSentryAttemptyDelivery */
     void (*attemptDelivery)(void);
 
     /**
@@ -70,7 +70,7 @@ typedef struct BSG_KSCrash_SentryContext {
     // Implementation defined values. Caller does not initialize these.
 
     /** Threads reserved by the crash handlers, which must not be suspended. */
-    thread_t reservedThreads[BSG_KSCrashReservedThreadTypeCount];
+    thread_t reservedThreads[RSC_KSCrashReservedThreadTypeCount];
 
     /** If true, the crash handling system is currently handling a crash.
      * When false, all values below this field are considered invalid.
@@ -94,7 +94,7 @@ typedef struct BSG_KSCrash_SentryContext {
 
     /** The type of crash that occurred.
      * This determines which other fields are valid. */
-    BSG_KSCrashType crashType;
+    RSC_KSCrashType crashType;
 
     /** Short description of why the crash occurred. */
     const char *crashReason;
@@ -150,7 +150,7 @@ typedef struct BSG_KSCrash_SentryContext {
         const siginfo_t *signalInfo;
     } signal;
 
-} BSG_KSCrash_SentryContext;
+} RSC_KSCrash_SentryContext;
 
 /** Install crash sentry.
  *
@@ -162,16 +162,16 @@ typedef struct BSG_KSCrash_SentryContext {
  *
  * @return which crash handlers were installed successfully.
  */
-BSG_KSCrashType
-bsg_kscrashsentry_installWithContext(BSG_KSCrash_SentryContext *context,
-                                     BSG_KSCrashType crashTypes,
+RSC_KSCrashType
+rsc_kscrashsentry_installWithContext(RSC_KSCrash_SentryContext *context,
+                                     RSC_KSCrashType crashTypes,
                                      void (*onCrash)(void *));
 
 /** Uninstall crash sentry.
  *
  * @param crashTypes The crash types to install handlers for.
  */
-void bsg_kscrashsentry_uninstall(BSG_KSCrashType crashTypes);
+void rsc_kscrashsentry_uninstall(RSC_KSCrashType crashTypes);
 
 #ifdef __cplusplus
 }

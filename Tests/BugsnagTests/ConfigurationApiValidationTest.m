@@ -1,22 +1,22 @@
 //
 //  ConfigurationApiValidationTest.m
-//  Bugsnag
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 10/06/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 #import <RSCrashReporter/RSCrashReporter.h>
-#import "BugsnagConfiguration+Private.h"
-#import "BugsnagPlugin.h"
-#import "BugsnagTestConstants.h"
+#import "RSCrashReporterConfiguration+Private.h"
+#import "RSCrashReporterPlugin.h"
+#import "RSCrashReporterTestConstants.h"
 #import <TargetConditionals.h>
 
-@interface FooPlugin: NSObject<BugsnagPlugin>
+@interface FooPlugin: NSObject<RSCrashReporterPlugin>
 @end
 @implementation FooPlugin
-- (void)load:(BugsnagClient *_Nonnull)client {}
+- (void)load:(RSCrashReporterClient *_Nonnull)client {}
 - (void)unload {}
 @end
 
@@ -24,13 +24,13 @@
 * Validates that the Configuration API interface handles any invalid input gracefully.
 */
 @interface ConfigurationApiValidationTest : XCTestCase
-@property BugsnagConfiguration *config;
+@property RSCrashReporterConfiguration *config;
 @end
 
 @implementation ConfigurationApiValidationTest
 
 - (void)setUp {
-    self.config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    self.config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
 }
 
 - (void)testValidReleaseStage {
@@ -85,11 +85,11 @@
 
 - (void)testValidSendThreads {
 #if !TARGET_OS_WATCH
-    XCTAssertEqual(BSGThreadSendPolicyAlways, self.config.sendThreads);
-    self.config.sendThreads = BSGThreadSendPolicyNever;
-    XCTAssertEqual(BSGThreadSendPolicyNever, self.config.sendThreads);
-    self.config.sendThreads = BSGThreadSendPolicyUnhandledOnly;
-    XCTAssertEqual(BSGThreadSendPolicyUnhandledOnly, self.config.sendThreads);
+    XCTAssertEqual(RSCThreadSendPolicyAlways, self.config.sendThreads);
+    self.config.sendThreads = RSCThreadSendPolicyNever;
+    XCTAssertEqual(RSCThreadSendPolicyNever, self.config.sendThreads);
+    self.config.sendThreads = RSCThreadSendPolicyUnhandledOnly;
+    XCTAssertEqual(RSCThreadSendPolicyUnhandledOnly, self.config.sendThreads);
 #endif
 }
 
@@ -108,12 +108,12 @@
 }
 
 - (void)testValidEnabledBreadcrumbTypes {
-    self.config.enabledBreadcrumbTypes = BSGEnabledBreadcrumbTypeNone;
-    XCTAssertEqual(BSGEnabledBreadcrumbTypeNone, self.config.enabledBreadcrumbTypes);
-    self.config.enabledBreadcrumbTypes = BSGEnabledBreadcrumbTypeAll;
-    XCTAssertEqual(BSGEnabledBreadcrumbTypeAll, self.config.enabledBreadcrumbTypes);
-    self.config.enabledBreadcrumbTypes = BSGEnabledBreadcrumbTypeState & BSGEnabledBreadcrumbTypeNavigation;
-    XCTAssertEqual(BSGEnabledBreadcrumbTypeState & BSGEnabledBreadcrumbTypeNavigation, self.config.enabledBreadcrumbTypes);
+    self.config.enabledBreadcrumbTypes = RSCEnabledBreadcrumbTypeNone;
+    XCTAssertEqual(RSCEnabledBreadcrumbTypeNone, self.config.enabledBreadcrumbTypes);
+    self.config.enabledBreadcrumbTypes = RSCEnabledBreadcrumbTypeAll;
+    XCTAssertEqual(RSCEnabledBreadcrumbTypeAll, self.config.enabledBreadcrumbTypes);
+    self.config.enabledBreadcrumbTypes = RSCEnabledBreadcrumbTypeState & RSCEnabledBreadcrumbTypeNavigation;
+    XCTAssertEqual(RSCEnabledBreadcrumbTypeState & RSCEnabledBreadcrumbTypeNavigation, self.config.enabledBreadcrumbTypes);
 }
 
 - (void)testValidBundleVersion {
@@ -173,7 +173,7 @@
 }
 
 - (void)testValidEnabledErrorTypes {
-    BugsnagErrorTypes *types = [BugsnagErrorTypes new];
+    RSCrashReporterErrorTypes *types = [RSCrashReporterErrorTypes new];
 #if !TARGET_OS_WATCH
     types.ooms = true;
 #endif
@@ -191,9 +191,9 @@
 }
 
 - (void)testValidEndpoints {
-    self.config.endpoints = [[BugsnagEndpointConfiguration alloc] initWithNotify:@"http://notify.example.com"
+    self.config.endpoints = [[RSCrashReporterEndpointConfiguration alloc] initWithNotify:@"http://notify.example.com"
                                                                         sessions:@"http://sessions.example.com"];
-    BugsnagEndpointConfiguration *endpoints = self.config.endpoints;
+    RSCrashReporterEndpointConfiguration *endpoints = self.config.endpoints;
     XCTAssertNotNil(endpoints);
     XCTAssertEqualObjects(@"http://notify.example.com", endpoints.notify);
     XCTAssertEqualObjects(@"http://sessions.example.com", endpoints.sessions);
@@ -214,30 +214,30 @@
 }
 
 - (void)testValidOnSessionBlock {
-    BOOL (^block)(BugsnagSession *) = ^BOOL(BugsnagSession *session) {
+    BOOL (^block)(RSCrashReporterSession *) = ^BOOL(RSCrashReporterSession *session) {
         return NO;
     };
-    BugsnagOnSessionRef callback = [self.config addOnSessionBlock:block];
+    RSCrashReporterOnSessionRef callback = [self.config addOnSessionBlock:block];
     XCTAssertEqual(1, [self.config.onSessionBlocks count]);
     [self.config removeOnSession:callback];
     XCTAssertEqual(0, [self.config.onSessionBlocks count]);
 }
 
 - (void)testValidOnSendErrorBlock {
-    BOOL (^block)(BugsnagEvent *) = ^BOOL(BugsnagEvent *event) {
+    BOOL (^block)(RSCrashReporterEvent *) = ^BOOL(RSCrashReporterEvent *event) {
         return NO;
     };
-    BugsnagOnSendErrorRef callback = [self.config addOnSendErrorBlock:block];
+    RSCrashReporterOnSendErrorRef callback = [self.config addOnSendErrorBlock:block];
     XCTAssertEqual(1, [self.config.onSendBlocks count]);
     [self.config removeOnSendError:callback];
     XCTAssertEqual(0, [self.config.onSendBlocks count]);
 }
 
 - (void)testValidOnBreadcrumbBlock {
-    BOOL (^block)(BugsnagBreadcrumb *) = ^BOOL(BugsnagBreadcrumb *breadcrumb) {
+    BOOL (^block)(RSCrashReporterBreadcrumb *) = ^BOOL(RSCrashReporterBreadcrumb *breadcrumb) {
         return NO;
     };
-    BugsnagOnBreadcrumbRef callback = [self.config addOnBreadcrumbBlock:block];
+    RSCrashReporterOnBreadcrumbRef callback = [self.config addOnBreadcrumbBlock:block];
     XCTAssertEqual(1, [self.config.onBreadcrumbBlocks count]);
     [self.config removeOnBreadcrumb:callback];
     XCTAssertEqual(0, [self.config.onBreadcrumbBlocks count]);

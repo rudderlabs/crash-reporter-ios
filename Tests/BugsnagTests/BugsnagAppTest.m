@@ -1,33 +1,33 @@
 //
-//  BugsnagDeviceTest.m
+//  RSCrashReporterDeviceTest.m
 //  Tests
 //
 //  Created by Jamie Lynch on 01/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BSG_KSSystemInfo.h"
-#import "BugsnagApp+Private.h"
-#import "BugsnagAppWithState+Private.h"
-#import "BugsnagConfiguration+Private.h"
-#import "BugsnagTestConstants.h"
+#import "RSC_KSSystemInfo.h"
+#import "RSCrashReporterApp+Private.h"
+#import "RSCrashReporterAppWithState+Private.h"
+#import "RSCrashReporterConfiguration+Private.h"
+#import "RSCrashReporterTestConstants.h"
 
 #include <sys/sysctl.h>
 
-@interface BugsnagAppTest : XCTestCase
+@interface RSCrashReporterAppTest : XCTestCase
 @property NSDictionary *data;
-@property BugsnagConfiguration *config;
+@property RSCrashReporterConfiguration *config;
 @property NSString *codeBundleId;
 @end
 
-@implementation BugsnagAppTest
+@implementation RSCrashReporterAppTest
 
 - (void)setUp {
     [super setUp];
     // this mocks the structure of a KSCrashReport which is persisted to disk
-    // and used to populate the contents of BugsnagApp/BugsnagAppWithState
+    // and used to populate the contents of RSCrashReporterApp/RSCrashReporterAppWithState
     self.data = @{
             @"system": @{
                     @"application_stats": @{
@@ -49,7 +49,7 @@
             }
     };
 
-    self.config = [[BugsnagConfiguration alloc] initWithDictionaryRepresentation:self.data[@"user"][@"config"]];
+    self.config = [[RSCrashReporterConfiguration alloc] initWithDictionaryRepresentation:self.data[@"user"][@"config"]];
     self.config.appType = @"iOS";
     self.config.bundleVersion = nil;
     self.config.appVersion = @"3.14.159";
@@ -57,7 +57,7 @@
 }
 
 - (void)testApp {
-    BugsnagApp *app = [BugsnagApp appWithDictionary:self.data config:self.config codeBundleId:self.codeBundleId];
+    RSCrashReporterApp *app = [RSCrashReporterApp appWithDictionary:self.data config:self.config codeBundleId:self.codeBundleId];
 
     // verify stateless fields
     XCTAssertEqualObjects(app.binaryArch, @"arm64");
@@ -71,7 +71,7 @@
 }
 
 - (void)testAppWithState {
-    BugsnagAppWithState *app = [BugsnagAppWithState appWithDictionary:self.data config:self.config codeBundleId:self.codeBundleId];
+    RSCrashReporterAppWithState *app = [RSCrashReporterAppWithState appWithDictionary:self.data config:self.config codeBundleId:self.codeBundleId];
 
     // verify stateful fields
     XCTAssertEqualObjects(@7000, app.duration);
@@ -91,7 +91,7 @@
 
 - (void)testAppToDict {
     self.config.appVersion = nil; // Check that the system value is picked up
-    BugsnagApp *app = [BugsnagApp appWithDictionary:self.data config:self.config codeBundleId:self.codeBundleId];
+    RSCrashReporterApp *app = [RSCrashReporterApp appWithDictionary:self.data config:self.config codeBundleId:self.codeBundleId];
     NSDictionary *dict = [app toDict];
 
     // verify stateless fields
@@ -107,7 +107,7 @@
 
 - (void)testAppWithStateToDict {
     self.config.appVersion = nil; // Check that the system value is picked up
-    BugsnagAppWithState *app = [BugsnagAppWithState appWithDictionary:self.data config:self.config codeBundleId:self.codeBundleId];
+    RSCrashReporterAppWithState *app = [RSCrashReporterAppWithState appWithDictionary:self.data config:self.config codeBundleId:self.codeBundleId];
     NSDictionary *dict = [app toDict];
 
     // verify stateful fields
@@ -140,7 +140,7 @@
             @"type": @"iOS",
             @"version": @"5.6.3",
     };
-    BugsnagAppWithState *app = [BugsnagAppWithState appFromJson:json];
+    RSCrashReporterAppWithState *app = [RSCrashReporterAppWithState appFromJson:json];
     XCTAssertNotNil(app);
 
     // verify stateful fields
@@ -162,29 +162,29 @@
 - (void)testAppVersionPrecedence {
     // default to system.CFBundleShortVersionString
     self.config.appVersion = nil;
-    BugsnagAppWithState *app = [BugsnagAppWithState appWithDictionary:self.data config:self.config codeBundleId:self.codeBundleId];
+    RSCrashReporterAppWithState *app = [RSCrashReporterAppWithState appWithDictionary:self.data config:self.config codeBundleId:self.codeBundleId];
     XCTAssertEqualObjects(@"5.6.3", app.version);
 
     // 2nd precedence is config.appVersion
     self.config.appVersion = @"4.2.6";
-    app = [BugsnagAppWithState appWithDictionary:self.data config:self.config codeBundleId:self.codeBundleId];
+    app = [RSCrashReporterAppWithState appWithDictionary:self.data config:self.config codeBundleId:self.codeBundleId];
     XCTAssertEqualObjects(@"4.2.6", app.version);
 }
 
 - (void)testBundleVersionPrecedence {
     // default to system.CFBundleVersion
     self.config.bundleVersion = nil;
-    BugsnagAppWithState *app = [BugsnagAppWithState appWithDictionary:self.data config:self.config codeBundleId:self.codeBundleId];
+    RSCrashReporterAppWithState *app = [RSCrashReporterAppWithState appWithDictionary:self.data config:self.config codeBundleId:self.codeBundleId];
     XCTAssertEqualObjects(@"1", app.bundleVersion);
 
     // 2nd precedence is config.bundleVersion
     self.config.bundleVersion = @"4.2.6";
-    app = [BugsnagAppWithState appWithDictionary:self.data config:self.config codeBundleId:self.codeBundleId];
+    app = [RSCrashReporterAppWithState appWithDictionary:self.data config:self.config codeBundleId:self.codeBundleId];
     XCTAssertEqualObjects(@"4.2.6", app.bundleVersion);
 }
 
-- (void)testBSGParseAppMetadata {
-    NSDictionary *metadata = BSGParseAppMetadata(@{@"system": [BSG_KSSystemInfo systemInfo]});
+- (void)testRSCParseAppMetadata {
+    NSDictionary *metadata = RSCParseAppMetadata(@{@"system": [RSC_KSSystemInfo systemInfo]});
     int proc_translated = 0;
     size_t size = sizeof(proc_translated);
     if (!sysctlbyname("sysctl.proc_translated", &proc_translated, &size, NULL, 0) && proc_translated) {

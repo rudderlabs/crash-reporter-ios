@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2016 Bugsnag, Inc. All rights reserved.
+//  Copyright (c) 2016 RSCrashReporter, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,24 +19,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "BugsnagCollections.h"
+#import "RSCrashReporterCollections.h"
 
-#import "BSG_RFC3339DateTool.h"
-#import "BSGJSONSerialization.h"
+#import "RSC_RFC3339DateTool.h"
+#import "RSCJSONSerialization.h"
 
 // MARK: NSArray
 
-NSArray * BSGArrayWithObject(id _Nullable object) {
+NSArray * RSCArrayWithObject(id _Nullable object) {
     return object ? @[(id _Nonnull)object] : @[];
 }
 
-void BSGArrayAddIfNonnull(NSMutableArray *array, id _Nullable object) {
+void RSCArrayAddIfNonnull(NSMutableArray *array, id _Nullable object) {
     if (object) {
         [array addObject:(id _Nonnull)object];
     }
 }
 
-NSArray * BSGArrayMap(NSArray *array, id _Nullable (^ transform)(id)) {
+NSArray * RSCArrayMap(NSArray *array, id _Nullable (^ transform)(id)) {
     NSMutableArray *mappedArray = [NSMutableArray array];
     for (id object in array) {
         id mapped = transform(object);
@@ -47,7 +47,7 @@ NSArray * BSGArrayMap(NSArray *array, id _Nullable (^ transform)(id)) {
     return mappedArray;
 }
 
-NSArray * BSGArraySubarrayFromIndex(NSArray *array, NSUInteger index) {
+NSArray * RSCArraySubarrayFromIndex(NSArray *array, NSUInteger index) {
     if (index >= array.count) {
         return @[];
     }
@@ -56,11 +56,11 @@ NSArray * BSGArraySubarrayFromIndex(NSArray *array, NSUInteger index) {
 
 // MARK: - NSDictionary
 
-NSDictionary * BSGDictionaryWithKeyAndObject(NSString *key, id _Nullable object) {
+NSDictionary * RSCDictionaryWithKeyAndObject(NSString *key, id _Nullable object) {
     return object ? @{key: (id _Nonnull)object} : @{};
 }
 
-NSDictionary *BSGDictMerge(NSDictionary *source, NSDictionary *destination) {
+NSDictionary *RSCDictMerge(NSDictionary *source, NSDictionary *destination) {
     if ([destination count] == 0) {
         return source;
     }
@@ -74,18 +74,18 @@ NSDictionary *BSGDictMerge(NSDictionary *source, NSDictionary *destination) {
         id dstEntry = destination[key];
         if ([dstEntry isKindOfClass:[NSDictionary class]] &&
             [srcEntry isKindOfClass:[NSDictionary class]]) {
-            srcEntry = BSGDictMerge(srcEntry, dstEntry);
+            srcEntry = RSCDictMerge(srcEntry, dstEntry);
         }
         dict[key] = srcEntry;
     }
     return dict;
 }
 
-NSDictionary * BSGJSONDictionary(NSDictionary *dictionary) {
+NSDictionary * RSCJSONDictionary(NSDictionary *dictionary) {
     if (!dictionary) {
         return nil;
     }
-    if (BSGJSONDictionaryIsValid(dictionary, nil)) {
+    if (RSCJSONDictionaryIsValid(dictionary, nil)) {
         return dictionary;
     }
     NSMutableDictionary *json = [NSMutableDictionary dictionary];
@@ -94,10 +94,10 @@ NSDictionary * BSGJSONDictionary(NSDictionary *dictionary) {
             continue;
         }
         const id value = dictionary[key];
-        if (BSGJSONDictionaryIsValid(@{key: value}, nil)) {
+        if (RSCJSONDictionaryIsValid(@{key: value}, nil)) {
             json[key] = value;
         } else if ([value isKindOfClass:[NSDictionary class]]) {
-            json[key] = BSGJSONDictionary(value);
+            json[key] = RSCJSONDictionary(value);
         } else {
             json[key] = ((NSObject *)value).description;
         }
@@ -107,7 +107,7 @@ NSDictionary * BSGJSONDictionary(NSDictionary *dictionary) {
 
 // MARK: - NSSet
 
-void BSGSetAddIfNonnull(NSMutableSet *set, id _Nullable object) {
+void RSCSetAddIfNonnull(NSMutableSet *set, id _Nullable object) {
     if (object) {
         [set addObject:(id _Nonnull)object];
     }
@@ -115,44 +115,44 @@ void BSGSetAddIfNonnull(NSMutableSet *set, id _Nullable object) {
 
 // MARK: - Deserialization
 
-NSDictionary * _Nullable BSGDeserializeDict(id _Nullable rawValue) {
+NSDictionary * _Nullable RSCDeserializeDict(id _Nullable rawValue) {
     if (![rawValue isKindOfClass:[NSDictionary class]]) {
         return nil;
     }
     return (NSDictionary *)rawValue;
 }
 
-id _Nullable BSGDeserializeObject(id _Nullable rawValue, id _Nullable (^ deserializer)(NSDictionary * _Nonnull dict)) {
+id _Nullable RSCDeserializeObject(id _Nullable rawValue, id _Nullable (^ deserializer)(NSDictionary * _Nonnull dict)) {
     if (![rawValue isKindOfClass:[NSDictionary class]]) {
         return nil;
     }
     return deserializer((NSDictionary *)rawValue);
 }
 
-id _Nullable BSGDeserializeArrayOfObjects(id _Nullable rawValue, id _Nullable (^ deserializer)(NSDictionary * _Nonnull dict)) {
+id _Nullable RSCDeserializeArrayOfObjects(id _Nullable rawValue, id _Nullable (^ deserializer)(NSDictionary * _Nonnull dict)) {
     if (![rawValue isKindOfClass:[NSArray class]]) {
         return nil;
     }
-    return BSGArrayMap((NSArray *)rawValue, ^id _Nullable(id _Nonnull value) {
-        return BSGDeserializeObject(value, deserializer);
+    return RSCArrayMap((NSArray *)rawValue, ^id _Nullable(id _Nonnull value) {
+        return RSCDeserializeObject(value, deserializer);
     });
 }
 
-NSString * _Nullable BSGDeserializeString(id _Nullable rawValue) {
+NSString * _Nullable RSCDeserializeString(id _Nullable rawValue) {
     if (![rawValue isKindOfClass:[NSString class]]) {
         return nil;
     }
     return (NSString *)rawValue;
 }
 
-NSDate * _Nullable BSGDeserializeDate(id _Nullable rawValue) {
+NSDate * _Nullable RSCDeserializeDate(id _Nullable rawValue) {
     if (![rawValue isKindOfClass:[NSString class]]) {
         return nil;
     }
-    return [BSG_RFC3339DateTool dateFromString:(NSString *)rawValue];
+    return [RSC_RFC3339DateTool dateFromString:(NSString *)rawValue];
 }
 
-NSNumber * _Nullable BSGDeserializeNumber(id  _Nullable rawValue) {
+NSNumber * _Nullable RSCDeserializeNumber(id  _Nullable rawValue) {
     if (![rawValue isKindOfClass:[NSNumber class]]) {
         return nil;
     }

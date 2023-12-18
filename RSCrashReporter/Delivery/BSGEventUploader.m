@@ -1,30 +1,30 @@
 //
-//  BSGEventUploader.m
-//  Bugsnag
+//  RSCEventUploader.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 17/02/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGEventUploader.h"
+#import "RSCEventUploader.h"
 
-#import "BSGEventUploadKSCrashReportOperation.h"
-#import "BSGEventUploadObjectOperation.h"
-#import "BSGFileLocations.h"
-#import "BSGInternalErrorReporter.h"
-#import "BSGJSONSerialization.h"
-#import "BSGUtils.h"
-#import "BugsnagConfiguration.h"
-#import "BugsnagEvent+Private.h"
-#import "BugsnagInternals.h"
-#import "BugsnagLogger.h"
+#import "RSCEventUploadKSCrashReportOperation.h"
+#import "RSCEventUploadObjectOperation.h"
+#import "RSCFileLocations.h"
+#import "RSCInternalErrorReporter.h"
+#import "RSCJSONSerialization.h"
+#import "RSCUtils.h"
+#import "RSCrashReporterConfiguration.h"
+#import "RSCrashReporterEvent+Private.h"
+#import "RSCrashReporterInternals.h"
+#import "RSCrashReporterLogger.h"
 
 
 static NSString * const CrashReportPrefix = @"CrashReport-";
 static NSString * const RecrashReportPrefix = @"RecrashReport-";
 
 
-@interface BSGEventUploader () <BSGEventUploadOperationDelegate>
+@interface RSCEventUploader () <RSCEventUploadOperationDelegate>
 
 @property (readonly, nonatomic) NSString *eventsDirectory;
 
@@ -41,18 +41,18 @@ static NSString * const RecrashReportPrefix = @"RecrashReport-";
 
 // MARK: -
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BSGEventUploader
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCEventUploader
 
 @synthesize configuration = _configuration;
 @synthesize notifier = _notifier;
 
-- (instancetype)initWithConfiguration:(BugsnagConfiguration *)configuration notifier:(BugsnagNotifier *)notifier delegate:(id<RSCrashReporterNotifyDelegate> _Nullable) delegate {
+- (instancetype)initWithConfiguration:(RSCrashReporterConfiguration *)configuration notifier:(RSCrashReporterNotifier *)notifier delegate:(id<RSCrashReporterNotifyDelegate> _Nullable) delegate {
     if ((self = [super init])) {
         _configuration = configuration;
         _delegate = delegate;
-        _eventsDirectory = [BSGFileLocations current].events;
-        _kscrashReportsDirectory = [BSGFileLocations current].kscrashReports;
+        _eventsDirectory = [RSCFileLocations current].events;
+        _kscrashReportsDirectory = [RSCFileLocations current].kscrashReports;
         _notifier = notifier;
         _scanQueue = [[NSOperationQueue alloc] init];
         _scanQueue.maxConcurrentOperationCount = 1;
@@ -71,27 +71,27 @@ BSG_OBJC_DIRECT_MEMBERS
 
 // MARK: - Public API
 
-- (void)storeEvent:(BugsnagEvent *)event {
+- (void)storeEvent:(RSCrashReporterEvent *)event {
     [event symbolicateIfNeeded];
     [self storeEventPayload:[event toJsonWithRedactedKeys:self.configuration.redactedKeys]];
 }
 
-- (void)uploadEvent:(BugsnagEvent *)event completionHandler:(nullable void (^)(void))completionHandler {
+- (void)uploadEvent:(RSCrashReporterEvent *)event completionHandler:(nullable void (^)(void))completionHandler {
     NSUInteger operationCount = self.uploadQueue.operationCount;
     if (operationCount >= self.configuration.maxPersistedEvents) {
-        bsg_log_warn(@"Dropping notification, %lu outstanding requests", (unsigned long)operationCount);
+        rsc_log_warn(@"Dropping notification, %lu outstanding requests", (unsigned long)operationCount);
         if (completionHandler) {
             completionHandler();
         }
         return;
     }
-    BSGEventUploadObjectOperation *operation = [[BSGEventUploadObjectOperation alloc] initWithEvent:event delegate:self];
+    RSCEventUploadObjectOperation *operation = [[RSCEventUploadObjectOperation alloc] initWithEvent:event delegate:self];
     operation.completionBlock = completionHandler;
     [self.uploadQueue addOperation:operation];
 }
 
 - (void)uploadKSCrashReportWithFile:(NSString *)file completionHandler:(nullable void (^)(void))completionHandler {
-    BSGEventUploadKSCrashReportOperation *operation = [[BSGEventUploadKSCrashReportOperation alloc] initWithFile:file delegate:self];
+    RSCEventUploadKSCrashReportOperation *operation = [[RSCEventUploadKSCrashReportOperation alloc] initWithFile:file delegate:self];
     operation.completionBlock = completionHandler;
     [self.uploadQueue addOperation:operation];
 }
@@ -101,13 +101,13 @@ BSG_OBJC_DIRECT_MEMBERS
         // Prevent too many scan operations being scheduled
         return;
     }
-    bsg_log_debug(@"Will scan stored events");
+    rsc_log_debug(@"Will scan stored events");
     [self.scanQueue addOperationWithBlock:^{
         [self processRecrashReports];
         NSMutableArray<NSString *> *sortedFiles = [self sortedEventFiles];
         [self deleteExcessFiles:sortedFiles];
-        NSArray<BSGEventUploadFileOperation *> *operations = [self uploadOperationsWithFiles:sortedFiles];
-        bsg_log_debug(@"Uploading %lu stored events", (unsigned long)operations.count);
+        NSArray<RSCEventUploadFileOperation *> *operations = [self uploadOperationsWithFiles:sortedFiles];
+        rsc_log_debug(@"Uploading %lu stored events", (unsigned long)operations.count);
         [self.uploadQueue addOperations:operations waitUntilFinished:NO];
     }];
 }
@@ -122,9 +122,9 @@ BSG_OBJC_DIRECT_MEMBERS
 - (void)uploadLatestStoredEvent:(void (^)(void))completionHandler {
     [self processRecrashReports];
     NSString *latestFile = [self sortedEventFiles].lastObject;
-    BSGEventUploadFileOperation *operation = latestFile ? [self uploadOperationsWithFiles:@[latestFile]].lastObject : nil;
+    RSCEventUploadFileOperation *operation = latestFile ? [self uploadOperationsWithFiles:@[latestFile]].lastObject : nil;
     if (!operation) {
-        bsg_log_warn(@"Could not find a stored event to upload");
+        rsc_log_warn(@"Could not find a stored event to upload");
         completionHandler();
         return;
     }
@@ -141,7 +141,7 @@ BSG_OBJC_DIRECT_MEMBERS
     
     NSArray<NSString *> *entries = [fileManager contentsOfDirectoryAtPath:directory error:&error];
     if (!entries) {
-        bsg_log_err(@"%@", error);
+        rsc_log_err(@"%@", error);
         return;
     }
     
@@ -156,25 +156,25 @@ BSG_OBJC_DIRECT_MEMBERS
         
         NSString *path = [directory stringByAppendingPathComponent:filename];
         if (!didReportRecrash) {
-            NSDictionary *recrashReport = BSGJSONDictionaryFromFile(path, 0, &error);
+            NSDictionary *recrashReport = RSCJSONDictionaryFromFile(path, 0, &error);
             if (recrashReport) {
-                bsg_log_debug(@"Reporting %@", filename);
-                [BSGInternalErrorReporter.sharedInstance reportRecrash:recrashReport];
+                rsc_log_debug(@"Reporting %@", filename);
+                [RSCInternalErrorReporter.sharedInstance reportRecrash:recrashReport];
                 didReportRecrash = YES;
             }
         }
-        bsg_log_debug(@"Deleting %@", filename);
+        rsc_log_debug(@"Deleting %@", filename);
         if (![fileManager removeItemAtPath:path error:&error]) {
-            bsg_log_err(@"%@", error);
+            rsc_log_err(@"%@", error);
         }
         
         // Delete the report to prevent reporting a "JSON parsing error"
         NSString *crashReportFilename = [filename stringByReplacingOccurrencesOfString:RecrashReportPrefix withString:CrashReportPrefix];
         NSString *crashReportPath = [directory stringByAppendingPathComponent:crashReportFilename];
-        if (!BSGJSONDictionaryFromFile(crashReportPath, 0, nil)) {
-            bsg_log_info(@"Deleting unparsable %@", crashReportFilename);
+        if (!RSCJSONDictionaryFromFile(crashReportPath, 0, nil)) {
+            rsc_log_info(@"Deleting unparsable %@", crashReportFilename);
             if (![fileManager removeItemAtPath:crashReportPath error:&error]) {
-                bsg_log_err(@"%@", error);
+                rsc_log_err(@"%@", error);
             }
         }
     }
@@ -190,7 +190,7 @@ BSG_OBJC_DIRECT_MEMBERS
         NSError *error = nil;
         NSArray<NSString *> *entries = [NSFileManager.defaultManager contentsOfDirectoryAtPath:directory error:&error];
         if (!entries) {
-            bsg_log_err(@"%@", error);
+            rsc_log_err(@"%@", error);
             continue;
         }
         
@@ -223,22 +223,22 @@ BSG_OBJC_DIRECT_MEMBERS
         NSString *file = sortedEventFiles[0];
         NSError *error = nil;
         if ([NSFileManager.defaultManager removeItemAtPath:file error:&error]) {
-            bsg_log_debug(@"Deleted %@ to comply with maxPersistedEvents", file);
+            rsc_log_debug(@"Deleted %@ to comply with maxPersistedEvents", file);
         } else {
-            bsg_log_err(@"Error while deleting file: %@", error);
+            rsc_log_err(@"Error while deleting file: %@", error);
         }
         [sortedEventFiles removeObject:file];
     }
 }
 
 /// Creates an upload operation for each file that is not currently being uploaded
-- (NSArray<BSGEventUploadFileOperation *> *)uploadOperationsWithFiles:(NSArray<NSString *> *)files {
-    NSMutableArray<BSGEventUploadFileOperation *> *operations = [NSMutableArray array];
+- (NSArray<RSCEventUploadFileOperation *> *)uploadOperationsWithFiles:(NSArray<NSString *> *)files {
+    NSMutableArray<RSCEventUploadFileOperation *> *operations = [NSMutableArray array];
     
     NSMutableSet<NSString *> *currentFiles = [NSMutableSet set];
     for (id operation in self.uploadQueue.operations) {
-        if ([operation isKindOfClass:[BSGEventUploadFileOperation class]]) {
-            [currentFiles addObject:((BSGEventUploadFileOperation *)operation).file];
+        if ([operation isKindOfClass:[RSCEventUploadFileOperation class]]) {
+            [currentFiles addObject:((RSCEventUploadFileOperation *)operation).file];
         }
     }
     
@@ -248,30 +248,30 @@ BSG_OBJC_DIRECT_MEMBERS
         }
         NSString *directory = file.stringByDeletingLastPathComponent;
         if ([directory isEqualToString:self.kscrashReportsDirectory]) {
-            [operations addObject:[[BSGEventUploadKSCrashReportOperation alloc] initWithFile:file delegate:self]];
+            [operations addObject:[[RSCEventUploadKSCrashReportOperation alloc] initWithFile:file delegate:self]];
         } else {
-            [operations addObject:[[BSGEventUploadFileOperation alloc] initWithFile:file delegate:self]];
+            [operations addObject:[[RSCEventUploadFileOperation alloc] initWithFile:file delegate:self]];
         }
     }
     
     return operations;
 }
 
-// MARK: - BSGEventUploadOperationDelegate
+// MARK: - RSCEventUploadOperationDelegate
 
 - (void)storeEventPayload:(NSDictionary *)eventPayload {
-    dispatch_sync(BSGGetFileSystemQueue(), ^{
+    dispatch_sync(RSCGetFileSystemQueue(), ^{
         NSString *file = [[self.eventsDirectory stringByAppendingPathComponent:[NSUUID UUID].UUIDString] stringByAppendingPathExtension:@"json"];
         NSError *error = nil;
-        if (!BSGJSONWriteToFileAtomically(eventPayload, file, &error)) {
-            bsg_log_err(@"Error encountered while saving event payload for retry: %@", error);
+        if (!RSCJSONWriteToFileAtomically(eventPayload, file, &error)) {
+            rsc_log_err(@"Error encountered while saving event payload for retry: %@", error);
             return;
         }
         [self deleteExcessFiles:[self sortedEventFiles]];
     });
 }
 
-- (void)notifyCrashEvent:(BugsnagEvent *_Nullable)event withRequestPayload:(NSDictionary *_Nullable)requestPayload {
+- (void)notifyCrashEvent:(RSCrashReporterEvent *_Nullable)event withRequestPayload:(NSDictionary *_Nullable)requestPayload {
     [self.delegate notifyCrashEvent:event withRequestPayload:requestPayload];
 }
 

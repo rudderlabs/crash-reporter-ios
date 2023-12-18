@@ -1,26 +1,26 @@
 #import <XCTest/XCTest.h>
 
-#import "BSGFileLocations.h"
-#import "BSGRunContext.h"
-#import "BSG_KSCrashState.h"
-#import "BSG_KSSystemInfo.h"
+#import "RSCFileLocations.h"
+#import "RSCRunContext.h"
+#import "RSC_KSCrashState.h"
+#import "RSC_KSSystemInfo.h"
 #import "RSCrashReporter.h"
-#import "BugsnagClient+Private.h"
-#import "BugsnagConfiguration.h"
-#import "BugsnagSystemState.h"
-#import "BugsnagTestConstants.h"
+#import "RSCrashReporterClient+Private.h"
+#import "RSCrashReporterConfiguration.h"
+#import "RSCrashReporterSystemState.h"
+#import "RSCrashReporterTestConstants.h"
 
-@interface BSGOutOfMemoryTests : XCTestCase
+@interface RSCOutOfMemoryTests : XCTestCase
 @end
 
-@implementation BSGOutOfMemoryTests
+@implementation RSCOutOfMemoryTests
 
-- (BugsnagClient *)newClient {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+- (RSCrashReporterClient *)newClient {
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
 //    config.autoDetectErrors = NO;
     config.releaseStage = @"MagicalTestingTime";
 
-    BugsnagClient *client = [[BugsnagClient alloc] initWithConfiguration:config delegate:nil];
+    RSCrashReporterClient *client = [[RSCrashReporterClient alloc] initWithConfiguration:config delegate:nil];
     [client start];
     return client;
 }
@@ -29,8 +29,8 @@
  * Test that the generated OOM report values exist and are correct (where that can be tested)
  */
 - (void)testOOMFieldsSetCorrectly {
-    BugsnagClient *client = [self newClient];
-    BugsnagSystemState *systemState = [client systemState];
+    RSCrashReporterClient *client = [self newClient];
+    RSCrashReporterSystemState *systemState = [client systemState];
 
     client.codeBundleId = @"codeBundleIdHere";
     // The update happens on a bg thread, so let it run.
@@ -60,7 +60,7 @@
 }
 
 -(void)testBadJSONData {
-    NSString *stateFilePath = [BSGFileLocations current].systemState;
+    NSString *stateFilePath = [RSCFileLocations current].systemState;
     NSError* error;
     [@"{1=\"a\"" writeToFile:stateFilePath atomically:YES encoding:NSUTF8StringEncoding error:&error];
     XCTAssertNil(error);
@@ -70,12 +70,12 @@
 }
 
 - (void)testLastLaunchTerminatedUnexpectedly {
-    if (!bsg_runContext) {
-        BSGRunContextInit(BSGFileLocations.current.runContext);
+    if (!rsc_runContext) {
+        RSCRunContextInit(RSCFileLocations.current.runContext);
     }
-    const struct BSGRunContext *oldContext = bsg_lastRunContext;
-    struct BSGRunContext lastRunContext = *bsg_runContext;
-    bsg_lastRunContext = &lastRunContext;
+    const struct RSCRunContext *oldContext = rsc_lastRunContext;
+    struct RSCRunContext lastRunContext = *rsc_runContext;
+    rsc_lastRunContext = &lastRunContext;
 
     // Debugger active
     
@@ -83,25 +83,25 @@
     lastRunContext.isTerminating = true;
     lastRunContext.isForeground = true;
     lastRunContext.isActive = true;
-    XCTAssertFalse(BSGRunContextWasKilled());
+    XCTAssertFalse(RSCRunContextWasKilled());
 
     lastRunContext.isDebuggerAttached = true;
     lastRunContext.isTerminating = true;
     lastRunContext.isForeground = false;
     lastRunContext.isActive = false;
-    XCTAssertFalse(BSGRunContextWasKilled());
+    XCTAssertFalse(RSCRunContextWasKilled());
 
     lastRunContext.isDebuggerAttached = true;
     lastRunContext.isTerminating = false;
     lastRunContext.isForeground = true;
     lastRunContext.isActive = true;
-    XCTAssertFalse(BSGRunContextWasKilled());
+    XCTAssertFalse(RSCRunContextWasKilled());
 
     lastRunContext.isDebuggerAttached = true;
     lastRunContext.isTerminating = false;
     lastRunContext.isForeground = false;
     lastRunContext.isActive = false;
-    XCTAssertFalse(BSGRunContextWasKilled());
+    XCTAssertFalse(RSCRunContextWasKilled());
 
     // Debugger inactive
 
@@ -109,41 +109,41 @@
     lastRunContext.isTerminating = true;
     lastRunContext.isForeground = true;
     lastRunContext.isActive = true;
-    XCTAssertFalse(BSGRunContextWasKilled());
+    XCTAssertFalse(RSCRunContextWasKilled());
 
     lastRunContext.isDebuggerAttached = false;
     lastRunContext.isTerminating = true;
     lastRunContext.isForeground = false;
     lastRunContext.isActive = false;
-    XCTAssertFalse(BSGRunContextWasKilled());
+    XCTAssertFalse(RSCRunContextWasKilled());
 
     lastRunContext.isDebuggerAttached = false;
     lastRunContext.isTerminating = false;
     lastRunContext.isForeground = true;
     lastRunContext.isActive = false;
-    XCTAssertFalse(BSGRunContextWasKilled());
+    XCTAssertFalse(RSCRunContextWasKilled());
 
     lastRunContext.isDebuggerAttached = false;
     lastRunContext.isTerminating = false;
     lastRunContext.isForeground = true;
     lastRunContext.isActive = true;
-    XCTAssertTrue(BSGRunContextWasKilled());
+    XCTAssertTrue(RSCRunContextWasKilled());
     
     uuid_generate(lastRunContext.machoUUID);
-    XCTAssertFalse(BSGRunContextWasKilled());
-    uuid_copy(lastRunContext.machoUUID, bsg_runContext->machoUUID);
+    XCTAssertFalse(RSCRunContextWasKilled());
+    uuid_copy(lastRunContext.machoUUID, rsc_runContext->machoUUID);
     
     lastRunContext.bootTime = 0;
-    XCTAssertFalse(BSGRunContextWasKilled());
-    lastRunContext.bootTime = bsg_runContext->bootTime;
+    XCTAssertFalse(RSCRunContextWasKilled());
+    lastRunContext.bootTime = rsc_runContext->bootTime;
 
     lastRunContext.isDebuggerAttached = false;
     lastRunContext.isTerminating = false;
     lastRunContext.isForeground = false;
     lastRunContext.isActive = false;
-    XCTAssertFalse(BSGRunContextWasKilled());
+    XCTAssertFalse(RSCRunContextWasKilled());
     
-    bsg_lastRunContext = oldContext;
+    rsc_lastRunContext = oldContext;
 }
 
 @end

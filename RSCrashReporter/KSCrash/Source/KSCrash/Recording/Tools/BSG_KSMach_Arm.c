@@ -26,74 +26,74 @@
 
 #if defined(__arm__)
 
-#include "BSG_KSMach.h"
-#include "BSGDefines.h"
+#include "RSC_KSMach.h"
+#include "RSCDefines.h"
 
-//#define BSG_KSLogger_LocalLevel TRACE
-#include "BSG_KSLogger.h"
+//#define RSC_KSLogger_LocalLevel TRACE
+#include "RSC_KSLogger.h"
 
-static const char *bsg_g_registerNames[] = {
+static const char *rsc_g_registerNames[] = {
     "r0", "r1",  "r2",  "r3", "r4", "r5", "r6", "r7",  "r8",
     "r9", "r10", "r11", "ip", "sp", "lr", "pc", "cpsr"};
-static const int bsg_g_registerNamesCount =
-    sizeof(bsg_g_registerNames) / sizeof(*bsg_g_registerNames);
+static const int rsc_g_registerNamesCount =
+    sizeof(rsc_g_registerNames) / sizeof(*rsc_g_registerNames);
 
-static const char *bsg_g_exceptionRegisterNames[] = {"exception", "fsr", "far"};
-static const int bsg_g_exceptionRegisterNamesCount =
-    sizeof(bsg_g_exceptionRegisterNames) /
-    sizeof(*bsg_g_exceptionRegisterNames);
+static const char *rsc_g_exceptionRegisterNames[] = {"exception", "fsr", "far"};
+static const int rsc_g_exceptionRegisterNamesCount =
+    sizeof(rsc_g_exceptionRegisterNames) /
+    sizeof(*rsc_g_exceptionRegisterNames);
 
 uintptr_t
-bsg_ksmachframePointer(const BSG_STRUCT_MCONTEXT_L *const machineContext) {
+rsc_ksmachframePointer(const RSC_STRUCT_MCONTEXT_L *const machineContext) {
     return machineContext->__ss.__r[7];
 }
 
 uintptr_t
-bsg_ksmachstackPointer(const BSG_STRUCT_MCONTEXT_L *const machineContext) {
+rsc_ksmachstackPointer(const RSC_STRUCT_MCONTEXT_L *const machineContext) {
     return machineContext->__ss.__sp;
 }
 
-uintptr_t bsg_ksmachinstructionAddress(
-    const BSG_STRUCT_MCONTEXT_L *const machineContext) {
+uintptr_t rsc_ksmachinstructionAddress(
+    const RSC_STRUCT_MCONTEXT_L *const machineContext) {
     return machineContext->__ss.__pc;
 }
 
 uintptr_t
-bsg_ksmachlinkRegister(const BSG_STRUCT_MCONTEXT_L *const machineContext) {
+rsc_ksmachlinkRegister(const RSC_STRUCT_MCONTEXT_L *const machineContext) {
     return machineContext->__ss.__lr;
 }
 
-#if BSG_HAVE_MACH_THREADS
-bool bsg_ksmachthreadState(const thread_t thread,
-                           BSG_STRUCT_MCONTEXT_L *const machineContext) {
-    return bsg_ksmachfillState(thread, (thread_state_t)&machineContext->__ss,
+#if RSC_HAVE_MACH_THREADS
+bool rsc_ksmachthreadState(const thread_t thread,
+                           RSC_STRUCT_MCONTEXT_L *const machineContext) {
+    return rsc_ksmachfillState(thread, (thread_state_t)&machineContext->__ss,
                                ARM_THREAD_STATE, ARM_THREAD_STATE_COUNT);
 }
 
-bool bsg_ksmachfloatState(const thread_t thread,
-                          BSG_STRUCT_MCONTEXT_L *const machineContext) {
-    return bsg_ksmachfillState(thread, (thread_state_t)&machineContext->__fs,
+bool rsc_ksmachfloatState(const thread_t thread,
+                          RSC_STRUCT_MCONTEXT_L *const machineContext) {
+    return rsc_ksmachfillState(thread, (thread_state_t)&machineContext->__fs,
                                ARM_VFP_STATE, ARM_VFP_STATE_COUNT);
 }
 
-bool bsg_ksmachexceptionState(const thread_t thread,
-                              BSG_STRUCT_MCONTEXT_L *const machineContext) {
-    return bsg_ksmachfillState(thread, (thread_state_t)&machineContext->__es,
+bool rsc_ksmachexceptionState(const thread_t thread,
+                              RSC_STRUCT_MCONTEXT_L *const machineContext) {
+    return rsc_ksmachfillState(thread, (thread_state_t)&machineContext->__es,
                                ARM_EXCEPTION_STATE, ARM_EXCEPTION_STATE_COUNT);
 }
 #endif
 
-int bsg_ksmachnumRegisters(void) { return bsg_g_registerNamesCount; }
+int rsc_ksmachnumRegisters(void) { return rsc_g_registerNamesCount; }
 
-const char *bsg_ksmachregisterName(const int regNumber) {
-    if (regNumber < bsg_ksmachnumRegisters()) {
-        return bsg_g_registerNames[regNumber];
+const char *rsc_ksmachregisterName(const int regNumber) {
+    if (regNumber < rsc_ksmachnumRegisters()) {
+        return rsc_g_registerNames[regNumber];
     }
     return NULL;
 }
 
 uint64_t
-bsg_ksmachregisterValue(const BSG_STRUCT_MCONTEXT_L *const machineContext,
+rsc_ksmachregisterValue(const RSC_STRUCT_MCONTEXT_L *const machineContext,
                         const int regNumber) {
     if (regNumber <= 12) {
         return machineContext->__ss.__r[regNumber];
@@ -110,24 +110,24 @@ bsg_ksmachregisterValue(const BSG_STRUCT_MCONTEXT_L *const machineContext,
         return machineContext->__ss.__cpsr;
     }
 
-    BSG_KSLOG_ERROR("Invalid register number: %d", regNumber);
+    RSC_KSLOG_ERROR("Invalid register number: %d", regNumber);
     return 0;
 }
 
-int bsg_ksmachnumExceptionRegisters(void) {
-    return bsg_g_exceptionRegisterNamesCount;
+int rsc_ksmachnumExceptionRegisters(void) {
+    return rsc_g_exceptionRegisterNamesCount;
 }
 
-const char *bsg_ksmachexceptionRegisterName(const int regNumber) {
-    if (regNumber < bsg_ksmachnumExceptionRegisters()) {
-        return bsg_g_exceptionRegisterNames[regNumber];
+const char *rsc_ksmachexceptionRegisterName(const int regNumber) {
+    if (regNumber < rsc_ksmachnumExceptionRegisters()) {
+        return rsc_g_exceptionRegisterNames[regNumber];
     }
-    BSG_KSLOG_ERROR("Invalid register number: %d", regNumber);
+    RSC_KSLOG_ERROR("Invalid register number: %d", regNumber);
     return NULL;
 }
 
-uint64_t bsg_ksmachexceptionRegisterValue(
-    const BSG_STRUCT_MCONTEXT_L *const machineContext, const int regNumber) {
+uint64_t rsc_ksmachexceptionRegisterValue(
+    const RSC_STRUCT_MCONTEXT_L *const machineContext, const int regNumber) {
     switch (regNumber) {
     case 0:
         return machineContext->__es.__exception;
@@ -137,15 +137,15 @@ uint64_t bsg_ksmachexceptionRegisterValue(
         return machineContext->__es.__far;
     }
 
-    BSG_KSLOG_ERROR("Invalid register number: %d", regNumber);
+    RSC_KSLOG_ERROR("Invalid register number: %d", regNumber);
     return 0;
 }
 
 uintptr_t
-bsg_ksmachfaultAddress(const BSG_STRUCT_MCONTEXT_L *const machineContext) {
+rsc_ksmachfaultAddress(const RSC_STRUCT_MCONTEXT_L *const machineContext) {
     return machineContext->__es.__far;
 }
 
-int bsg_ksmachstackGrowDirection(void) { return -1; }
+int rsc_ksmachstackGrowDirection(void) { return -1; }
 
 #endif

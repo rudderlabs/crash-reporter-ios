@@ -1,5 +1,5 @@
 //
-//  BSG_KSSystemInfo.h
+//  RSC_KSSystemInfo.h
 //
 //  Created by Karl Stenerud on 2012-02-05.
 //
@@ -24,39 +24,39 @@
 // THE SOFTWARE.
 //
 
-#import <RSCrashReporter/BugsnagDefines.h>
+#import <RSCrashReporter/RSCrashReporterDefines.h>
 #import <Foundation/Foundation.h>
 
-#import "BSGDefines.h"
+#import "RSCDefines.h"
 
-#define BSG_KSSystemField_AppUUID "app_uuid"
-#define BSG_KSSystemField_BinaryArch "binary_arch"
-#define BSG_KSSystemField_BundleID "CFBundleIdentifier"
-#define BSG_KSSystemField_BundleName "CFBundleName"
-#define BSG_KSSystemField_BundleExecutable "CFBundleExecutable"
-#define BSG_KSSystemField_BundleShortVersion "CFBundleShortVersionString"
-#define BSG_KSSystemField_BundleVersion "CFBundleVersion"
-#define BSG_KSSystemField_CPUArch "cpu_arch"
-#define BSG_KSSystemField_DeviceAppHash "device_app_hash"
-#define BSG_KSSystemField_Disk "disk"
-#define BSG_KSSystemField_Jailbroken "jailbroken"
-#define BSG_KSSystemField_Machine "machine"
-#define BSG_KSSystemField_Memory "memory"
-#define BSG_KSSystemField_Model "model"
-#define BSG_KSSystemField_OSVersion "os_version"
-#define BSG_KSSystemField_Size "size"
-#define BSG_KSSystemField_SystemName "system_name"
-#define BSG_KSSystemField_SystemVersion "system_version"
-#define BSG_KSSystemField_ClangVersion "clang_version"
-#define BSG_KSSystemField_TimeZone "time_zone"
-#define BSG_KSSystemField_Translated "proc_translated"
-#define BSG_KSSystemField_iOSSupportVersion "iOSSupportVersion"
+#define RSC_KSSystemField_AppUUID "app_uuid"
+#define RSC_KSSystemField_BinaryArch "binary_arch"
+#define RSC_KSSystemField_BundleID "CFBundleIdentifier"
+#define RSC_KSSystemField_BundleName "CFBundleName"
+#define RSC_KSSystemField_BundleExecutable "CFBundleExecutable"
+#define RSC_KSSystemField_BundleShortVersion "CFBundleShortVersionString"
+#define RSC_KSSystemField_BundleVersion "CFBundleVersion"
+#define RSC_KSSystemField_CPUArch "cpu_arch"
+#define RSC_KSSystemField_DeviceAppHash "device_app_hash"
+#define RSC_KSSystemField_Disk "disk"
+#define RSC_KSSystemField_Jailbroken "jailbroken"
+#define RSC_KSSystemField_Machine "machine"
+#define RSC_KSSystemField_Memory "memory"
+#define RSC_KSSystemField_Model "model"
+#define RSC_KSSystemField_OSVersion "os_version"
+#define RSC_KSSystemField_Size "size"
+#define RSC_KSSystemField_SystemName "system_name"
+#define RSC_KSSystemField_SystemVersion "system_version"
+#define RSC_KSSystemField_ClangVersion "clang_version"
+#define RSC_KSSystemField_TimeZone "time_zone"
+#define RSC_KSSystemField_Translated "proc_translated"
+#define RSC_KSSystemField_iOSSupportVersion "iOSSupportVersion"
 
 /**
  * Provides system information useful for a crash report.
  */
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSG_KSSystemInfo : NSObject
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSC_KSSystemInfo : NSObject
 
 /** Get the system info.
  *

@@ -1,40 +1,40 @@
 //
-//  BSGTelemetryTests.m
-//  Bugsnag
+//  RSCTelemetryTests.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 05/07/2022.
-//  Copyright © 2022 Bugsnag Inc. All rights reserved.
+//  Copyright © 2022 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
 #import <RSCrashReporter/RSCrashReporter.h>
 
-#import "BSGTelemetry.h"
-#import "BugsnagTestConstants.h"
+#import "RSCTelemetry.h"
+#import "RSCrashReporterTestConstants.h"
 
-@interface BSGTelemetryTests : XCTestCase
+@interface RSCTelemetryTests : XCTestCase
 
 @end
 
-@implementation BSGTelemetryTests
+@implementation RSCTelemetryTests
 
-static void OnCrashHandler(const BSG_KSCrashReportWriter *writer) {}
+static void OnCrashHandler(const RSC_KSCrashReportWriter *writer) {}
 
-- (BugsnagConfiguration *)createConfiguration {
-    return [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+- (RSCrashReporterConfiguration *)createConfiguration {
+    return [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
 }
 
 - (void)testEmptyWhenDefault {
-    BugsnagConfiguration *configuration = [self createConfiguration];
-    XCTAssertEqualObjects(BSGTelemetryCreateUsage(configuration), (@{@"callbacks": @{}, @"config": @{}}));
+    RSCrashReporterConfiguration *configuration = [self createConfiguration];
+    XCTAssertEqualObjects(RSCTelemetryCreateUsage(configuration), (@{@"callbacks": @{}, @"config": @{}}));
 }
 
 - (void)testCallbacks {
-    BugsnagConfiguration *configuration = [self createConfiguration];
-    [configuration addOnBreadcrumbBlock:^BOOL(BugsnagBreadcrumb * _Nonnull breadcrumb) { return NO; }];
-    [configuration addOnSendErrorBlock:^BOOL(BugsnagEvent * _Nonnull event) { return NO; }];
-    [configuration addOnSessionBlock:^BOOL(BugsnagSession * _Nonnull session) { return NO; }];
+    RSCrashReporterConfiguration *configuration = [self createConfiguration];
+    [configuration addOnBreadcrumbBlock:^BOOL(RSCrashReporterBreadcrumb * _Nonnull breadcrumb) { return NO; }];
+    [configuration addOnSendErrorBlock:^BOOL(RSCrashReporterEvent * _Nonnull event) { return NO; }];
+    [configuration addOnSessionBlock:^BOOL(RSCrashReporterSession * _Nonnull session) { return NO; }];
     configuration.onCrashHandler = OnCrashHandler;
     NSDictionary *expected = @{@"config": @{},
                                @"callbacks": @{
@@ -43,14 +43,14 @@ static void OnCrashHandler(const BSG_KSCrashReportWriter *writer) {}
                                    @"onSendError": @1,
                                    @"onSession": @1,
                                }};
-    XCTAssertEqualObjects(BSGTelemetryCreateUsage(configuration), expected);
+    XCTAssertEqualObjects(RSCTelemetryCreateUsage(configuration), expected);
 }
 
 - (void)testConfigValues {
-    BugsnagConfiguration *configuration = [self createConfiguration];
+    RSCrashReporterConfiguration *configuration = [self createConfiguration];
 #if !TARGET_OS_WATCH
     configuration.appHangThresholdMillis = 250;
-    configuration.sendThreads = BSGThreadSendPolicyUnhandledOnly;
+    configuration.sendThreads = RSCThreadSendPolicyUnhandledOnly;
 #endif
     configuration.autoDetectErrors = NO;
     configuration.autoTrackSessions = NO;
@@ -77,34 +77,34 @@ static void OnCrashHandler(const BSG_KSCrashReportWriter *writer) {}
                                    @"persistUser": @NO,
                                    @"pluginCount": @1,
                                }};
-    XCTAssertEqualObjects(BSGTelemetryCreateUsage(configuration), expected);
+    XCTAssertEqualObjects(RSCTelemetryCreateUsage(configuration), expected);
 }
 
 - (void)testEnabledBreadcrumbTypes {
-    BugsnagConfiguration *configuration = [self createConfiguration];
-    configuration.enabledBreadcrumbTypes &= ~BSGEnabledBreadcrumbTypeNavigation;
-    XCTAssertEqualObjects(BSGTelemetryCreateUsage(configuration),
+    RSCrashReporterConfiguration *configuration = [self createConfiguration];
+    configuration.enabledBreadcrumbTypes &= ~RSCEnabledBreadcrumbTypeNavigation;
+    XCTAssertEqualObjects(RSCTelemetryCreateUsage(configuration),
                           (@{@"callbacks": @{}, @"config": @{
                               @"enabledBreadcrumbTypes": @"error,log,process,request,state,user"}}));
 }
 
 - (void)testEnabledErrorTypes {
-    BugsnagConfiguration *configuration = [self createConfiguration];
+    RSCrashReporterConfiguration *configuration = [self createConfiguration];
     configuration.enabledErrorTypes.cppExceptions = NO;
 #if TARGET_OS_WATCH
     NSString *expected = @"unhandledExceptions,unhandledRejections";
 #else
     NSString *expected = @"appHangs,machExceptions,ooms,signals,thermalKills,unhandledExceptions,unhandledRejections";
 #endif
-    XCTAssertEqualObjects(BSGTelemetryCreateUsage(configuration),
+    XCTAssertEqualObjects(RSCTelemetryCreateUsage(configuration),
                           (@{@"callbacks": @{}, @"config": @{
                               @"enabledErrorTypes": expected}}));
 }
 
 - (void)testNilWhenDisabled {
-    BugsnagConfiguration *configuration = [self createConfiguration];
-    configuration.telemetry &= ~BSGTelemetryUsage;
-    XCTAssertNil(BSGTelemetryCreateUsage(configuration));
+    RSCrashReporterConfiguration *configuration = [self createConfiguration];
+    configuration.telemetry &= ~RSCTelemetryUsage;
+    XCTAssertNil(RSCTelemetryCreateUsage(configuration));
 }
 
 @end

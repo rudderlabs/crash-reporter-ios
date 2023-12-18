@@ -1,21 +1,21 @@
 //
-//  BugsnagAppWithState+Private.h
-//  Bugsnag
+//  RSCrashReporterAppWithState+Private.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 04/12/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BugsnagApp+Private.h"
-#import "BugsnagInternals.h"
+#import "RSCrashReporterApp+Private.h"
+#import "RSCrashReporterInternals.h"
 
-@class BugsnagConfiguration;
+@class RSCrashReporterConfiguration;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface BugsnagAppWithState ()
+@interface RSCrashReporterAppWithState ()
 
-+ (BugsnagAppWithState *)appWithDictionary:(NSDictionary *)event config:(BugsnagConfiguration *)config codeBundleId:(nullable NSString *)codeBundleId;
++ (RSCrashReporterAppWithState *)appWithDictionary:(NSDictionary *)event config:(RSCrashReporterConfiguration *)config codeBundleId:(nullable NSString *)codeBundleId;
 
 @end
 

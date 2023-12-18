@@ -1,24 +1,24 @@
 //
-//  BugsnagMetadataRedactionTest.m
+//  RSCrashReporterMetadataRedactionTest.m
 //  Tests
 //
 //  Created by Jamie Lynch on 15/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BugsnagBreadcrumb+Private.h"
-#import "BugsnagEvent+Private.h"
+#import "RSCrashReporterBreadcrumb+Private.h"
+#import "RSCrashReporterEvent+Private.h"
 
-@interface BugsnagMetadataRedactionTest : XCTestCase
+@interface RSCrashReporterMetadataRedactionTest : XCTestCase
 
 @end
 
-@implementation BugsnagMetadataRedactionTest
+@implementation RSCrashReporterMetadataRedactionTest
 
 - (void)testEmptyRedaction {
-    BugsnagEvent *event = [self generateEventWithMetadata:@{
+    RSCrashReporterEvent *event = [self generateEventWithMetadata:@{
             @"password": @"hunter2",
             @"some_key": @"2fa0"
     }];
@@ -31,7 +31,7 @@
 }
 
 - (void)testDefaultRedaction {
-    BugsnagEvent *event = [self generateEventWithMetadata:@{
+    RSCrashReporterEvent *event = [self generateEventWithMetadata:@{
             @"password": @"hunter2",
             @"some_key": @"2fa0"
     }];
@@ -44,7 +44,7 @@
 }
 
 - (void)testNestedRedaction {
-    BugsnagEvent *event = [self generateEventWithMetadata:@{
+    RSCrashReporterEvent *event = [self generateEventWithMetadata:@{
             @"user_auth": @{
                     @"password": @"123456",
                     @"authority": @"admin",
@@ -65,7 +65,7 @@
 }
 
 - (void)testNonDefaultKeys {
-    BugsnagEvent *event = [self generateEventWithMetadata:@{
+    RSCrashReporterEvent *event = [self generateEventWithMetadata:@{
             @"user_auth": @{
                     @"password": @"123456",
                     @"authority": @"admin"
@@ -82,8 +82,8 @@
     XCTAssertEqualObjects(@"[REDACTED]", section[@"some_key"]);
 }
 
-- (BugsnagEvent *)generateEventWithMetadata:(NSDictionary *)data {
-    return [[BugsnagEvent alloc] initWithKSReport:@{
+- (RSCrashReporterEvent *)generateEventWithMetadata:(NSDictionary *)data {
+    return [[RSCrashReporterEvent alloc] initWithKSReport:@{
             @"user": @{
                     @"metaData": @{
                             @"custom": data
@@ -93,7 +93,7 @@
 }
 
 - (void)testRegexRedaction {
-    BugsnagEvent *event = [self generateEventWithMetadata:@{
+    RSCrashReporterEvent *event = [self generateEventWithMetadata:@{
             @"password": @"hunter2",
             @"somekey9": @"2fa0",
             @"somekey": @"ba09"
@@ -110,7 +110,7 @@
 }
 
 - (void)testCaseInsensitiveKeys {
-    BugsnagEvent *event = [self generateEventWithMetadata:@{
+    RSCrashReporterEvent *event = [self generateEventWithMetadata:@{
             @"password": @"hunter2",
             @"somekey9": @"2fa0",
             @"somekey": @"ba09",
@@ -132,7 +132,7 @@
 }
 
 - (void)testBreadcrumbMetadataRedaction {
-    BugsnagBreadcrumb *breadcrumb = [[BugsnagBreadcrumb alloc] init];
+    RSCrashReporterBreadcrumb *breadcrumb = [[RSCrashReporterBreadcrumb alloc] init];
     breadcrumb.message = @"message cannot be empty";
     breadcrumb.metadata = @{
         @"foo" : @"not redacted",
@@ -143,7 +143,7 @@
         }
     };
     
-    BugsnagEvent *event = [self generateEventWithMetadata:@{}];
+    RSCrashReporterEvent *event = [self generateEventWithMetadata:@{}];
     event.breadcrumbs = @[breadcrumb];
     
     NSDictionary *eventPayload = [event toJsonWithRedactedKeys:[NSSet setWithArray:@[@"password"]]];

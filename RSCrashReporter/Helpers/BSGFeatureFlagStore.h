@@ -1,39 +1,39 @@
 //
-//  BSGFeatureFlagStore.h
-//  Bugsnag
+//  RSCFeatureFlagStore.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 11/11/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BugsnagInternals.h"
-#import "BSGDefines.h"
+#import "RSCrashReporterInternals.h"
+#import "RSCDefines.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-void BSGFeatureFlagStoreAddFeatureFlag(BSGFeatureFlagStore *store, NSString *name, NSString *_Nullable variant);
+void RSCFeatureFlagStoreAddFeatureFlag(RSCFeatureFlagStore *store, NSString *name, NSString *_Nullable variant);
 
-void BSGFeatureFlagStoreAddFeatureFlags(BSGFeatureFlagStore *store, NSArray<BugsnagFeatureFlag *> *featureFlags);
+void RSCFeatureFlagStoreAddFeatureFlags(RSCFeatureFlagStore *store, NSArray<RSCrashReporterFeatureFlag *> *featureFlags);
 
-void BSGFeatureFlagStoreClear(BSGFeatureFlagStore *store, NSString *_Nullable name);
+void RSCFeatureFlagStoreClear(RSCFeatureFlagStore *store, NSString *_Nullable name);
 
-NSArray<NSDictionary *> * BSGFeatureFlagStoreToJSON(BSGFeatureFlagStore *store);
+NSArray<NSDictionary *> * RSCFeatureFlagStoreToJSON(RSCFeatureFlagStore *store);
 
-BSGFeatureFlagStore * BSGFeatureFlagStoreFromJSON(id _Nullable json);
+RSCFeatureFlagStore * RSCFeatureFlagStoreFromJSON(id _Nullable json);
 
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSGFeatureFlagStore ()
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCFeatureFlagStore ()
 
-@property(nonatomic,nonnull,readonly) NSArray<BugsnagFeatureFlag *> * allFlags;
+@property(nonatomic,nonnull,readonly) NSArray<RSCrashReporterFeatureFlag *> * allFlags;
 
-+ (nonnull BSGFeatureFlagStore *) fromJSON:(nonnull id)json;
++ (nonnull RSCFeatureFlagStore *) fromJSON:(nonnull id)json;
 
 - (NSUInteger) count;
 
 - (void) addFeatureFlag:(nonnull NSString *)name withVariant:(nullable NSString *)variant;
 
-- (void) addFeatureFlags:(nonnull NSArray<BugsnagFeatureFlag *> *)featureFlags;
+- (void) addFeatureFlags:(nonnull NSArray<RSCrashReporterFeatureFlag *> *)featureFlags;
 
 - (void) clear:(nullable NSString *)name;
 

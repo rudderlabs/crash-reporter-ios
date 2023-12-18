@@ -1,22 +1,22 @@
 //
-//  BSGStorageMigratorV0V1Tests.m
-//  Bugsnag-iOSTests
+//  RSCStorageMigratorV0V1Tests.m
+//  RSCrashReporter-iOSTests
 //
 //  Created by Karl Stenerud on 07.01.21.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
-#import "BSGStorageMigratorV0V1.h"
-#import "BugsnagClient+Private.h"
-#import "BugsnagConfiguration+Private.h"
-#import "BugsnagTestConstants.h"
+#import "RSCStorageMigratorV0V1.h"
+#import "RSCrashReporterClient+Private.h"
+#import "RSCrashReporterConfiguration+Private.h"
+#import "RSCrashReporterTestConstants.h"
 
-@interface BSGStorageMigratorV0V1Tests : XCTestCase
+@interface RSCStorageMigratorV0V1Tests : XCTestCase
 
 @end
 
-@implementation BSGStorageMigratorV0V1Tests
+@implementation RSCStorageMigratorV0V1Tests
 
 - (NSString *)getCachesDir {
     NSArray *dirs = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
@@ -92,7 +92,7 @@
     [fm removeItemAtPath:[cachesPath stringByAppendingPathComponent:@"bugsnag"] error:nil];
     [fm removeItemAtPath:[cachesPath stringByAppendingPathComponent:@"Sessions"] error:nil];
     [fm removeItemAtPath:[cachesPath stringByAppendingPathComponent:@"KSCrashReports"] error:nil];
-    [fm removeItemAtPath:[cachesPath stringByAppendingPathComponent:@"bsg_kvstore"] error:nil];
+    [fm removeItemAtPath:[cachesPath stringByAppendingPathComponent:@"rsc_kvstore"] error:nil];
 
     // Now copy the faked app data across from the test fixture data.
     NSString *srcPath = [[bundle resourcePath] stringByAppendingPathComponent:@"v0_files/Caches"];
@@ -134,16 +134,16 @@
     }
 
     // Migrate and check.
-    [BSGStorageMigratorV0V1 migrate];
+    [RSCStorageMigratorV0V1 migrate];
     [self postMigrateCheck];
 
     // Make sure it's idempotent.
-    [BSGStorageMigratorV0V1 migrate];
-    [BSGStorageMigratorV0V1 migrate];
-    [BSGStorageMigratorV0V1 migrate];
-    [BSGStorageMigratorV0V1 migrate];
-    [BSGStorageMigratorV0V1 migrate];
-    [BSGStorageMigratorV0V1 migrate];
+    [RSCStorageMigratorV0V1 migrate];
+    [RSCStorageMigratorV0V1 migrate];
+    [RSCStorageMigratorV0V1 migrate];
+    [RSCStorageMigratorV0V1 migrate];
+    [RSCStorageMigratorV0V1 migrate];
+    [RSCStorageMigratorV0V1 migrate];
     [self postMigrateCheck];
 }
 
@@ -167,7 +167,7 @@
 
     NSString *cachesDir = [self getCachesDir];
     for(NSString *path in @[
-        [cachesDir stringByAppendingPathComponent:@"bsg_kvstore"],
+        [cachesDir stringByAppendingPathComponent:@"rsc_kvstore"],
         [cachesDir stringByAppendingPathComponent:@"bugsnag"],
         [cachesDir stringByAppendingPathComponent:@"KSCrashReports"],
         [cachesDir stringByAppendingPathComponent:@"Sessions"],

@@ -1,22 +1,22 @@
 //
-//  BSGEventUploadKSCrashReportOperation.h
-//  Bugsnag
+//  RSCEventUploadKSCrashReportOperation.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 17/02/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGEventUploadFileOperation.h"
+#import "RSCEventUploadFileOperation.h"
 
-#import "BSGDefines.h"
+#import "RSCDefines.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * A concrete operation class for reading a KSCrashReport from disk, converting it into a BugsnagEvent, and uploading.
+ * A concrete operation class for reading a KSCrashReport from disk, converting it into a RSCrashReporterEvent, and uploading.
  */
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSGEventUploadKSCrashReportOperation : BSGEventUploadFileOperation
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCEventUploadKSCrashReportOperation : RSCEventUploadFileOperation
 
 @end
 

@@ -1,13 +1,13 @@
 //
-//  BSG_KSMachHeaders.h
-//  Bugsnag
+//  RSC_KSMachHeaders.h
+//  RSCrashReporter
 //
 //  Created by Robin Macharg on 04/05/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
-#ifndef BSG_KSMachHeaders_h
-#define BSG_KSMachHeaders_h
+#ifndef RSC_KSMachHeaders_h
+#define RSC_KSMachHeaders_h
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -22,7 +22,7 @@
  * An encapsulation of the Mach header data as a linked list - either 64 or 32 bit, along with some additiona
  * information required for detailing a crash report's binary images.
  */
-typedef struct bsg_mach_image {
+typedef struct rsc_mach_image {
 
     /// The mach_header or mach_header_64
     ///
@@ -53,8 +53,8 @@ typedef struct bsg_mach_image {
     bool inCrashReport;
 
     /// The next image in the linked list
-    _Atomic(struct bsg_mach_image *) next;
-} BSG_Mach_Header_Info;
+    _Atomic(struct rsc_mach_image *) next;
+} RSC_Mach_Header_Info;
 
 // MARK: - Operations
 
@@ -62,27 +62,27 @@ typedef struct bsg_mach_image {
  * Initialize the headers management system.
  * This MUST be called before calling anything else.
  */
-void bsg_mach_headers_initialize(void);
+void rsc_mach_headers_initialize(void);
 
 /**
  * Returns the head of the link list of headers
  */
-BSG_Mach_Header_Info *bsg_mach_headers_get_images(void);
+RSC_Mach_Header_Info *rsc_mach_headers_get_images(void);
 
 /**
  * Returns the process's main image
  */
-BSG_Mach_Header_Info *bsg_mach_headers_get_main_image(void);
+RSC_Mach_Header_Info *rsc_mach_headers_get_main_image(void);
 
 /**
  * Returns the image that contains KSCrash.
  */
-BSG_Mach_Header_Info *bsg_mach_headers_get_self_image(void);
+RSC_Mach_Header_Info *rsc_mach_headers_get_self_image(void);
 
 /**
  * Find the loaded binary image that contains the specified instruction address.
 */
-BSG_Mach_Header_Info *bsg_mach_headers_image_at_address(const uintptr_t address);
+RSC_Mach_Header_Info *rsc_mach_headers_image_at_address(const uintptr_t address);
 
 
 /** Find a loaded binary image with the specified name.
@@ -93,7 +93,7 @@ BSG_Mach_Header_Info *bsg_mach_headers_image_at_address(const uintptr_t address)
  *
  * @return the matched image, or NULL if not found.
  */
-BSG_Mach_Header_Info *bsg_mach_headers_image_named(const char *const imageName, bool exactMatch);
+RSC_Mach_Header_Info *rsc_mach_headers_image_named(const char *const imageName, bool exactMatch);
 
 /** Get the address of the first command following a header (which will be of
  * type struct load_command).
@@ -103,28 +103,28 @@ BSG_Mach_Header_Info *bsg_mach_headers_image_named(const char *const imageName, 
  * @return The address of the first command, or NULL if none was found (which
  *         should not happen unless the header or image is corrupt).
  */
-uintptr_t bsg_mach_headers_first_cmd_after_header(const struct mach_header *header);
+uintptr_t rsc_mach_headers_first_cmd_after_header(const struct mach_header *header);
 
 /** Get the __crash_info message of the specified image.
  *
  * @param header The header to get commands for.
  * @return The __crash_info message, or NULL if no readable message could be found.
  */
-const char *bsg_mach_headers_get_crash_info_message(const BSG_Mach_Header_Info *header);
+const char *rsc_mach_headers_get_crash_info_message(const RSC_Mach_Header_Info *header);
 
 /**
  * Resets mach header data (for unit tests).
  */
-void bsg_test_support_mach_headers_reset(void);
+void rsc_test_support_mach_headers_reset(void);
 
 /**
  * Add a binary image (for unit tests).
  */
-void bsg_test_support_mach_headers_add_image(const struct mach_header *mh, intptr_t slide);
+void rsc_test_support_mach_headers_add_image(const struct mach_header *mh, intptr_t slide);
 
 /**
  * Remove a binary image (for unit tests).
  */
-void bsg_test_support_mach_headers_remove_image(const struct mach_header *mh, intptr_t slide);
+void rsc_test_support_mach_headers_remove_image(const struct mach_header *mh, intptr_t slide);
 
-#endif /* BSG_KSMachHeaders_h */
+#endif /* RSC_KSMachHeaders_h */

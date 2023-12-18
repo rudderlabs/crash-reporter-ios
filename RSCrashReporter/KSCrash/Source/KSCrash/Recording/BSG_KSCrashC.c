@@ -1,5 +1,5 @@
 //
-//  BSG_KSCrashC.c
+//  RSC_KSCrashC.c
 //
 //  Created by Karl Stenerud on 2012-01-28.
 //
@@ -24,17 +24,17 @@
 // THE SOFTWARE.
 //
 
-#include "BSG_KSCrashC.h"
+#include "RSC_KSCrashC.h"
 
-#include "BSG_KSCrashReport.h"
-#include "BSG_KSMach.h"
-#include "BSG_KSMachHeaders.h"
-#include "BSG_KSString.h"
-#include "BSG_KSSystemInfoC.h"
-#include "BSGDefines.h"
+#include "RSC_KSCrashReport.h"
+#include "RSC_KSMach.h"
+#include "RSC_KSMachHeaders.h"
+#include "RSC_KSString.h"
+#include "RSC_KSSystemInfoC.h"
+#include "RSCDefines.h"
 
-//#define BSG_KSLogger_LocalLevel TRACE
-#include "BSG_KSLogger.h"
+//#define RSC_KSLogger_LocalLevel TRACE
+#include "RSC_KSLogger.h"
 
 #include <mach/mach_time.h>
 
@@ -42,24 +42,24 @@
 #pragma mark - Globals -
 // ============================================================================
 
-/** True if BSG_KSCrash has been initialised. */
-static volatile sig_atomic_t bsg_g_initialised = 0;
+/** True if RSC_KSCrash has been initialised. */
+static volatile sig_atomic_t rsc_g_initialised = 0;
 
-/** True if BSG_KSCrash has been installed. */
-static volatile sig_atomic_t bsg_g_installed = 0;
+/** True if RSC_KSCrash has been installed. */
+static volatile sig_atomic_t rsc_g_installed = 0;
 
 /** Single, global crash context. */
-static BSG_KSCrash_Context bsg_g_crashReportContext;
+static RSC_KSCrash_Context rsc_g_crashReportContext;
 
 /** Path to store the state file. */
-static char *bsg_g_stateFilePath;
+static char *rsc_g_stateFilePath;
 
 // ============================================================================
 #pragma mark - Utility -
 // ============================================================================
 
-BSG_KSCrash_Context *crashContext(void) {
-    return &bsg_g_crashReportContext;
+RSC_KSCrash_Context *crashContext(void) {
+    return &rsc_g_crashReportContext;
 }
 
 // ============================================================================
@@ -72,16 +72,16 @@ BSG_KSCrash_Context *crashContext(void) {
  *
  * This function gets passed as a callback to a crash handler.
  */
-void bsg_kscrash_i_onCrash(BSG_KSCrash_Context *context) {
-    BSG_KSLOG_DEBUG("Updating application state to note crash.");
+void rsc_kscrash_i_onCrash(RSC_KSCrash_Context *context) {
+    RSC_KSLOG_DEBUG("Updating application state to note crash.");
 
-    bsg_kscrashstate_notifyAppCrash();
+    rsc_kscrashstate_notifyAppCrash();
 
     if (context->crash.crashedDuringCrashHandling) {
-        bsg_kscrashreport_writeMinimalReport(context,
+        rsc_kscrashreport_writeMinimalReport(context,
                                              context->config.recrashReportFilePath);
     } else {
-        bsg_kscrashreport_writeStandardReport(context, context->config.crashReportFilePath);
+        rsc_kscrashreport_writeStandardReport(context, context->config.crashReportFilePath);
     }
 }
 
@@ -89,88 +89,88 @@ void bsg_kscrash_i_onCrash(BSG_KSCrash_Context *context) {
 #pragma mark - API -
 // ============================================================================
 
-void bsg_kscrash_init(void) {
-    if (!bsg_g_initialised) {
-        bsg_g_initialised = true;
-        bsg_g_crashReportContext.config.handlingCrashTypes = BSG_KSCrashTypeProductionSafe;
+void rsc_kscrash_init(void) {
+    if (!rsc_g_initialised) {
+        rsc_g_initialised = true;
+        rsc_g_crashReportContext.config.handlingCrashTypes = RSC_KSCrashTypeProductionSafe;
     }
 }
 
-BSG_KSCrashType bsg_kscrash_install(const char *const crashReportFilePath,
+RSC_KSCrashType rsc_kscrash_install(const char *const crashReportFilePath,
                                     const char *const recrashReportFilePath,
                                     const char *stateFilePath,
                                     const char *crashID) {
-    BSG_KSLOG_DEBUG("Installing crash reporter.");
+    RSC_KSLOG_DEBUG("Installing crash reporter.");
 
-    BSG_KSCrash_Context *context = crashContext();
+    RSC_KSCrash_Context *context = crashContext();
     
-    if (bsg_g_installed) {
-        BSG_KSLOG_DEBUG("Crash reporter already installed.");
+    if (rsc_g_installed) {
+        RSC_KSLOG_DEBUG("Crash reporter already installed.");
         return context->config.handlingCrashTypes;
     }
-    bsg_g_installed = 1;
+    rsc_g_installed = 1;
     
-    bsg_mach_headers_initialize();
+    rsc_mach_headers_initialize();
 
-    bsg_kscrash_reinstall(crashReportFilePath, recrashReportFilePath,
+    rsc_kscrash_reinstall(crashReportFilePath, recrashReportFilePath,
                           stateFilePath, crashID);
 
-    BSG_KSCrashType crashTypes =
-        bsg_kscrash_setHandlingCrashTypes(context->config.handlingCrashTypes);
+    RSC_KSCrashType crashTypes =
+        rsc_kscrash_setHandlingCrashTypes(context->config.handlingCrashTypes);
 
-    context->config.systemInfoJSON = bsg_kssysteminfo_toJSON();
-    context->config.processName = bsg_kssysteminfo_copyProcessName();
+    context->config.systemInfoJSON = rsc_kssysteminfo_toJSON();
+    context->config.processName = rsc_kssysteminfo_copyProcessName();
 
-    BSG_KSLOG_DEBUG("Installation complete.");
+    RSC_KSLOG_DEBUG("Installation complete.");
     return crashTypes;
 }
 
-void bsg_kscrash_reinstall(const char *const crashReportFilePath,
+void rsc_kscrash_reinstall(const char *const crashReportFilePath,
                            const char *const recrashReportFilePath,
                            const char *const stateFilePath,
                            const char *const crashID) {
-    BSG_KSLOG_TRACE("reportFilePath = %s", crashReportFilePath);
-    BSG_KSLOG_TRACE("secondaryReportFilePath = %s", recrashReportFilePath);
-    BSG_KSLOG_TRACE("stateFilePath = %s", stateFilePath);
-    BSG_KSLOG_TRACE("crashID = %s", crashID);
+    RSC_KSLOG_TRACE("reportFilePath = %s", crashReportFilePath);
+    RSC_KSLOG_TRACE("secondaryReportFilePath = %s", recrashReportFilePath);
+    RSC_KSLOG_TRACE("stateFilePath = %s", stateFilePath);
+    RSC_KSLOG_TRACE("crashID = %s", crashID);
 
-    bsg_ksstring_replace(&bsg_g_stateFilePath, stateFilePath);
+    rsc_ksstring_replace(&rsc_g_stateFilePath, stateFilePath);
 
-    BSG_KSCrash_Context *context = crashContext();
-    bsg_ksstring_replace(&context->config.crashReportFilePath,
+    RSC_KSCrash_Context *context = crashContext();
+    rsc_ksstring_replace(&context->config.crashReportFilePath,
                          crashReportFilePath);
-    bsg_ksstring_replace(&context->config.recrashReportFilePath,
+    rsc_ksstring_replace(&context->config.recrashReportFilePath,
                          recrashReportFilePath);
-    bsg_ksstring_replace(&context->config.crashID, crashID);
+    rsc_ksstring_replace(&context->config.crashID, crashID);
 
-    if (!bsg_kscrashstate_init(bsg_g_stateFilePath, &context->state)) {
-        BSG_KSLOG_ERROR("Failed to initialize persistent crash state");
+    if (!rsc_kscrashstate_init(rsc_g_stateFilePath, &context->state)) {
+        RSC_KSLOG_ERROR("Failed to initialize persistent crash state");
     }
 }
 
-BSG_KSCrashType bsg_kscrash_setHandlingCrashTypes(BSG_KSCrashType crashTypes) {
-    BSG_KSCrash_Context *context = crashContext();
+RSC_KSCrashType rsc_kscrash_setHandlingCrashTypes(RSC_KSCrashType crashTypes) {
+    RSC_KSCrash_Context *context = crashContext();
     context->config.handlingCrashTypes = crashTypes;
 
-    if (bsg_g_installed) {
-        bsg_kscrashsentry_uninstall(~crashTypes);
+    if (rsc_g_installed) {
+        rsc_kscrashsentry_uninstall(~crashTypes);
         if (crashTypes) {
-            crashTypes = bsg_kscrashsentry_installWithContext(
-                &context->crash, crashTypes, (void(*)(void *))bsg_kscrash_i_onCrash);
+            crashTypes = rsc_kscrashsentry_installWithContext(
+                &context->crash, crashTypes, (void(*)(void *))rsc_kscrash_i_onCrash);
         }
     }
 
     return crashTypes;
 }
 
-void bsg_kscrash_setCrashNotifyCallback(
-    const BSG_KSReportWriteCallback onCrashNotify) {
-    BSG_KSLOG_TRACE("Set onCrashNotify to %p", onCrashNotify);
+void rsc_kscrash_setCrashNotifyCallback(
+    const RSC_KSReportWriteCallback onCrashNotify) {
+    RSC_KSLOG_TRACE("Set onCrashNotify to %p", onCrashNotify);
     crashContext()->config.onCrashNotify = onCrashNotify;
 }
 
-void bsg_kscrash_setThreadTracingEnabled(bool threadTracingEnabled) {
-#if BSG_HAVE_MACH_THREADS
+void rsc_kscrash_setThreadTracingEnabled(bool threadTracingEnabled) {
+#if RSC_HAVE_MACH_THREADS
     crashContext()->crash.threadTracingEnabled = threadTracingEnabled;
 #else
     (void)threadTracingEnabled;

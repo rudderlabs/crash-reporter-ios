@@ -1,47 +1,47 @@
 //
-//  BugsnagBreadcrumbs.h
-//  Bugsnag
+//  RSCrashReporterBreadcrumbs.h
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 26/03/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-#import "BSGDefines.h"
+#import "RSCDefines.h"
 
-@class BugsnagBreadcrumb;
-@class BugsnagConfiguration;
-typedef struct BSG_KSCrashReportWriter BSG_KSCrashReportWriter;
+@class RSCrashReporterBreadcrumb;
+@class RSCrashReporterConfiguration;
+typedef struct RSC_KSCrashReportWriter RSC_KSCrashReportWriter;
 
 NS_ASSUME_NONNULL_BEGIN
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BugsnagBreadcrumbs : NSObject
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCrashReporterBreadcrumbs : NSObject
 
-- (instancetype)initWithConfiguration:(BugsnagConfiguration *)config;
+- (instancetype)initWithConfiguration:(RSCrashReporterConfiguration *)config;
 
 /**
  * Returns an array of new objects representing the breadcrumbs stored in memory.
  */
-@property (readonly, nonatomic) NSArray<BugsnagBreadcrumb *> *breadcrumbs;
+@property (readonly, nonatomic) NSArray<RSCrashReporterBreadcrumb *> *breadcrumbs;
 
 /**
  * Store a new breadcrumb.
  */
-- (void)addBreadcrumb:(BugsnagBreadcrumb *)breadcrumb;
+- (void)addBreadcrumb:(RSCrashReporterBreadcrumb *)breadcrumb;
 
 /**
  * Store a new serialized breadcrumb.
  */
 - (void)addBreadcrumbWithData:(NSData *)data writeToDisk:(BOOL)writeToDisk;
 
-- (NSArray<BugsnagBreadcrumb *> *)breadcrumbsBeforeDate:(NSDate *)date;
+- (NSArray<RSCrashReporterBreadcrumb *> *)breadcrumbsBeforeDate:(NSDate *)date;
 
 /**
  * The breadcrumb stored on disk.
  */
-- (NSArray<BugsnagBreadcrumb *> *)cachedBreadcrumbs;
+- (NSArray<RSCrashReporterBreadcrumb *> *)cachedBreadcrumbs;
 
 /**
  * Removes breadcrumbs from disk.
@@ -60,4 +60,4 @@ NS_ASSUME_NONNULL_END
  * This function is async-signal-safe, but requires that any threads that could be adding
  * breadcrumbs are suspended.
  */
-void BugsnagBreadcrumbsWriteCrashReport(const BSG_KSCrashReportWriter * _Nonnull writer);
+void RSCrashReporterBreadcrumbsWriteCrashReport(const RSC_KSCrashReportWriter * _Nonnull writer);

@@ -1,5 +1,5 @@
 //
-//  BugsnagSwiftPublicAPITests.swift
+//  RSCrashReporterSwiftPublicAPITests.swift
 //  Tests
 //
 //  Created by Robin Macharg on 15/05/2020.
@@ -12,13 +12,13 @@ import XCTest
  * Test all public APIs from Swift.  Purely existence tests, no attempt to verify correctness
  */
 
-class FakePlugin: NSObject, BugsnagPlugin {
-    func load(_ client: BugsnagClient) {}
+class FakePlugin: NSObject, RSCrashReporterPlugin {
+    func load(_ client: RSCrashReporterClient) {}
     func unload() {}
 }
 
 // MetadataStore conformance - presence of required methods is a test in and of itself
-class myMetadata: NSObject, BugsnagMetadataStore, BugsnagClassLevelMetadataStore {
+class myMetadata: NSObject, RSCrashReporterMetadataStore, RSCrashReporterClassLevelMetadataStore {
     static func addMetadata(_ metadata: [AnyHashable : Any], section sectionName: String) {}
     static func addMetadata(_ metadata: Any?, key: String, section sectionName: String) {}
     static func getMetadata(section sectionName: String) -> NSMutableDictionary? { return NSMutableDictionary() }
@@ -34,18 +34,18 @@ class myMetadata: NSObject, BugsnagMetadataStore, BugsnagClassLevelMetadataStore
     func clearMetadata(section sectionName: String, key: String) {}
 }
 
-class BugsnagSwiftPublicAPITests: XCTestCase {
+class RSCrashReporterSwiftPublicAPITests: XCTestCase {
 
     let apiKey = "01234567890123456789012345678901"
     let ex = NSException(name: NSExceptionName("exception"),
                          reason: "myReason",
                          userInfo: nil)
     let err = NSError(domain: "dom", code: 123, userInfo: nil)
-    let sessionBlock: BugsnagOnSessionBlock = { (session) -> Bool in return false }
-    let onSendErrorBlock: BugsnagOnSendErrorBlock = { (event) -> Bool in return false }
-    let onBreadcrumbBlock: BugsnagOnBreadcrumbBlock = { (breadcrumb) -> Bool in return false }
+    let sessionBlock: RSCrashReporterOnSessionBlock = { (session) -> Bool in return false }
+    let onSendErrorBlock: RSCrashReporterOnSendErrorBlock = { (event) -> Bool in return false }
+    let onBreadcrumbBlock: RSCrashReporterOnBreadcrumbBlock = { (breadcrumb) -> Bool in return false }
     
-    func testBugsnagClass() throws {
+    func testRSCrashReporterClass() throws {
         RSCrashReporter.start(with: nil)
         
         RSCrashReporter.notify(ex)
@@ -58,8 +58,8 @@ class BugsnagSwiftPublicAPITests: XCTestCase {
         RSCrashReporter.leaveBreadcrumb("msg", metadata: ["foo" : "bar"], type: .error)
     }
 
-    func testBugsnagConfigurationClass() throws {
-        let config = BugsnagConfiguration(apiKey)
+    func testRSCrashReporterConfigurationClass() throws {
+        let config = RSCrashReporterConfiguration(apiKey)
 
         config.apiKey = apiKey
         config.releaseStage = "stage1"
@@ -80,7 +80,7 @@ class BugsnagSwiftPublicAPITests: XCTestCase {
 
         config.onCrashHandler = nil
         config.onCrashHandler = { (writer) in }
-        let crashHandler: (@convention(c)(UnsafePointer<BSG_KSCrashReportWriter>) -> Void)? = { writer in }
+        let crashHandler: (@convention(c)(UnsafePointer<RSC_KSCrashReportWriter>) -> Void)? = { writer in }
         config.onCrashHandler = crashHandler
         
         config.autoDetectErrors = true
@@ -93,7 +93,7 @@ class BugsnagSwiftPublicAPITests: XCTestCase {
         config.maxBreadcrumbs = 999
         config.persistUser = true
         
-        let errorTypes =  BugsnagErrorTypes()
+        let errorTypes =  RSCrashReporterErrorTypes()
         errorTypes.cppExceptions = true
 #if !os(watchOS)
         errorTypes.ooms = true
@@ -104,22 +104,22 @@ class BugsnagSwiftPublicAPITests: XCTestCase {
         errorTypes.unhandledRejections = true
         config.enabledErrorTypes = errorTypes
         
-        config.endpoints = BugsnagEndpointConfiguration()
-        config.endpoints = BugsnagEndpointConfiguration(notify: "http://test.com", sessions: "http://test.com")
+        config.endpoints = RSCrashReporterEndpointConfiguration()
+        config.endpoints = RSCrashReporterEndpointConfiguration(notify: "http://test.com", sessions: "http://test.com")
         
         config.setUser("user", withEmail: "email", andName: "name")
         let onSession = config.addOnSession(block: sessionBlock)
-        config.addOnSession { (session: BugsnagSession) -> Bool in
+        config.addOnSession { (session: RSCrashReporterSession) -> Bool in
             return true
         }
         config.removeOnSession(onSession)
         config.addOnSendError(block:onSendErrorBlock)
-        config.addOnSendError { (event: BugsnagEvent) -> Bool in
+        config.addOnSendError { (event: RSCrashReporterEvent) -> Bool in
             return true
         }
         config.removeOnSendError(onSession)
         let onBreadcrumb = config.addOnBreadcrumb(block: onBreadcrumbBlock)
-        config.addOnBreadcrumb { (breadcrumb: BugsnagBreadcrumb) -> Bool in
+        config.addOnBreadcrumb { (breadcrumb: RSCrashReporterBreadcrumb) -> Bool in
             return true
         }
         config.removeOnBreadcrumb(onBreadcrumb)
@@ -128,10 +128,10 @@ class BugsnagSwiftPublicAPITests: XCTestCase {
         config.add(plugin)
     }
     
-    // Also test <BugsnagMetadataStore> behaviour
-    func testBugsnagMetadataClass() throws {
-        var md = BugsnagMetadata()
-        md = BugsnagMetadata(dictionary: ["foo" : "bar"])
+    // Also test <RSCrashReporterMetadataStore> behaviour
+    func testRSCrashReporterMetadataClass() throws {
+        var md = RSCrashReporterMetadata()
+        md = RSCrashReporterMetadata(dictionary: ["foo" : "bar"])
         
         md.addMetadata(["key" : "secret"], section: "mental")
         md.addMetadata("spock", key: "kirk", section: "enterprise")
@@ -141,34 +141,34 @@ class BugsnagSwiftPublicAPITests: XCTestCase {
         md.clearMetadata(section: "enterprise", key: "key")
     }
     
-    func testBugsnagEventClass() throws {
-        let event = BugsnagEvent()
+    func testRSCrashReporterEventClass() throws {
+        let event = RSCrashReporterEvent()
         
         event.context = nil
         event.context = "ctx"
         event.errors = []
-        event.errors = [BugsnagError()]
+        event.errors = [RSCrashReporterError()]
         event.groupingHash = nil
         event.groupingHash = "1234"
         event.breadcrumbs = []
-        event.breadcrumbs = [BugsnagBreadcrumb()]
+        event.breadcrumbs = [RSCrashReporterBreadcrumb()]
         event.apiKey = apiKey
         _ = event.device
         _ = event.app
         _ = event.unhandled
         event.threads = []
-        event.threads = [BugsnagThread()]
+        event.threads = [RSCrashReporterThread()]
         event.originalError = nil
         event.originalError = 123
-        event.originalError = BugsnagError()
+        event.originalError = RSCrashReporterError()
 //        _ = event.user
         event.setUser("user", withEmail: "email", andName: "name")
         event.severity = .error
         _ = event.severity
     }
     
-    func testBugsnagAppWithStateClass() throws {
-        let app = BugsnagAppWithState()
+    func testRSCrashReporterAppWithStateClass() throws {
+        let app = RSCrashReporterAppWithState()
         
         app.bundleVersion = nil
         app.bundleVersion = "bundle"
@@ -219,17 +219,17 @@ class BugsnagSwiftPublicAPITests: XCTestCase {
         
     }
 
-    func testBugsnagBreadcrumbClass() throws {
-        let breadcrumb = BugsnagBreadcrumb()
+    func testRSCrashReporterBreadcrumbClass() throws {
+        let breadcrumb = RSCrashReporterBreadcrumb()
         breadcrumb.type = .manual
         breadcrumb.message = "message"
         breadcrumb.metadata = [:]
     }
 
-    func testBugsnagClientClass() throws {
-        var client = BugsnagClient()
-        let config = BugsnagConfiguration(apiKey)
-        client = BugsnagClient(configuration: config, delegate: nil)
+    func testRSCrashReporterClientClass() throws {
+        var client = RSCrashReporterClient()
+        let config = RSCrashReporterConfiguration(apiKey)
+        client = RSCrashReporterClient(configuration: config, delegate: nil)
         client.notify(ex)
         client.notify(ex) { (event) -> Bool in return false }
         client.notifyError(err)
@@ -253,20 +253,20 @@ class BugsnagSwiftPublicAPITests: XCTestCase {
         let _ = client.user()
         
         let onSession = client.addOnSession(block: sessionBlock)
-        client.addOnSession { (session: BugsnagSession) -> Bool in
+        client.addOnSession { (session: RSCrashReporterSession) -> Bool in
             return true
         }
         client.removeOnSession(onSession)
         
         let onBreadcrumb = client.addOnBreadcrumb(block: onBreadcrumbBlock)
-        client.addOnBreadcrumb { (breadcrumb: BugsnagBreadcrumb) -> Bool in
+        client.addOnBreadcrumb { (breadcrumb: RSCrashReporterBreadcrumb) -> Bool in
             return true
         }
         client.removeOnBreadcrumb(onBreadcrumb)
     }
 
-    func testBugsnagDeviceWithStateClass() throws {
-        let device = BugsnagDeviceWithState()
+    func testRSCrashReporterDeviceWithStateClass() throws {
+        let device = RSCrashReporterDeviceWithState()
         
         device.jailbroken = false
         _ = device.jailbroken
@@ -327,15 +327,15 @@ class BugsnagSwiftPublicAPITests: XCTestCase {
         _ = device.time
     }
 
-    func testBugsnagEndpointConfigurationlass() throws {
-        let epc = BugsnagEndpointConfiguration()
+    func testRSCrashReporterEndpointConfigurationlass() throws {
+        let epc = RSCrashReporterEndpointConfiguration()
         epc.notify = "notify"
         epc.sessions = "sessions"
     }
 
     // Also error types
-    func testBugsnagErrorClass() throws {
-        let e = BugsnagError()
+    func testRSCrashReporterErrorClass() throws {
+        let e = RSCrashReporterError()
         e.errorClass = nil
         e.errorClass = "class"
         _ = e.errorClass
@@ -349,8 +349,8 @@ class BugsnagSwiftPublicAPITests: XCTestCase {
         e.type = .cSharp
     }
 
-    func testBugsnagSessionClass() throws {
-        let session = BugsnagSession()
+    func testRSCrashReporterSessionClass() throws {
+        let session = RSCrashReporterSession()
         session.id = "id"
         _ = session.id
         session.startedAt = Date()
@@ -361,8 +361,8 @@ class BugsnagSwiftPublicAPITests: XCTestCase {
         session.setUser("user", withEmail: "email", andName: "name")
     }
 
-    func testBugsnagStackframeClass() throws {
-        let sf = BugsnagStackframe()
+    func testRSCrashReporterStackframeClass() throws {
+        let sf = RSCrashReporterStackframe()
         sf.method = nil
         sf.method = "method"
         _ = sf.method
@@ -390,8 +390,8 @@ class BugsnagSwiftPublicAPITests: XCTestCase {
         _ = sf.isLr
     }
 
-    func testBugsnagThreadClass() throws {
-        let thread = BugsnagThread()
+    func testRSCrashReporterThreadClass() throws {
+        let thread = RSCrashReporterThread()
         thread.id = nil
         thread.id = "id"
         _ = thread.id
@@ -403,8 +403,8 @@ class BugsnagSwiftPublicAPITests: XCTestCase {
         _ = thread.stacktrace
     }
 
-    func testBugsnagUserClass() throws {
-        let user = BugsnagUser()
+    func testRSCrashReporterUserClass() throws {
+        let user = RSCrashReporterUser()
         _ = user.id
         _ = user.email
         _ = user.name

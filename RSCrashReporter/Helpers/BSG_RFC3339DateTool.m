@@ -22,7 +22,7 @@
 // THE SOFTWARE.
 //
 
-#import "BSG_RFC3339DateTool.h"
+#import "RSC_RFC3339DateTool.h"
 
 // New formatter: Everything is UTC with milliseconds
 static NSDateFormatter *g_currentDateFormatter;
@@ -33,7 +33,7 @@ static NSDateFormatter *g_utcDateFormatter;
 // Oldx2 formatter: Time zones can be specified
 static NSDateFormatter *g_timezoneAllowedDateFormatter;
 
-@implementation BSG_RFC3339DateTool
+@implementation RSC_RFC3339DateTool
 
 + (void)initialize {
     NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];

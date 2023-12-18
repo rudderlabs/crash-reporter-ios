@@ -1,5 +1,5 @@
 //
-//  BSG_KSCrashSentry_Signal.h
+//  RSC_KSCrashSentry_Signal.h
 //
 //  Created by Karl Stenerud on 2012-01-28.
 //
@@ -27,18 +27,18 @@
 /* Catches fatal unix signals.
  */
 
-#ifndef HDR_BSG_KSCrashSentry_Signal_h
-#define HDR_BSG_KSCrashSentry_Signal_h
+#ifndef HDR_RSC_KSCrashSentry_Signal_h
+#define HDR_RSC_KSCrashSentry_Signal_h
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "BSGDefines.h"
+#include "RSCDefines.h"
 
-#if BSG_HAVE_SIGNAL
+#if RSC_HAVE_SIGNAL
 
-#include "BSG_KSCrashSentry.h"
+#include "RSC_KSCrashSentry.h"
 
 /** Install our custom signal handler.
  *
@@ -46,11 +46,11 @@ extern "C" {
  *
  * @return true if installation was succesful.
  */
-bool bsg_kscrashsentry_installSignalHandler(BSG_KSCrash_SentryContext *context);
+bool rsc_kscrashsentry_installSignalHandler(RSC_KSCrash_SentryContext *context);
 
 /** Uninstall our custom signal handlers and restore the previous ones.
  */
-void bsg_kscrashsentry_uninstallSignalHandler(void);
+void rsc_kscrashsentry_uninstallSignalHandler(void);
 
 #endif
 

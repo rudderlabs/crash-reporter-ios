@@ -1,9 +1,9 @@
 //
 //  UISceneStub.h
-//  BugsnagTests
+//  RSCrashReporterTests
 //
 //  Created by Nick Dowell on 12/08/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>

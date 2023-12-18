@@ -1,30 +1,30 @@
 //
-//  BugsnagThreadTests.m
+//  RSCrashReporterThreadTests.m
 //  Tests
 //
 //  Created by Jamie Lynch on 07/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BSG_KSMachHeaders.h"
-#import "BugsnagStackframe+Private.h"
-#import "BugsnagThread+Private.h"
+#import "RSC_KSMachHeaders.h"
+#import "RSCrashReporterStackframe+Private.h"
+#import "RSCrashReporterThread+Private.h"
 
 #import <pthread.h>
 #import <stdatomic.h>
 
-@interface BugsnagThreadTests : XCTestCase
+@interface RSCrashReporterThreadTests : XCTestCase
 @property NSArray *binaryImages;
 @property NSDictionary *thread;
 @end
 
-@implementation BugsnagThreadTests
+@implementation RSCrashReporterThreadTests
 
 + (void)setUp {
-    bsg_mach_headers_initialize();
-    bsg_mach_headers_get_images(); // Ensure call stack can be symbolicated
+    rsc_mach_headers_initialize();
+    rsc_mach_headers_get_images(); // Ensure call stack can be symbolicated
 }
 
 - (void)setUp {
@@ -56,24 +56,24 @@
 }
 
 - (void)testThreadFromDict {
-    BugsnagThread *thread = [[BugsnagThread alloc] initWithThread:self.thread binaryImages:self.binaryImages];
+    RSCrashReporterThread *thread = [[RSCrashReporterThread alloc] initWithThread:self.thread binaryImages:self.binaryImages];
     XCTAssertNotNil(thread);
 
     XCTAssertEqualObjects(@"4", thread.id);
     XCTAssertNil(thread.name);
-    XCTAssertEqual(BSGThreadTypeCocoa, thread.type);
+    XCTAssertEqual(RSCThreadTypeCocoa, thread.type);
     XCTAssertTrue(thread.errorReportingThread);
 
     // validate stacktrace
     XCTAssertEqual(1, [thread.stacktrace count]);
-    BugsnagStackframe *frame = thread.stacktrace[0];
+    RSCrashReporterStackframe *frame = thread.stacktrace[0];
     XCTAssertEqualObjects(@"kscrashsentry_reportUserException", frame.method);
     XCTAssertEqualObjects(@"/Users/joesmith/foo", frame.machoFile);
     XCTAssertEqualObjects(@"D0A41830-4FD2-3B02-A23B-0741AD4C7F52", frame.machoUuid);
 }
 
 - (void)testThreadToDict {
-    BugsnagThread *thread = [[BugsnagThread alloc] initWithThread:self.thread binaryImages:self.binaryImages];
+    RSCrashReporterThread *thread = [[RSCrashReporterThread alloc] initWithThread:self.thread binaryImages:self.binaryImages];
     thread.name = @"bugsnag-thread-1";
 
     NSDictionary *dict = [thread toDictionary];
@@ -118,7 +118,7 @@
                 }
             }
     };
-    NSDictionary *thread = [BugsnagThread enhanceThreadInfo:dict];
+    NSDictionary *thread = [RSCrashReporterThread enhanceThreadInfo:dict];
     XCTAssertEqual(dict, thread);
 }
 
@@ -150,7 +150,7 @@
                 }
             }
     };
-    NSDictionary *thread = [BugsnagThread enhanceThreadInfo:dict];
+    NSDictionary *thread = [RSCrashReporterThread enhanceThreadInfo:dict];
     XCTAssertNotEqual(dict, thread);
     NSArray *trace = thread[@"backtrace"][@"contents"];
     XCTAssertEqual(3, [trace count]);
@@ -170,17 +170,17 @@
 }
 
 - (void)testStacktraceOverride {
-    BugsnagThread *thread = [[BugsnagThread alloc] initWithThread:self.thread binaryImages:self.binaryImages];
+    RSCrashReporterThread *thread = [[RSCrashReporterThread alloc] initWithThread:self.thread binaryImages:self.binaryImages];
     XCTAssertNotNil(thread.stacktrace);
     XCTAssertEqual(1, thread.stacktrace.count);
     thread.stacktrace = @[];
     XCTAssertEqual(0, thread.stacktrace.count);
 }
 
-// MARK: - BugsnagThread (Recording)
+// MARK: - RSCrashReporterThread (Recording)
 
 - (void)testAllThreads {
-    NSArray<BugsnagThread *> *threads = [BugsnagThread allThreads:YES callStackReturnAddresses:NSThread.callStackReturnAddresses];
+    NSArray<RSCrashReporterThread *> *threads = [RSCrashReporterThread allThreads:YES callStackReturnAddresses:NSThread.callStackReturnAddresses];
     [threads[0].stacktrace makeObjectsPerformSelector:@selector(symbolicateIfNeeded)];
     XCTAssertTrue(threads[0].errorReportingThread);
     XCTAssertEqualObjects(threads[0].name, @"com.apple.main-thread");
@@ -202,9 +202,9 @@ static void * executeBlock(void *ptr) {
             dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
         });
     }
-    __block NSArray<BugsnagThread *> *threads = nil;
+    __block NSArray<RSCrashReporterThread *> *threads = nil;
     dispatch_sync(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
-        threads = [BugsnagThread allThreads:YES callStackReturnAddresses:NSThread.callStackReturnAddresses];
+        threads = [RSCrashReporterThread allThreads:YES callStackReturnAddresses:NSThread.callStackReturnAddresses];
     });
     XCTAssertGreaterThan(threads.count, threadCount);
     for (int i = 0; i < threadCount; i++) {
@@ -216,7 +216,7 @@ static void * executeBlock(void *ptr) {
 }
 
 - (void)testCurrentThread {
-    NSArray<BugsnagThread *> *threads = [BugsnagThread allThreads:NO callStackReturnAddresses:NSThread.callStackReturnAddresses];
+    NSArray<RSCrashReporterThread *> *threads = [RSCrashReporterThread allThreads:NO callStackReturnAddresses:NSThread.callStackReturnAddresses];
     [threads[0].stacktrace makeObjectsPerformSelector:@selector(symbolicateIfNeeded)];
     XCTAssertEqual(threads.count, 1);
     XCTAssertTrue(threads[0].errorReportingThread);
@@ -227,10 +227,10 @@ static void * executeBlock(void *ptr) {
 }
 
 - (void)testCurrentThreadFromBackground {
-    __block BugsnagThread *thread = nil;
+    __block RSCrashReporterThread *thread = nil;
     XCTestExpectation *expectation = [self expectationWithDescription:@"Thread recorded in background"];
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
-        thread = [BugsnagThread allThreads:NO callStackReturnAddresses:NSThread.callStackReturnAddresses][0];
+        thread = [RSCrashReporterThread allThreads:NO callStackReturnAddresses:NSThread.callStackReturnAddresses][0];
         [thread.stacktrace makeObjectsPerformSelector:@selector(symbolicateIfNeeded)];
         [expectation fulfill];
     });
@@ -244,19 +244,19 @@ static void * executeBlock(void *ptr) {
 }
 
 - (void)testMainThread {
-    BugsnagThread *thread = [BugsnagThread mainThread];
+    RSCrashReporterThread *thread = [RSCrashReporterThread mainThread];
     XCTAssertNil(thread);
 }
 
 - (void)testMainThreadFromBackground {
     NSParameterAssert(NSThread.currentThread.isMainThread);
-    __block BugsnagThread *thread = nil;
+    __block RSCrashReporterThread *thread = nil;
     __block atomic_int state = 0;
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
         while (atomic_load(&state) != 1) {
             // Wait for main thread to be back in -testMainThreadFromBackground
         }
-        thread = [BugsnagThread mainThread];
+        thread = [RSCrashReporterThread mainThread];
         [thread.stacktrace makeObjectsPerformSelector:@selector(symbolicateIfNeeded)];
         atomic_store(&state, 2);
     });

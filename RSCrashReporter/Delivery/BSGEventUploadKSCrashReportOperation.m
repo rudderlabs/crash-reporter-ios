@@ -1,22 +1,22 @@
 //
-//  BSGEventUploadKSCrashReportOperation.m
-//  Bugsnag
+//  RSCEventUploadKSCrashReportOperation.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 17/02/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGEventUploadKSCrashReportOperation.h"
+#import "RSCEventUploadKSCrashReportOperation.h"
 
-#import "BSGInternalErrorReporter.h"
-#import "BSGJSONSerialization.h"
-#import "BSG_KSCrashReportFields.h"
-#import "BSG_RFC3339DateTool.h"
-#import "BugsnagAppWithState.h"
-#import "BugsnagCollections.h"
-#import "BugsnagConfiguration.h"
-#import "BugsnagEvent+Private.h"
-#import "BugsnagLogger.h"
+#import "RSCInternalErrorReporter.h"
+#import "RSCJSONSerialization.h"
+#import "RSC_KSCrashReportFields.h"
+#import "RSC_RFC3339DateTool.h"
+#import "RSCrashReporterAppWithState.h"
+#import "RSCrashReporterCollections.h"
+#import "RSCrashReporterConfiguration.h"
+#import "RSCrashReporterEvent+Private.h"
+#import "RSCrashReporterLogger.h"
 
 
 /// Returns a list of the crash report keys present in the valid portion of the JSON data
@@ -51,10 +51,10 @@ static NSArray * CrashReportKeys(NSData *data, NSError *error) {
 }
 
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BSGEventUploadKSCrashReportOperation
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCEventUploadKSCrashReportOperation
 
-- (BugsnagEvent *)loadEventAndReturnError:(NSError * __autoreleasing *)errorPtr {
+- (RSCrashReporterEvent *)loadEventAndReturnError:(NSError * __autoreleasing *)errorPtr {
     __block NSError *error = nil;
     
     void (^ reportError)(NSString *, NSData *) = ^(NSString *context, NSData *data) {
@@ -76,8 +76,8 @@ BSG_OBJC_DIRECT_MEMBERS
             diagnostics[@"keys"] = CrashReportKeys(data, error);
         }
         
-        [BSGInternalErrorReporter.sharedInstance
-         reportErrorWithClass:@"Invalid crash report" context:context message:BSGErrorDescription(error) diagnostics:diagnostics];
+        [RSCInternalErrorReporter.sharedInstance
+         reportErrorWithClass:@"Invalid crash report" context:context message:RSCErrorDescription(error) diagnostics:diagnostics];
     };
     
     NSData *data = [NSData dataWithContentsOfFile:self.file options:0 error:&error];
@@ -91,7 +91,7 @@ BSG_OBJC_DIRECT_MEMBERS
         return nil;
     }
     
-    NSDictionary *json = BSGJSONDictionaryFromData(data, 0, &error);
+    NSDictionary *json = RSCJSONDictionaryFromData(data, 0, &error);
     if (!json) {
         if (errorPtr) {
             *errorPtr = error;
@@ -121,7 +121,7 @@ BSG_OBJC_DIRECT_MEMBERS
         return nil;
     }
     
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:crashReport];
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:crashReport];
     if (!event) {
         reportError(@"Invalid JSON payload", nil);
     }
@@ -134,35 +134,35 @@ BSG_OBJC_DIRECT_MEMBERS
     return event;
 }
 
-// Methods below were copied from BSG_KSCrashReportStore.m
+// Methods below were copied from RSC_KSCrashReportStore.m
 
 - (NSMutableDictionary *)fixupCrashReport:(NSDictionary *)report {
     NSMutableDictionary *mutableReport = [report mutableCopy];
     NSMutableDictionary *mutableInfo =
-            [report[@BSG_KSCrashField_Report] mutableCopy];
-    mutableReport[@BSG_KSCrashField_Report] = mutableInfo;
+            [report[@RSC_KSCrashField_Report] mutableCopy];
+    mutableReport[@RSC_KSCrashField_Report] = mutableInfo;
 
     // Timestamp gets stored as a unix timestamp. Convert it to rfc3339.
-    NSNumber *timestampMillis = mutableInfo[@BSG_KSCrashField_Timestamp_Millis];
+    NSNumber *timestampMillis = mutableInfo[@RSC_KSCrashField_Timestamp_Millis];
     if ([timestampMillis isKindOfClass:[NSNumber class]]) {
         NSTimeInterval timeInterval = (double)timestampMillis.unsignedLongLongValue / 1000.0;
         NSDate *date = [NSDate dateWithTimeIntervalSince1970:timeInterval];
-        mutableInfo[@BSG_KSCrashField_Timestamp] = [BSG_RFC3339DateTool stringFromDate:date];
+        mutableInfo[@RSC_KSCrashField_Timestamp] = [RSC_RFC3339DateTool stringFromDate:date];
     } else {
-        [self convertTimestamp:@BSG_KSCrashField_Timestamp inReport:mutableInfo];
+        [self convertTimestamp:@RSC_KSCrashField_Timestamp inReport:mutableInfo];
     }
 
-    [self mergeDictWithKey:@BSG_KSCrashField_SystemAtCrash
-           intoDictWithKey:@BSG_KSCrashField_System
+    [self mergeDictWithKey:@RSC_KSCrashField_SystemAtCrash
+           intoDictWithKey:@RSC_KSCrashField_System
                   inReport:mutableReport];
 
-    [self mergeDictWithKey:@BSG_KSCrashField_UserAtCrash
-           intoDictWithKey:@BSG_KSCrashField_User
+    [self mergeDictWithKey:@RSC_KSCrashField_UserAtCrash
+           intoDictWithKey:@RSC_KSCrashField_User
                   inReport:mutableReport];
 
     NSMutableDictionary *crashReport =
-            [report[@BSG_KSCrashField_Crash] mutableCopy];
-    mutableReport[@BSG_KSCrashField_Crash] = crashReport;
+            [report[@RSC_KSCrashField_Crash] mutableCopy];
+    mutableReport[@RSC_KSCrashField_Crash] = crashReport;
 
     return mutableReport;
 }
@@ -181,12 +181,12 @@ BSG_OBJC_DIRECT_MEMBERS
         dstDict = @{};
     }
     if (![dstDict isKindOfClass:[NSDictionary class]]) {
-        bsg_log_err(@"'%@' should be a dictionary, not %@", dstKey,
+        rsc_log_err(@"'%@' should be a dictionary, not %@", dstKey,
                 [dstDict class]);
         return;
     }
 
-    report[dstKey] = BSGDictMerge(srcDict, dstDict);
+    report[dstKey] = RSCDictMerge(srcDict, dstDict);
     [report removeObjectForKey:srcKey];
 }
 
@@ -194,11 +194,11 @@ BSG_OBJC_DIRECT_MEMBERS
                 inReport:(NSMutableDictionary *)report {
     NSNumber *timestamp = report[key];
     if (timestamp == nil) {
-        bsg_log_err(@"entry '%@' not found", key);
+        rsc_log_err(@"entry '%@' not found", key);
         return;
     }
     [report
-            setValue:[BSG_RFC3339DateTool
+            setValue:[RSC_RFC3339DateTool
                     stringFromUNIXTimestamp:[timestamp doubleValue]]
               forKey:key];
 }

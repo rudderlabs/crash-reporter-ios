@@ -1,20 +1,20 @@
 //
-//  BugsnagUserTest.m
+//  RSCrashReporterUserTest.m
 //  Tests
 //
 //  Created by Jamie Lynch on 27/11/2017.
-//  Copyright © 2017 Bugsnag. All rights reserved.
+//  Copyright © 2017 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BugsnagEvent+Private.h"
-#import "BugsnagUser+Private.h"
+#import "RSCrashReporterEvent+Private.h"
+#import "RSCrashReporterUser+Private.h"
 
-@interface BugsnagUserTest : XCTestCase
+@interface RSCrashReporterUserTest : XCTestCase
 @end
 
-@implementation BugsnagUserTest
+@implementation RSCrashReporterUserTest
 
 - (void)testDictDeserialisation {
 
@@ -23,7 +23,7 @@
             @"email": @"fake@example.com",
             @"name": @"Tom Bombadil"
     };
-    BugsnagUser *user = [[BugsnagUser alloc] initWithDictionary:dict];
+    RSCrashReporterUser *user = [[RSCrashReporterUser alloc] initWithDictionary:dict];
 
     XCTAssertNotNil(user);
     XCTAssertEqualObjects(user.id, @"test");
@@ -32,7 +32,7 @@
 }
 
 - (void)testPayloadSerialisation {
-    BugsnagUser *payload = [[BugsnagUser alloc] initWithId:@"test" name:@"Tom Bombadil" emailAddress:@"fake@example.com"];
+    RSCrashReporterUser *payload = [[RSCrashReporterUser alloc] initWithId:@"test" name:@"Tom Bombadil" emailAddress:@"fake@example.com"];
     NSDictionary *rootNode = [payload toJson];
     XCTAssertNotNil(rootNode);
     XCTAssertEqual(3, [rootNode count]);
@@ -44,7 +44,7 @@
 
 /*- (void)testUserEvent {
     // Setup
-    BugsnagEvent *event = [[BugsnagEvent alloc] initWithKSReport:@{
+    RSCrashReporterEvent *event = [[RSCrashReporterEvent alloc] initWithKSReport:@{
             @"user.metaData": @{
                     @"user": @{
                             @"id": @"123",

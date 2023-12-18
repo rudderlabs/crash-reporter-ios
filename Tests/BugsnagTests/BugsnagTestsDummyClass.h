@@ -1,16 +1,16 @@
 //
-//  BugsnagTestsDummyClass.h
+//  RSCrashReporterTestsDummyClass.h
 //  Tests
 //
 //  Created by Robin Macharg on 18/02/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface BugsnagTestsDummyClass : NSObject
+@interface RSCrashReporterTestsDummyClass : NSObject
 
 @end
 

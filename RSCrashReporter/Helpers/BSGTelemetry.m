@@ -1,17 +1,17 @@
 //
-//  BSGTelemetry.m
-//  Bugsnag
+//  RSCTelemetry.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 05/07/2022.
-//  Copyright © 2022 Bugsnag Inc. All rights reserved.
+//  Copyright © 2022 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGTelemetry.h"
+#import "RSCTelemetry.h"
 
-#import "BSGDefines.h"
-#import "BSG_KSMachHeaders.h"
-#import "BugsnagConfiguration+Private.h"
-#import "BugsnagErrorTypes.h"
+#import "RSCDefines.h"
+#import "RSC_KSMachHeaders.h"
+#import "RSCrashReporterConfiguration+Private.h"
+#import "RSCrashReporterErrorTypes.h"
 
 static NSNumber *_Nullable BooleanValue(BOOL actual, BOOL defaultValue) {
     return actual != defaultValue ? (actual ? @YES : @NO) : nil;
@@ -22,15 +22,15 @@ static NSNumber *_Nullable IntegerValue(NSUInteger actual, NSUInteger defaultVal
 }
 
 static BOOL IsStaticallyLinked(void) {
-    return bsg_mach_headers_get_self_image() == bsg_mach_headers_get_main_image();
+    return rsc_mach_headers_get_self_image() == rsc_mach_headers_get_main_image();
 }
 
-static NSDictionary * ConfigValue(BugsnagConfiguration *configuration) {
+static NSDictionary * ConfigValue(RSCrashReporterConfiguration *configuration) {
     NSMutableDictionary *config = [NSMutableDictionary dictionary];
     
-    BugsnagConfiguration *defaults = [[BugsnagConfiguration alloc] initWithApiKey:nil]; 
+    RSCrashReporterConfiguration *defaults = [[RSCrashReporterConfiguration alloc] initWithApiKey:nil]; 
     
-#if BSG_HAVE_APP_HANG_DETECTION
+#if RSC_HAVE_APP_HANG_DETECTION
     config[@"appHangThresholdMillis"] = IntegerValue(configuration.appHangThresholdMillis, defaults.appHangThresholdMillis);
     config[@"reportBackgroundAppHangs"] = BooleanValue(configuration.reportBackgroundAppHangs, defaults.reportBackgroundAppHangs);
 #endif
@@ -47,20 +47,20 @@ static NSDictionary * ConfigValue(BugsnagConfiguration *configuration) {
     config[@"pluginCount"] = IntegerValue(configuration.plugins.count, 0);
     config[@"staticallyLinked"] = BooleanValue(IsStaticallyLinked(), NO);
     
-    BSGEnabledBreadcrumbType enabledBreadcrumbTypes = configuration.enabledBreadcrumbTypes;
+    RSCEnabledBreadcrumbType enabledBreadcrumbTypes = configuration.enabledBreadcrumbTypes;
     if (enabledBreadcrumbTypes != defaults.enabledBreadcrumbTypes) {
         NSMutableArray *array = [NSMutableArray array];
-        if (enabledBreadcrumbTypes & BSGEnabledBreadcrumbTypeError)         { [array addObject:@"error"]; }
-        if (enabledBreadcrumbTypes & BSGEnabledBreadcrumbTypeLog)           { [array addObject:@"log"]; }
-        if (enabledBreadcrumbTypes & BSGEnabledBreadcrumbTypeNavigation)    { [array addObject:@"navigation"]; }
-        if (enabledBreadcrumbTypes & BSGEnabledBreadcrumbTypeProcess)       { [array addObject:@"process"]; }
-        if (enabledBreadcrumbTypes & BSGEnabledBreadcrumbTypeRequest)       { [array addObject:@"request"]; }
-        if (enabledBreadcrumbTypes & BSGEnabledBreadcrumbTypeState)         { [array addObject:@"state"]; }
-        if (enabledBreadcrumbTypes & BSGEnabledBreadcrumbTypeUser)          { [array addObject:@"user"]; }
+        if (enabledBreadcrumbTypes & RSCEnabledBreadcrumbTypeError)         { [array addObject:@"error"]; }
+        if (enabledBreadcrumbTypes & RSCEnabledBreadcrumbTypeLog)           { [array addObject:@"log"]; }
+        if (enabledBreadcrumbTypes & RSCEnabledBreadcrumbTypeNavigation)    { [array addObject:@"navigation"]; }
+        if (enabledBreadcrumbTypes & RSCEnabledBreadcrumbTypeProcess)       { [array addObject:@"process"]; }
+        if (enabledBreadcrumbTypes & RSCEnabledBreadcrumbTypeRequest)       { [array addObject:@"request"]; }
+        if (enabledBreadcrumbTypes & RSCEnabledBreadcrumbTypeState)         { [array addObject:@"state"]; }
+        if (enabledBreadcrumbTypes & RSCEnabledBreadcrumbTypeUser)          { [array addObject:@"user"]; }
         config[@"enabledBreadcrumbTypes"] = [array componentsJoinedByString:@","];
     }
     
-    BugsnagErrorTypes *enabledErrorTypes = configuration.enabledErrorTypes;
+    RSCrashReporterErrorTypes *enabledErrorTypes = configuration.enabledErrorTypes;
     if (!enabledErrorTypes.cppExceptions ||
 #if !TARGET_OS_WATCH
         !enabledErrorTypes.appHangs ||
@@ -86,16 +86,16 @@ static NSDictionary * ConfigValue(BugsnagConfiguration *configuration) {
         config[@"enabledErrorTypes"] = [array componentsJoinedByString:@","];
     }
     
-#if BSG_HAVE_MACH_THREADS
+#if RSC_HAVE_MACH_THREADS
     if (configuration.sendThreads != defaults.sendThreads) {
         switch (configuration.sendThreads) {
-            case BSGThreadSendPolicyAlways:
+            case RSCThreadSendPolicyAlways:
                 config[@"sendThreads"] = @"always";
                 break;
-            case BSGThreadSendPolicyUnhandledOnly:
+            case RSCThreadSendPolicyUnhandledOnly:
                 config[@"sendThreads"] = @"unhandledOnly";
                 break;
-            case BSGThreadSendPolicyNever:
+            case RSCThreadSendPolicyNever:
                 config[@"sendThreads"] = @"never";
                 break;
             default:
@@ -107,8 +107,8 @@ static NSDictionary * ConfigValue(BugsnagConfiguration *configuration) {
     return config;
 }
 
-NSDictionary * BSGTelemetryCreateUsage(BugsnagConfiguration *configuration) {
-    if (!(configuration.telemetry & BSGTelemetryUsage)) {
+NSDictionary * RSCTelemetryCreateUsage(RSCrashReporterConfiguration *configuration) {
+    if (!(configuration.telemetry & RSCTelemetryUsage)) {
         return nil;
     }
     

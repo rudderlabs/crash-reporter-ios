@@ -1,5 +1,5 @@
 //
-//  BSG_KSCrashSentry_NSException.h
+//  RSC_KSCrashSentry_NSException.h
 //
 //  Created by Karl Stenerud on 2012-01-28.
 //
@@ -27,14 +27,14 @@
 /* Catches Objective-C exceptions.
  */
 
-#ifndef HDR_BSG_KSCrashSentry_NSException_h
-#define HDR_BSG_KSCrashSentry_NSException_h
+#ifndef HDR_RSC_KSCrashSentry_NSException_h
+#define HDR_RSC_KSCrashSentry_NSException_h
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "BSG_KSCrashSentry.h"
+#include "RSC_KSCrashSentry.h"
 
 /** Install our custom NSException handler.
  *
@@ -42,12 +42,12 @@ extern "C" {
  *
  * @return true if installation was succesful.
  */
-bool bsg_kscrashsentry_installNSExceptionHandler(
-    BSG_KSCrash_SentryContext *context);
+bool rsc_kscrashsentry_installNSExceptionHandler(
+    RSC_KSCrash_SentryContext *context);
 
 /** Uninstall our custome NSException handler.
  */
-void bsg_kscrashsentry_uninstallNSExceptionHandler(void);
+void rsc_kscrashsentry_uninstallNSExceptionHandler(void);
 
 #ifdef __cplusplus
 }

@@ -1,20 +1,20 @@
 //
-//  BugsnagConfiguration+Private.h
-//  Bugsnag
+//  RSCrashReporterConfiguration+Private.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 26/11/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGDefines.h"
-#import "BugsnagInternals.h"
+#import "RSCDefines.h"
+#import "RSCrashReporterInternals.h"
 
-@class BugsnagNotifier;
+@class RSCrashReporterNotifier;
 
 NS_ASSUME_NONNULL_BEGIN
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BugsnagConfiguration ()
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCrashReporterConfiguration ()
 
 #pragma mark Initializers
 
@@ -24,9 +24,9 @@ BSG_OBJC_DIRECT_MEMBERS
 
 @property (readonly, nonatomic) NSDictionary<NSString *, id> *dictionaryRepresentation;
 
-@property (nonatomic) BSGFeatureFlagStore *featureFlagStore;
+@property (nonatomic) RSCFeatureFlagStore *featureFlagStore;
 
-@property (copy, nonatomic) BugsnagMetadata *metadata;
+@property (copy, nonatomic) RSCrashReporterMetadata *metadata;
 
 @property (readonly, nullable, nonatomic) NSURL *notifyURL;
 
@@ -38,7 +38,7 @@ BSG_OBJC_DIRECT_MEMBERS
 
 @property (readonly, nullable, nonatomic) NSURL *sessionURL;
 
-@property (readwrite, retain, nonnull, nonatomic) BugsnagUser *user;
+@property (readwrite, retain, nonnull, nonatomic) RSCrashReporterUser *user;
 
 #pragma mark Methods
 
@@ -46,7 +46,7 @@ BSG_OBJC_DIRECT_MEMBERS
 
 - (BOOL)shouldDiscardErrorClass:(NSString *)errorClass;
 
-- (BOOL)shouldRecordBreadcrumbType:(BSGBreadcrumbType)breadcrumbType;
+- (BOOL)shouldRecordBreadcrumbType:(RSCBreadcrumbType)breadcrumbType;
 
 /// Throws an NSInvalidArgumentException if the API key is empty or missing.
 /// Logs a warning message if the API key is not in the expected format.
@@ -54,7 +54,7 @@ BSG_OBJC_DIRECT_MEMBERS
 
 @end
 
-@interface BugsnagConfiguration (/* not objc_direct */) <NSCopying>
+@interface RSCrashReporterConfiguration (/* not objc_direct */) <NSCopying>
 @end
 
 NS_ASSUME_NONNULL_END

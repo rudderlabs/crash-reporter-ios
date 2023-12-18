@@ -1,32 +1,32 @@
 //
-//  BugsnagHandledState.m
-//  Bugsnag
+//  RSCrashReporterHandledState.m
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 21/09/2017.
-//  Copyright © 2017 Bugsnag. All rights reserved.
+//  Copyright © 2017 RSCrashReporter. All rights reserved.
 //
 
-#import "BugsnagHandledState.h"
+#import "RSCrashReporterHandledState.h"
 
-#import "BSGDefines.h"
-#import "BSGKeys.h"
+#import "RSCDefines.h"
+#import "RSCKeys.h"
 
-BSGSeverity BSGParseSeverity(NSString *severity) {
-    if ([severity isEqualToString:BSGKeyInfo])
-        return BSGSeverityInfo;
-    else if ([severity isEqualToString:BSGKeyWarning])
-        return BSGSeverityWarning;
-    return BSGSeverityError;
+RSCSeverity RSCParseSeverity(NSString *severity) {
+    if ([severity isEqualToString:RSCKeyInfo])
+        return RSCSeverityInfo;
+    else if ([severity isEqualToString:RSCKeyWarning])
+        return RSCSeverityWarning;
+    return RSCSeverityError;
 }
 
-NSString *BSGFormatSeverity(BSGSeverity severity) {
+NSString *RSCFormatSeverity(RSCSeverity severity) {
     switch (severity) {
-    case BSGSeverityError:
-        return BSGKeyError;
-    case BSGSeverityInfo:
-        return BSGKeyInfo;
-    case BSGSeverityWarning:
-        return BSGKeyWarning;
+    case RSCSeverityError:
+        return RSCKeyError;
+    case RSCSeverityInfo:
+        return RSCKeyInfo;
+    case RSCSeverityWarning:
+        return RSCKeyWarning;
     }
 }
 
@@ -50,23 +50,23 @@ static NSString *const kHandledException = @"handledException";
 static NSString *const kUserSpecifiedSeverity = @"userSpecifiedSeverity";
 static NSString *const kUserCallbackSetSeverity = @"userCallbackSetSeverity";
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BugsnagHandledState
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCrashReporterHandledState
 
 + (instancetype)handledStateFromJson:(NSDictionary *)json {
-    BOOL unhandled = [json[BSGKeyUnhandled] boolValue];
-    NSDictionary *severityReason = json[BSGKeySeverityReason];
-    BOOL unhandledOverridden = [severityReason[BSGKeyUnhandledOverridden] boolValue];
-    BSGSeverity severity = BSGParseSeverity(json[BSGKeySeverity]);
+    BOOL unhandled = [json[RSCKeyUnhandled] boolValue];
+    NSDictionary *severityReason = json[RSCKeySeverityReason];
+    BOOL unhandledOverridden = [severityReason[RSCKeyUnhandledOverridden] boolValue];
+    RSCSeverity severity = RSCParseSeverity(json[RSCKeySeverity]);
 
     NSString *attrValue = nil;
-    NSDictionary *attrs = severityReason[BSGKeyAttributes];
+    NSDictionary *attrs = severityReason[RSCKeyAttributes];
 
     if (attrs != nil && [attrs count] == 1) { // only 1 attrValue is ever present
         attrValue = [attrs allValues][0];
     }
-    SeverityReasonType reason = [BugsnagHandledState severityReasonFromString:severityReason[BSGKeyType]];
-    return [[BugsnagHandledState alloc] initWithSeverityReason:reason
+    SeverityReasonType reason = [RSCrashReporterHandledState severityReasonFromString:severityReason[RSCKeyType]];
+    return [[RSCrashReporterHandledState alloc] initWithSeverityReason:reason
                                                       severity:severity
                                                      unhandled:unhandled
                                            unhandledOverridden:unhandledOverridden
@@ -76,31 +76,31 @@ BSG_OBJC_DIRECT_MEMBERS
 + (instancetype)handledStateWithSeverityReason:
     (SeverityReasonType)severityReason {
     return [self handledStateWithSeverityReason:severityReason
-                                       severity:BSGSeverityWarning
+                                       severity:RSCSeverityWarning
                                       attrValue:nil];
 }
 
 + (instancetype)handledStateWithSeverityReason:
                     (SeverityReasonType)severityReason
-                                      severity:(BSGSeverity)severity
+                                      severity:(RSCSeverity)severity
                                      attrValue:(NSString *)attrValue {
     BOOL unhandled = NO;
     BOOL unhandledOverridden = NO;
 
     switch (severityReason) {
     case PromiseRejection:
-        severity = BSGSeverityError;
+        severity = RSCSeverityError;
         unhandled = YES;
         break;
     case Signal:
-        severity = BSGSeverityError;
+        severity = RSCSeverityError;
         unhandled = YES;
         break;
     case HandledError:
-        severity = BSGSeverityWarning;
+        severity = RSCSeverityWarning;
         break;
     case HandledException:
-        severity = BSGSeverityWarning;
+        severity = RSCSeverityWarning;
         break;
     case LogMessage:
     case UserSpecifiedSeverity:
@@ -109,16 +109,16 @@ BSG_OBJC_DIRECT_MEMBERS
     case LikelyOutOfMemory:
     case ThermalKill:
     case UnhandledException:
-        severity = BSGSeverityError;
+        severity = RSCSeverityError;
         unhandled = YES;
         break;
     case AppHang:
-        severity = BSGSeverityError;
+        severity = RSCSeverityError;
         unhandled = NO;
         break;
     }
 
-    return [[BugsnagHandledState alloc] initWithSeverityReason:severityReason
+    return [[RSCrashReporterHandledState alloc] initWithSeverityReason:severityReason
                                                       severity:severity
                                                      unhandled:unhandled
                                            unhandledOverridden:unhandledOverridden
@@ -126,7 +126,7 @@ BSG_OBJC_DIRECT_MEMBERS
 }
 
 - (instancetype)initWithSeverityReason:(SeverityReasonType)severityReason
-                              severity:(BSGSeverity)severity
+                              severity:(RSCSeverity)severity
                              unhandled:(BOOL)unhandled
                    unhandledOverridden:(BOOL)unhandledOverridden
                              attrValue:(NSString *)attrValue {
@@ -151,10 +151,10 @@ BSG_OBJC_DIRECT_MEMBERS
 - (instancetype)initWithDictionary:(NSDictionary *)dict {
     if ((self = [super init])) {
         _unhandled = [dict[kUnhandled] boolValue];
-        _severityReasonType = [BugsnagHandledState
+        _severityReasonType = [RSCrashReporterHandledState
             severityReasonFromString:dict[kSeverityReasonType]];
-        _originalSeverity = BSGParseSeverity(dict[kOriginalSeverity]);
-        _currentSeverity = BSGParseSeverity(dict[kCurrentSeverity]);
+        _originalSeverity = RSCParseSeverity(dict[kOriginalSeverity]);
+        _currentSeverity = RSCParseSeverity(dict[kCurrentSeverity]);
         _attrKey = dict[kAttrKey];
         _attrValue = dict[kAttrValue];
     }
@@ -228,9 +228,9 @@ BSG_OBJC_DIRECT_MEMBERS
         dict[kUnhandledOverridden] = @(self.unhandledOverridden);
     }
     dict[kSeverityReasonType] =
-        [BugsnagHandledState stringFromSeverityReason:self.severityReasonType];
-    dict[kOriginalSeverity] = BSGFormatSeverity(self.originalSeverity);
-    dict[kCurrentSeverity] = BSGFormatSeverity(self.currentSeverity);
+        [RSCrashReporterHandledState stringFromSeverityReason:self.severityReasonType];
+    dict[kOriginalSeverity] = RSCFormatSeverity(self.originalSeverity);
+    dict[kCurrentSeverity] = RSCFormatSeverity(self.currentSeverity);
     dict[kAttrKey] = self.attrKey;
     dict[kAttrValue] = self.attrValue;
     return dict;

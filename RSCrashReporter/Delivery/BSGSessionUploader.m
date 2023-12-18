@@ -1,26 +1,26 @@
 //
-//  BSGSessionUploader.m
-//  Bugsnag
+//  RSCSessionUploader.m
+//  RSCrashReporter
 //
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGSessionUploader.h"
+#import "RSCSessionUploader.h"
 
-#import "BSGFileLocations.h"
-#import "BSGJSONSerialization.h"
-#import "BSGKeys.h"
-#import "BSG_RFC3339DateTool.h"
-#import "BugsnagApiClient.h"
-#import "BugsnagApp+Private.h"
-#import "BugsnagCollections.h"
-#import "BugsnagConfiguration+Private.h"
-#import "BugsnagDevice+Private.h"
-#import "BugsnagLogger.h"
-#import "BugsnagNotifier.h"
-#import "BugsnagSession+Private.h"
-#import "BugsnagSession.h"
-#import "BugsnagUser+Private.h"
+#import "RSCFileLocations.h"
+#import "RSCJSONSerialization.h"
+#import "RSCKeys.h"
+#import "RSC_RFC3339DateTool.h"
+#import "RSCrashReporterApiClient.h"
+#import "RSCrashReporterApp+Private.h"
+#import "RSCrashReporterCollections.h"
+#import "RSCrashReporterConfiguration+Private.h"
+#import "RSCrashReporterDevice+Private.h"
+#import "RSCrashReporterLogger.h"
+#import "RSCrashReporterNotifier.h"
+#import "RSCrashReporterSession+Private.h"
+#import "RSCrashReporterSession.h"
+#import "RSCrashReporterUser+Private.h"
 
 /// Persisted sessions older than this should be deleted without sending.
 static const NSTimeInterval MaxPersistedAge = 60 * 24 * 60 * 60;
@@ -28,17 +28,17 @@ static const NSTimeInterval MaxPersistedAge = 60 * 24 * 60 * 60;
 static NSArray * SortedFiles(NSFileManager *fileManager, NSMutableDictionary<NSString *, NSDate *> **creationDates);
 
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSGSessionUploader ()
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCSessionUploader ()
 @property (nonatomic) NSMutableSet *activeIds;
-@property(nonatomic) BugsnagConfiguration *config;
+@property(nonatomic) RSCrashReporterConfiguration *config;
 @end
 
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BSGSessionUploader
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCSessionUploader
 
-- (instancetype)initWithConfig:(BugsnagConfiguration *)config notifier:(BugsnagNotifier *)notifier {
+- (instancetype)initWithConfig:(RSCrashReporterConfiguration *)config notifier:(RSCrashReporterNotifier *)notifier {
     if ((self = [super init])) {
         _activeIds = [NSMutableSet new];
         _config = config;
@@ -47,35 +47,35 @@ BSG_OBJC_DIRECT_MEMBERS
     return self;
 }
 
-- (void)uploadSession:(BugsnagSession *)session {
-    [self sendSession:session completionHandler:^(BSGDeliveryStatus status) {
+- (void)uploadSession:(RSCrashReporterSession *)session {
+    [self sendSession:session completionHandler:^(RSCDeliveryStatus status) {
         switch (status) {
-            case BSGDeliveryStatusDelivered:
+            case RSCDeliveryStatusDelivered:
                 [self processStoredSessions];
                 break;
                 
-            case BSGDeliveryStatusFailed:
+            case RSCDeliveryStatusFailed:
                 [self storeSession:session]; // Retry later
                 break;
                 
-            case BSGDeliveryStatusUndeliverable:
+            case RSCDeliveryStatusUndeliverable:
                 break;
         }
     }];
 }
 
-- (void)storeSession:(BugsnagSession *)session {
-    NSDictionary *json = BSGSessionToDictionary(session);
-    NSString *file = [[BSGFileLocations.current.sessions
+- (void)storeSession:(RSCrashReporterSession *)session {
+    NSDictionary *json = RSCSessionToDictionary(session);
+    NSString *file = [[RSCFileLocations.current.sessions
                        stringByAppendingPathComponent:session.id]
                       stringByAppendingPathExtension:@"json"];
     
     NSError *error;
-    if (BSGJSONWriteToFileAtomically(json, file, &error)) {
-        bsg_log_debug(@"Stored session %@", session.id);
+    if (RSCJSONWriteToFileAtomically(json, file, &error)) {
+        rsc_log_debug(@"Stored session %@", session.id);
         [self pruneFiles];
     } else {
-        bsg_log_debug(@"Failed to write session %@", error);
+        rsc_log_debug(@"Failed to write session %@", error);
     }
 }
 
@@ -86,16 +86,16 @@ BSG_OBJC_DIRECT_MEMBERS
     
     for (NSString *file in sortedFiles) {
         if (creationDates[file].timeIntervalSinceNow < -MaxPersistedAge) {
-            bsg_log_debug(@"Deleting stale session %@",
+            rsc_log_debug(@"Deleting stale session %@",
                           file.lastPathComponent.stringByDeletingPathExtension);
             [fileManager removeItemAtPath:file error:nil];
             continue;
         }
         
-        NSDictionary *json = BSGJSONDictionaryFromFile(file, 0, nil);
-        BugsnagSession *session = BSGSessionFromDictionary(json);
+        NSDictionary *json = RSCJSONDictionaryFromFile(file, 0, nil);
+        RSCrashReporterSession *session = RSCSessionFromDictionary(json);
         if (!session) {
-            bsg_log_debug(@"Deleting invalid session %@",
+            rsc_log_debug(@"Deleting invalid session %@",
                           file.lastPathComponent.stringByDeletingPathExtension);
             [fileManager removeItemAtPath:file error:nil];
             continue;
@@ -108,8 +108,8 @@ BSG_OBJC_DIRECT_MEMBERS
             [self.activeIds addObject:file];
         }
         
-        [self sendSession:session completionHandler:^(BSGDeliveryStatus status) {
-            if (status != BSGDeliveryStatusFailed) {
+        [self sendSession:session completionHandler:^(RSCDeliveryStatus status) {
+            if (status != RSCDeliveryStatusFailed) {
                 [fileManager removeItemAtPath:file error:nil];
             }
             @synchronized (self.activeIds) {
@@ -125,7 +125,7 @@ BSG_OBJC_DIRECT_MEMBERS
     
     while (sortedFiles.count > self.config.maxPersistedSessions) {
         NSString *file = sortedFiles[0];
-        bsg_log_debug(@"Deleting %@ to comply with maxPersistedSessions",
+        rsc_log_debug(@"Deleting %@ to comply with maxPersistedSessions",
                       file.lastPathComponent.stringByDeletingPathExtension);
         [fileManager removeItemAtPath:file error:nil];
         [sortedFiles removeObject:file];
@@ -135,54 +135,54 @@ BSG_OBJC_DIRECT_MEMBERS
 //
 // https://bugsnagsessiontrackingapi.docs.apiary.io/#reference/0/session/report-a-session-starting
 //
-- (void)sendSession:(BugsnagSession *)session completionHandler:(nonnull void (^)(BSGDeliveryStatus status))completionHandler {
+- (void)sendSession:(RSCrashReporterSession *)session completionHandler:(nonnull void (^)(RSCDeliveryStatus status))completionHandler {
     NSString *apiKey = [self.config.apiKey copy];
     if (!apiKey) {
-        bsg_log_err(@"Cannot send session because no apiKey is configured.");
-        completionHandler(BSGDeliveryStatusUndeliverable);
+        rsc_log_err(@"Cannot send session because no apiKey is configured.");
+        completionHandler(RSCDeliveryStatusUndeliverable);
         return;
     }
     
     NSURL *url = self.config.sessionURL;
     if (!url) {
-        bsg_log_err(@"Cannot send session because no endpoint is configured.");
-        completionHandler(BSGDeliveryStatusUndeliverable);
+        rsc_log_err(@"Cannot send session because no endpoint is configured.");
+        completionHandler(RSCDeliveryStatusUndeliverable);
         return;
     }
     
     NSDictionary *headers = @{
-        BugsnagHTTPHeaderNameApiKey: apiKey,
-        BugsnagHTTPHeaderNamePayloadVersion: @"1.0"
+        RSCrashReporterHTTPHeaderNameApiKey: apiKey,
+        RSCrashReporterHTTPHeaderNamePayloadVersion: @"1.0"
     };
     
     NSDictionary *payload = @{
-        BSGKeyApp: [session.app toDict] ?: [NSNull null],
-        BSGKeyDevice: [session.device toDictionary] ?: [NSNull null],
-        BSGKeyNotifier: [self.notifier toDict] ?: [NSNull null],
-        BSGKeySessions: @[@{
-            BSGKeyId: session.id,
-            BSGKeyStartedAt: [BSG_RFC3339DateTool stringFromDate:session.startedAt] ?: [NSNull null],
-            BSGKeyUser: [session.user toJson] ?: @{}
+        RSCKeyApp: [session.app toDict] ?: [NSNull null],
+        RSCKeyDevice: [session.device toDictionary] ?: [NSNull null],
+        RSCKeyNotifier: [self.notifier toDict] ?: [NSNull null],
+        RSCKeySessions: @[@{
+            RSCKeyId: session.id,
+            RSCKeyStartedAt: [RSC_RFC3339DateTool stringFromDate:session.startedAt] ?: [NSNull null],
+            RSCKeyUser: [session.user toJson] ?: @{}
         }]
     };
     
-    NSData *data = BSGJSONDataFromDictionary(payload, NULL);
+    NSData *data = RSCJSONDataFromDictionary(payload, NULL);
     if (!data) {
-        bsg_log_err(@"Failed to encode session %@", session.id);
-        completionHandler(BSGDeliveryStatusUndeliverable);
+        rsc_log_err(@"Failed to encode session %@", session.id);
+        completionHandler(RSCDeliveryStatusUndeliverable);
         return;
     }
     
-    BSGPostJSONData(self.config.sessionOrDefault, data, headers, url, ^(BSGDeliveryStatus status, NSError *error) {
+    RSCPostJSONData(self.config.sessionOrDefault, data, headers, url, ^(RSCDeliveryStatus status, NSError *error) {
         switch (status) {
-            case BSGDeliveryStatusDelivered:
-                bsg_log_info(@"Sent session %@", session.id);
+            case RSCDeliveryStatusDelivered:
+                rsc_log_info(@"Sent session %@", session.id);
                 break;
-            case BSGDeliveryStatusFailed:
-                bsg_log_warn(@"Failed to send sessions: %@", error);
+            case RSCDeliveryStatusFailed:
+                rsc_log_warn(@"Failed to send sessions: %@", error);
                 break;
-            case BSGDeliveryStatusUndeliverable:
-                bsg_log_warn(@"Failed to send sessions: %@", error);
+            case RSCDeliveryStatusUndeliverable:
+                rsc_log_warn(@"Failed to send sessions: %@", error);
                 break;
         }
         completionHandler(status);
@@ -193,14 +193,14 @@ BSG_OBJC_DIRECT_MEMBERS
 
 
 static NSArray * SortedFiles(NSFileManager *fileManager, NSMutableDictionary<NSString *, NSDate *> **outDates) {
-    NSString *dir = BSGFileLocations.current.sessions;
+    NSString *dir = RSCFileLocations.current.sessions;
     NSMutableDictionary<NSString *, NSDate *> *dates = [NSMutableDictionary dictionary];
     
     for (NSString *name in [fileManager contentsOfDirectoryAtPath:dir error:nil]) {
         NSString *file = [dir stringByAppendingPathComponent:name];
         NSDate *date = [fileManager attributesOfItemAtPath:file error:nil].fileCreationDate;
         if (!date) {
-            bsg_log_debug(@"Deleting session %@ because fileCreationDate is nil",
+            rsc_log_debug(@"Deleting session %@ because fileCreationDate is nil",
                           file.lastPathComponent.stringByDeletingPathExtension);
             [fileManager removeItemAtPath:file error:nil];
         }

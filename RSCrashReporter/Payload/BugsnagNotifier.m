@@ -1,27 +1,27 @@
 //
-//  BugsnagNotifier.m
-//  Bugsnag
+//  RSCrashReporterNotifier.m
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 29/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
-#import "BugsnagNotifier.h"
+#import "RSCrashReporterNotifier.h"
 
-@implementation BugsnagNotifier
+@implementation RSCrashReporterNotifier
 
 - (instancetype)init {
     if ((self = [super init])) {
 #if TARGET_OS_TV
-        _name = @"tvOS Bugsnag Notifier";
+        _name = @"tvOS RSCrashReporter Notifier";
 #elif TARGET_OS_IOS
-        _name = @"iOS Bugsnag Notifier";
+        _name = @"iOS RSCrashReporter Notifier";
 #elif TARGET_OS_OSX
-        _name = @"OSX Bugsnag Notifier";
+        _name = @"OSX RSCrashReporter Notifier";
 #elif TARGET_OS_WATCH
-        _name = @"watchOS Bugsnag Notifier";
+        _name = @"watchOS RSCrashReporter Notifier";
 #else
-        _name = @"Bugsnag Objective-C";
+        _name = @"RSCrashReporter Objective-C";
 #endif
         _version = @"6.27.0";
         _url = @"https://github.com/bugsnag/bugsnag-cocoa";
@@ -33,7 +33,7 @@
 - (instancetype)initWithName:(NSString *)name
                      version:(NSString *)version
                          url:(NSString *)url
-                dependencies:(NSArray<BugsnagNotifier *> *)dependencies {
+                dependencies:(NSArray<RSCrashReporterNotifier *> *)dependencies {
     if ((self = [super init])) {
         _name = [name copy];
         _version = [version copy];
@@ -53,7 +53,7 @@
         NSMutableArray *values = [NSMutableArray new];
         dict[@"dependencies"] = values;
 
-        for (BugsnagNotifier *notifier in self.dependencies) {
+        for (RSCrashReporterNotifier *notifier in self.dependencies) {
             [values addObject:[notifier toDict]];
         }
     }

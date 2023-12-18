@@ -1,5 +1,5 @@
 //
-//  BSG_KSCrashState.h
+//  RSC_KSCrashState.h
 //
 //  Created by Karl Stenerud on 2012-02-05.
 //
@@ -28,8 +28,8 @@
  * number of sessions, session length, etc.
  */
 
-#ifndef HDR_BSG_KSCrashState_h
-#define HDR_BSG_KSCrashState_h
+#ifndef HDR_RSC_KSCrashState_h
+#define HDR_RSC_KSCrashState_h
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,7 +66,7 @@ typedef struct {
     /** If true, the application is currently in the foreground. */
     bool applicationIsInForeground;
 
-} BSG_KSCrash_State;
+} RSC_KSCrash_State;
 
 /** Initialize the state monitor.
  *
@@ -76,28 +76,28 @@ typedef struct {
  *
  * @return true if initialization was successful.
  */
-bool bsg_kscrashstate_init(const char *stateFilePath, BSG_KSCrash_State *state);
+bool rsc_kscrashstate_init(const char *stateFilePath, RSC_KSCrash_State *state);
 
 /** Notify the crash reporter of the application foreground/background state.
  *
  * @param isInForeground true if the application is in the foreground, false if
  *                 it is in the background.
  */
-void bsg_kscrashstate_notifyAppInForeground(bool isInForeground);
+void rsc_kscrashstate_notifyAppInForeground(bool isInForeground);
 
 /** Notify the crash reporter that the application has crashed.
  */
-void bsg_kscrashstate_notifyAppCrash(void);
+void rsc_kscrashstate_notifyAppCrash(void);
 
 /** Read-only access into the current state.
  */
-const BSG_KSCrash_State *bsg_kscrashstate_currentState(void);
+const RSC_KSCrash_State *rsc_kscrashstate_currentState(void);
 
 /**
  * Updates the stats for duration in foreground/background. This needs to
  * be updated whenever an error report is captured.
  */
-void bsg_kscrashstate_updateDurationStats(void);
+void rsc_kscrashstate_updateDurationStats(void);
 
 #ifdef __cplusplus
 }

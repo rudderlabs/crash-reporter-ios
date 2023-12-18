@@ -1,8 +1,8 @@
 //
-//  BugsnagDefines.h
-//  Bugsnag
+//  RSCrashReporterDefines.h
+//  RSCrashReporter
 //
-//  Copyright © 2022 Bugsnag Inc. All rights reserved.
+//  Copyright © 2022 RSCrashReporter Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,18 +23,18 @@
 // THE SOFTWARE.
 //
 
-#ifndef BugsnagDefines_h
-#define BugsnagDefines_h
+#ifndef RSCrashReporterDefines_h
+#define RSCrashReporterDefines_h
 
-#ifndef BUGSNAG_DEPRECATED_WITH_REPLACEMENT
-#define BUGSNAG_DEPRECATED_WITH_REPLACEMENT(REPLACEMENT) __attribute__((deprecated ("", REPLACEMENT)))
+#ifndef RSCRASHREPORTER_DEPRECATED_WITH_REPLACEMENT
+#define RSCRASHREPORTER_DEPRECATED_WITH_REPLACEMENT(REPLACEMENT) __attribute__((deprecated ("", REPLACEMENT)))
 #endif
 
-#ifndef BUGSNAG_EXTERN
+#ifndef RSCRASHREPORTER_EXTERN
 #ifdef __cplusplus
-#define BUGSNAG_EXTERN extern "C" __attribute__((visibility ("default")))
+#define RSCRASHREPORTER_EXTERN extern "C" __attribute__((visibility ("default")))
 #else
-#define BUGSNAG_EXTERN extern __attribute__((visibility ("default")))
+#define RSCRASHREPORTER_EXTERN extern __attribute__((visibility ("default")))
 #endif
 #endif
 

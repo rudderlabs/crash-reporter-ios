@@ -1,16 +1,16 @@
 //
 // Created by Jamie Lynch on 04/12/2017.
-// Copyright (c) 2017 Bugsnag. All rights reserved.
+// Copyright (c) 2017 RSCrashReporter. All rights reserved.
 //
 
-#import "BugsnagApiClient.h"
+#import "RSCrashReporterApiClient.h"
 
-#import "BSGJSONSerialization.h"
-#import "BSGKeys.h"
-#import "BSG_RFC3339DateTool.h"
+#import "RSCJSONSerialization.h"
+#import "RSCKeys.h"
+#import "RSC_RFC3339DateTool.h"
 #import "RSCrashReporter.h"
-#import "BugsnagConfiguration.h"
-#import "BugsnagLogger.h"
+#import "RSCrashReporterConfiguration.h"
+#import "RSCrashReporterLogger.h"
 
 #import <CommonCrypto/CommonCrypto.h>
 
@@ -31,64 +31,64 @@ typedef NS_ENUM(NSInteger, HTTPStatusCode) {
     HTTPStatusCodeTooManyRequests = 429,
 };
 
-void BSGPostJSONData(NSURLSession *URLSession,
+void RSCPostJSONData(NSURLSession *URLSession,
                      NSData *data,
-                     NSDictionary<BugsnagHTTPHeaderName, NSString *> *headers,
+                     NSDictionary<RSCrashReporterHTTPHeaderName, NSString *> *headers,
                      NSURL *url,
-                     void (^ completionHandler)(BSGDeliveryStatus status, NSError *_Nullable error)) {
+                     void (^ completionHandler)(RSCDeliveryStatus status, NSError *_Nullable error)) {
     
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:15];
     request.HTTPMethod = @"POST";
     [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    [request setValue:BSGIntegrityHeaderValue(data) forHTTPHeaderField:BugsnagHTTPHeaderNameIntegrity];
-    [request setValue:[BSG_RFC3339DateTool stringFromDate:[NSDate date]] forHTTPHeaderField:BugsnagHTTPHeaderNameSentAt];
+    [request setValue:RSCIntegrityHeaderValue(data) forHTTPHeaderField:RSCrashReporterHTTPHeaderNameIntegrity];
+    [request setValue:[RSC_RFC3339DateTool stringFromDate:[NSDate date]] forHTTPHeaderField:RSCrashReporterHTTPHeaderNameSentAt];
     
-    for (BugsnagHTTPHeaderName name in headers) {
+    for (RSCrashReporterHTTPHeaderName name in headers) {
         [request setValue:headers[name] forHTTPHeaderField:name];
     }
     
-    bsg_log_debug(@"Sending %lu byte payload to %@", (unsigned long)data.length, url);
+    rsc_log_debug(@"Sending %lu byte payload to %@", (unsigned long)data.length, url);
     
     [[URLSession uploadTaskWithRequest:request fromData:data completionHandler:^(__unused NSData *responseData, NSURLResponse *response, NSError *error) {
         if (![response isKindOfClass:[NSHTTPURLResponse class]]) {
-            bsg_log_debug(@"Request to %@ completed with error %@", url, error);
-            completionHandler(BSGDeliveryStatusFailed, error ?:
-                              [NSError errorWithDomain:@"BugsnagApiClientErrorDomain" code:0 userInfo:@{
+            rsc_log_debug(@"Request to %@ completed with error %@", url, error);
+            completionHandler(RSCDeliveryStatusFailed, error ?:
+                              [NSError errorWithDomain:@"RSCrashReporterApiClientErrorDomain" code:0 userInfo:@{
                                   NSLocalizedDescriptionKey: @"Request failed: no response was received",
                                   NSURLErrorFailingURLErrorKey: url }]);
             return;
         }
         
         NSInteger statusCode = ((NSHTTPURLResponse *)response).statusCode;
-        bsg_log_debug(@"Request to %@ completed with status code %ld", url, (long)statusCode);
+        rsc_log_debug(@"Request to %@ completed with status code %ld", url, (long)statusCode);
         
         if (statusCode / 100 == 2) {
-            completionHandler(BSGDeliveryStatusDelivered, nil);
+            completionHandler(RSCDeliveryStatusDelivered, nil);
             return;
         }
         
-        error = [NSError errorWithDomain:@"BugsnagApiClientErrorDomain" code:1 userInfo:@{
+        error = [NSError errorWithDomain:@"RSCrashReporterApiClientErrorDomain" code:1 userInfo:@{
             NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Request failed: unacceptable status code %ld (%@)",
                                         (long)statusCode, [NSHTTPURLResponse localizedStringForStatusCode:statusCode]],
             NSURLErrorFailingURLErrorKey: url }];
         
-        bsg_log_debug(@"Response headers: %@", ((NSHTTPURLResponse *)response).allHeaderFields);
-        bsg_log_debug(@"Response body: %.*s", (int)data.length, (const char *)data.bytes);
+        rsc_log_debug(@"Response headers: %@", ((NSHTTPURLResponse *)response).allHeaderFields);
+        rsc_log_debug(@"Response body: %.*s", (int)data.length, (const char *)data.bytes);
         
         if (statusCode / 100 == 4 &&
             statusCode != HTTPStatusCodePaymentRequired &&
             statusCode != HTTPStatusCodeProxyAuthenticationRequired &&
             statusCode != HTTPStatusCodeClientTimeout &&
             statusCode != HTTPStatusCodeTooManyRequests) {
-            completionHandler(BSGDeliveryStatusUndeliverable, error);
+            completionHandler(RSCDeliveryStatusUndeliverable, error);
             return;
         }
         
-        completionHandler(BSGDeliveryStatusFailed, error);
+        completionHandler(RSCDeliveryStatusFailed, error);
     }] resume];
 }
 
-NSString * BSGIntegrityHeaderValue(NSData *data) {
+NSString * RSCIntegrityHeaderValue(NSData *data) {
     if (!data) {
         return nil;
     }

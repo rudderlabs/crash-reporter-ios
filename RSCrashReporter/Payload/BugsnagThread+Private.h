@@ -1,25 +1,25 @@
 //
-//  BugsnagThread+Private.h
-//  Bugsnag
+//  RSCrashReporterThread+Private.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 23/11/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGDefines.h"
-#import "BugsnagInternals.h"
+#import "RSCDefines.h"
+#import "RSCrashReporterInternals.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BugsnagThread ()
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCrashReporterThread ()
 
 - (instancetype)initWithId:(nullable NSString *)identifier
                       name:(nullable NSString *)name
       errorReportingThread:(BOOL)errorReportingThread
-                      type:(BSGThreadType)type
+                      type:(RSCThreadType)type
                      state:(nullable NSString *)state
-                stacktrace:(NSArray<BugsnagStackframe *> *)stacktrace;
+                stacktrace:(NSArray<RSCrashReporterStackframe *> *)stacktrace;
 
 - (instancetype)initWithThread:(NSDictionary *)thread binaryImages:(NSArray *)binaryImages;
 
@@ -29,18 +29,18 @@ BSG_OBJC_DIRECT_MEMBERS
 
 + (NSDictionary *)enhanceThreadInfo:(NSDictionary *)thread;
 
-#if BSG_HAVE_MACH_THREADS
+#if RSC_HAVE_MACH_THREADS
 + (nullable instancetype)mainThread;
 #endif
 
-+ (NSMutableArray<BugsnagThread *> *)threadsFromArray:(NSArray *)threads binaryImages:(NSArray *)binaryImages;
++ (NSMutableArray<RSCrashReporterThread *> *)threadsFromArray:(NSArray *)threads binaryImages:(NSArray *)binaryImages;
 
 - (NSDictionary *)toDictionary;
 
 @end
 
-BSGThreadType BSGParseThreadType(NSString *type);
+RSCThreadType RSCParseThreadType(NSString *type);
 
-NSString *BSGSerializeThreadType(BSGThreadType type);
+NSString *RSCSerializeThreadType(RSCThreadType type);
 
 NS_ASSUME_NONNULL_END

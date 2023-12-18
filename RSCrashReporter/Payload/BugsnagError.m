@@ -1,72 +1,72 @@
 //
-//  BugsnagError.m
-//  Bugsnag
+//  RSCrashReporterError.m
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 01/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
-#import "BugsnagError+Private.h"
+#import "RSCrashReporterError+Private.h"
 
-#import "BSGKeys.h"
-#import "BSG_KSCrashDoctor.h"
-#import "BSG_KSCrashReportFields.h"
-#import "BugsnagCollections.h"
-#import "BugsnagLogger.h"
-#import "BugsnagStackframe+Private.h"
-#import "BugsnagStacktrace.h"
-#import "BugsnagThread+Private.h"
-
-
-typedef NSString * BSGErrorTypeString NS_TYPED_ENUM;
-
-static BSGErrorTypeString const BSGErrorTypeStringCocoa = @"cocoa";
-static BSGErrorTypeString const BSGErrorTypeStringC = @"c";
-static BSGErrorTypeString const BSGErrorTypeStringReactNativeJs = @"reactnativejs";
-static BSGErrorTypeString const BSGErrorTypeStringCSharp = @"csharp";
+#import "RSCKeys.h"
+#import "RSC_KSCrashDoctor.h"
+#import "RSC_KSCrashReportFields.h"
+#import "RSCrashReporterCollections.h"
+#import "RSCrashReporterLogger.h"
+#import "RSCrashReporterStackframe+Private.h"
+#import "RSCrashReporterStacktrace.h"
+#import "RSCrashReporterThread+Private.h"
 
 
-NSString *_Nonnull BSGSerializeErrorType(BSGErrorType errorType) {
+typedef NSString * RSCErrorTypeString NS_TYPED_ENUM;
+
+static RSCErrorTypeString const RSCErrorTypeStringCocoa = @"cocoa";
+static RSCErrorTypeString const RSCErrorTypeStringC = @"c";
+static RSCErrorTypeString const RSCErrorTypeStringReactNativeJs = @"reactnativejs";
+static RSCErrorTypeString const RSCErrorTypeStringCSharp = @"csharp";
+
+
+NSString *_Nonnull RSCSerializeErrorType(RSCErrorType errorType) {
     switch (errorType) {
-        case BSGErrorTypeCocoa:
-            return BSGErrorTypeStringCocoa;
-        case BSGErrorTypeC:
-            return BSGErrorTypeStringC;
-        case BSGErrorTypeReactNativeJs:
-            return BSGErrorTypeStringReactNativeJs;
-        case BSGErrorTypeCSharp:
-            return BSGErrorTypeStringCSharp;
+        case RSCErrorTypeCocoa:
+            return RSCErrorTypeStringCocoa;
+        case RSCErrorTypeC:
+            return RSCErrorTypeStringC;
+        case RSCErrorTypeReactNativeJs:
+            return RSCErrorTypeStringReactNativeJs;
+        case RSCErrorTypeCSharp:
+            return RSCErrorTypeStringCSharp;
     }
 }
 
-BSGErrorType BSGParseErrorType(NSString *errorType) {
-    if ([BSGErrorTypeStringCocoa isEqualToString:errorType]) {
-        return BSGErrorTypeCocoa;
-    } else if ([BSGErrorTypeStringC isEqualToString:errorType]) {
-        return BSGErrorTypeC;
-    } else if ([BSGErrorTypeStringReactNativeJs isEqualToString:errorType]) {
-        return BSGErrorTypeReactNativeJs;
-    } else if ([BSGErrorTypeStringCSharp isEqualToString:errorType]) {
-        return BSGErrorTypeCSharp;
+RSCErrorType RSCParseErrorType(NSString *errorType) {
+    if ([RSCErrorTypeStringCocoa isEqualToString:errorType]) {
+        return RSCErrorTypeCocoa;
+    } else if ([RSCErrorTypeStringC isEqualToString:errorType]) {
+        return RSCErrorTypeC;
+    } else if ([RSCErrorTypeStringReactNativeJs isEqualToString:errorType]) {
+        return RSCErrorTypeReactNativeJs;
+    } else if ([RSCErrorTypeStringCSharp isEqualToString:errorType]) {
+        return RSCErrorTypeCSharp;
     } else {
-        return BSGErrorTypeCocoa;
+        return RSCErrorTypeCocoa;
     }
 }
 
 
-NSString *_Nonnull BSGParseErrorClass(NSDictionary *error, NSString *errorType) {
+NSString *_Nonnull RSCParseErrorClass(NSDictionary *error, NSString *errorType) {
     NSString *errorClass;
 
-    if ([errorType isEqualToString:BSGKeyCppException]) {
-        errorClass = error[BSGKeyCppException][BSGKeyName];
-    } else if ([errorType isEqualToString:BSGKeyMach]) {
-        errorClass = error[BSGKeyMach][BSGKeyExceptionName];
-    } else if ([errorType isEqualToString:BSGKeySignal]) {
-        errorClass = error[BSGKeySignal][BSGKeyName];
+    if ([errorType isEqualToString:RSCKeyCppException]) {
+        errorClass = error[RSCKeyCppException][RSCKeyName];
+    } else if ([errorType isEqualToString:RSCKeyMach]) {
+        errorClass = error[RSCKeyMach][RSCKeyExceptionName];
+    } else if ([errorType isEqualToString:RSCKeySignal]) {
+        errorClass = error[RSCKeySignal][RSCKeyName];
     } else if ([errorType isEqualToString:@"nsexception"]) {
-        errorClass = error[@"nsexception"][BSGKeyName];
-    } else if ([errorType isEqualToString:BSGKeyUser]) {
-        errorClass = error[@"user_reported"][BSGKeyName];
+        errorClass = error[@"nsexception"][RSCKeyName];
+    } else if ([errorType isEqualToString:RSCKeyUser]) {
+        errorClass = error[@"user_reported"][RSCKeyName];
     }
 
     if (!errorClass) { // use a default value
@@ -75,27 +75,27 @@ NSString *_Nonnull BSGParseErrorClass(NSDictionary *error, NSString *errorType) 
     return errorClass;
 }
 
-NSString *BSGParseErrorMessage(NSDictionary *report, NSDictionary *error, NSString *errorType) {
-    NSString *reason = error[@ BSG_KSCrashField_Reason];
+NSString *RSCParseErrorMessage(NSDictionary *report, NSDictionary *error, NSString *errorType) {
+    NSString *reason = error[@ RSC_KSCrashField_Reason];
     NSString *diagnosis = nil;
-    if ([errorType isEqualToString:@ BSG_KSCrashExcType_Mach] || !reason) {
-        diagnosis = [[BSG_KSCrashDoctor new] diagnoseCrash:report];
+    if ([errorType isEqualToString:@ RSC_KSCrashExcType_Mach] || !reason) {
+        diagnosis = [[RSC_KSCrashDoctor new] diagnoseCrash:report];
     }
     return diagnosis ?: reason ?: @"";
 }
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BugsnagError
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCrashReporterError
 
 @dynamic type;
 
-- (instancetype)initWithKSCrashReport:(NSDictionary *)event stacktrace:(NSArray<BugsnagStackframe *> *)stacktrace {
+- (instancetype)initWithKSCrashReport:(NSDictionary *)event stacktrace:(NSArray<RSCrashReporterStackframe *> *)stacktrace {
     if ((self = [super init])) {
         NSDictionary *error = [event valueForKeyPath:@"crash.error"];
-        NSString *errorType = error[BSGKeyType];
-        _errorClass = BSGParseErrorClass(error, errorType);
-        _errorMessage = BSGParseErrorMessage(event, error, errorType);
-        _typeString = BSGSerializeErrorType(BSGErrorTypeCocoa);
+        NSString *errorType = error[RSCKeyType];
+        _errorClass = RSCParseErrorClass(error, errorType);
+        _errorMessage = RSCParseErrorMessage(event, error, errorType);
+        _typeString = RSCSerializeErrorType(RSCErrorTypeCocoa);
 
         if (![[event valueForKeyPath:@"user.state.didOOM"] boolValue]) {
             _stacktrace = stacktrace;
@@ -106,34 +106,34 @@ BSG_OBJC_DIRECT_MEMBERS
 
 - (instancetype)initWithErrorClass:(NSString *)errorClass
                       errorMessage:(NSString *)errorMessage
-                         errorType:(BSGErrorType)errorType
-                        stacktrace:(NSArray<BugsnagStackframe *> *)stacktrace {
+                         errorType:(RSCErrorType)errorType
+                        stacktrace:(NSArray<RSCrashReporterStackframe *> *)stacktrace {
     if ((self = [super init])) {
         _errorClass = errorClass;
         _errorMessage = errorMessage;
-        _typeString = BSGSerializeErrorType(errorType);
+        _typeString = RSCSerializeErrorType(errorType);
         _stacktrace = stacktrace ?: @[];
     }
     return self;
 }
 
-+ (BugsnagError *)errorFromJson:(NSDictionary *)json {
-    BugsnagError *error = [[BugsnagError alloc] init];
-    error.errorClass = BSGDeserializeString(json[BSGKeyErrorClass]);
-    error.errorMessage = BSGDeserializeString(json[BSGKeyMessage]);
-    error.stacktrace = BSGDeserializeArrayOfObjects(json[BSGKeyStacktrace], ^id _Nullable(NSDictionary * _Nonnull dict) {
-        return [BugsnagStackframe frameFromJson:dict];
++ (RSCrashReporterError *)errorFromJson:(NSDictionary *)json {
+    RSCrashReporterError *error = [[RSCrashReporterError alloc] init];
+    error.errorClass = RSCDeserializeString(json[RSCKeyErrorClass]);
+    error.errorMessage = RSCDeserializeString(json[RSCKeyMessage]);
+    error.stacktrace = RSCDeserializeArrayOfObjects(json[RSCKeyStacktrace], ^id _Nullable(NSDictionary * _Nonnull dict) {
+        return [RSCrashReporterStackframe frameFromJson:dict];
     }) ?: @[];
-    error.typeString = BSGDeserializeString(json[BSGKeyType]) ?: BSGErrorTypeStringCocoa;
+    error.typeString = RSCDeserializeString(json[RSCKeyType]) ?: RSCErrorTypeStringCocoa;
     return error;
 }
 
-- (BSGErrorType)type {
-    return BSGParseErrorType(self.typeString);
+- (RSCErrorType)type {
+    return RSCParseErrorType(self.typeString);
 }
 
-- (void)setType:(BSGErrorType)type {
-    self.typeString = BSGSerializeErrorType(type);
+- (void)setType:(RSCErrorType)type {
+    self.typeString = RSCSerializeErrorType(type);
 }
 
 - (void)updateWithCrashInfoMessage:(NSString *)crashInfoMessage {
@@ -165,7 +165,7 @@ BSG_OBJC_DIRECT_MEMBERS
             NSRegularExpression *regex = [[NSRegularExpression alloc] initWithPattern:pattern options:0 error:nil];
             matches = [regex matchesInString:crashInfoMessage options:0 range:NSMakeRange(0, crashInfoMessage.length)];
         } @catch (NSException *exception) {
-            bsg_log_err(@"Exception thrown while parsing crash info message: %@", exception);
+            rsc_log_err(@"Exception thrown while parsing crash info message: %@", exception);
         }
         if (matches.count != 1 || matches[0].numberOfRanges != 4) {
             continue;
@@ -200,16 +200,16 @@ BSG_OBJC_DIRECT_MEMBERS
 
 - (NSDictionary *)toDictionary {
     NSMutableDictionary *dict = [NSMutableDictionary new];
-    dict[BSGKeyErrorClass] = self.errorClass;
-    dict[BSGKeyMessage] = self.errorMessage;
-    dict[BSGKeyType] = self.typeString;
+    dict[RSCKeyErrorClass] = self.errorClass;
+    dict[RSCKeyMessage] = self.errorMessage;
+    dict[RSCKeyType] = self.typeString;
 
     NSMutableArray *frames = [NSMutableArray new];
-    for (BugsnagStackframe *frame in self.stacktrace) {
+    for (RSCrashReporterStackframe *frame in self.stacktrace) {
         [frames addObject:[frame toDictionary]];
     }
 
-    dict[BSGKeyStacktrace] = frames;
+    dict[RSCKeyStacktrace] = frames;
     return dict;
 }
 

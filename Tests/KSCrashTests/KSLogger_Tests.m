@@ -28,7 +28,7 @@
 #import <XCTest/XCTest.h>
 #import "XCTestCase+KSCrash.h"
 
-#import "BSG_KSLogger.h"
+#import "RSC_KSLogger.h"
 
 
 @interface KSLogger_Tests : XCTestCase
@@ -55,37 +55,37 @@
 
 - (void) testLogError
 {
-    BSG_KSLOG_ERROR("TEST");
+    RSC_KSLOG_ERROR("TEST");
 }
 
 - (void) testLogAlways
 {
-    BSG_KSLOG_ALWAYS("TEST");
+    RSC_KSLOG_ALWAYS("TEST");
 }
 
 - (void) testLogAlwaysNull
 {
-    BSG_KSLOG_ALWAYS(nil);
+    RSC_KSLOG_ALWAYS(nil);
 }
 
 - (void) testLogBasicError
 {
-    BSG_KSLOGBASIC_ERROR("TEST");
+    RSC_KSLOGBASIC_ERROR("TEST");
 }
 
 - (void) testLogBasicErrorNull
 {
-    BSG_KSLOGBASIC_ERROR(nil);
+    RSC_KSLOGBASIC_ERROR(nil);
 }
 
 - (void) testLogBasicAlways
 {
-    BSG_KSLOGBASIC_ALWAYS("TEST");
+    RSC_KSLOGBASIC_ALWAYS("TEST");
 }
 
 - (void) testLogBasicAlwaysNull
 {
-    BSG_KSLOGBASIC_ALWAYS(nil);
+    RSC_KSLOGBASIC_ALWAYS(nil);
 }
 
 @end

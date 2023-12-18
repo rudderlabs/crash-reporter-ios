@@ -1,12 +1,12 @@
 //
-//  BSG_KSCrashNames.c
-//  Bugsnag
+//  RSC_KSCrashNames.c
+//  RSCrashReporter
 //
 //  Created by Karl Stenerud on 28.09.21.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#include "BSG_KSCrashNames.h"
+#include "RSC_KSCrashNames.h"
 #include <mach/thread_info.h>
 #include <stdio.h>
 
@@ -21,7 +21,7 @@ static const char* thread_state_names[] = {
 };
 static const int thread_state_names_count = sizeof(thread_state_names) / sizeof(*thread_state_names);
 
-const char *bsg_kscrashthread_state_name(integer_t state) {
+const char *rsc_kscrashthread_state_name(integer_t state) {
     if (state < 1 || state >= thread_state_names_count) {
         return NULL;
     }

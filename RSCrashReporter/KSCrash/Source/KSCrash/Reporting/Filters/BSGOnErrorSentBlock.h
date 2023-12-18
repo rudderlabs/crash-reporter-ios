@@ -1,5 +1,5 @@
 //
-//  BSGOnErrorSentBlock.h
+//  RSCOnErrorSentBlock.h
 //
 //  Created by Karl Stenerud on 2016-10-06.
 //
@@ -35,4 +35,4 @@
  *                  user cancelling the operation).
  * @param error Non-nil if an error occurred.
  */
-typedef void (^BSGOnErrorSentBlock)(NSString *filename, BOOL completed, NSError *error);
+typedef void (^RSCOnErrorSentBlock)(NSString *filename, BOOL completed, NSError *error);

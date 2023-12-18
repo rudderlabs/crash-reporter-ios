@@ -1,30 +1,30 @@
 //
-//  BugsnagSessionTracker.h
-//  Bugsnag
+//  RSCrashReporterSessionTracker.h
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 24/11/2017.
-//  Copyright © 2017 Bugsnag. All rights reserved.
+//  Copyright © 2017 RSCrashReporter. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-#import <RSCrashReporter/BugsnagConfiguration.h>
-#import <RSCrashReporter/BugsnagSession.h>
+#import <RSCrashReporter/RSCrashReporterConfiguration.h>
+#import <RSCrashReporter/RSCrashReporterSession.h>
 
-#import "BSGSessionUploader.h"
+#import "RSCSessionUploader.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BugsnagSessionTracker : NSObject
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCrashReporterSessionTracker : NSObject
 
 /**
  Create a new session tracker
 
- @param config The Bugsnag configuration to use
+ @param config The RSCrashReporter configuration to use
  @return A new session tracker
  */
-- (instancetype)initWithConfig:(BugsnagConfiguration *)config client:(nullable BugsnagClient *)client;
+- (instancetype)initWithConfig:(RSCrashReporterConfiguration *)config client:(nullable RSCrashReporterClient *)client;
 
 - (void)startWithNotificationCenter:(NSNotificationCenter *)notificationCenter isInForeground:(BOOL)isInForeground;
 
@@ -38,12 +38,12 @@ BSG_OBJC_DIRECT_MEMBERS
 
 /**
  Record a new auto-captured session if neededed. Auto-captured sessions are only
- recorded and sent if -[BugsnagConfiguration autoTrackSessions] is YES
+ recorded and sent if -[RSCrashReporterConfiguration autoTrackSessions] is YES
  */
 - (void)startNewSessionIfAutoCaptureEnabled;
 
 /**
- Handle some variation of Bugsnag.notify() being called.
+ Handle some variation of RSCrashReporter.notify() being called.
  Increments the number of handled or unhandled errors recorded for the current session, if
  a session exists.
  */
@@ -51,21 +51,21 @@ BSG_OBJC_DIRECT_MEMBERS
 
 @property (copy, nonatomic) NSString *codeBundleId;
 
-@property (nullable, nonatomic) BugsnagSession *currentSession;
+@property (nullable, nonatomic) RSCrashReporterSession *currentSession;
 
 /**
  * Retrieves the running session, or nil if the session is stopped or has not yet been started/resumed.
  */
-@property (nullable, readonly, nonatomic) BugsnagSession *runningSession;
+@property (nullable, readonly, nonatomic) RSCrashReporterSession *runningSession;
 
-@property (strong, nonatomic) BSGSessionUploader *sessionUploader;
+@property (strong, nonatomic) RSCSessionUploader *sessionUploader;
 
 - (void)addRuntimeVersionInfo:(NSString *)info
                       withKey:(NSString *)key;
 
 @end
 
-@interface BugsnagSessionTracker (/* not objc_direct */)
+@interface RSCrashReporterSessionTracker (/* not objc_direct */)
 
 /**
  Handle the app foregrounding event. If more than 30s has elapsed since being

@@ -1,59 +1,59 @@
 //
-//  BugsnagEnabledBreadcrumbTest.m
+//  RSCrashReporterEnabledBreadcrumbTest.m
 //  Tests
 //
 //  Created by Jamie Lynch on 27/05/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BugsnagConfiguration+Private.h"
-#import "BugsnagTestConstants.h"
+#import "RSCrashReporterConfiguration+Private.h"
+#import "RSCrashReporterTestConstants.h"
 
-@interface BugsnagEnabledBreadcrumbTest : XCTestCase
+@interface RSCrashReporterEnabledBreadcrumbTest : XCTestCase
 
 @end
 
-@implementation BugsnagEnabledBreadcrumbTest
+@implementation RSCrashReporterEnabledBreadcrumbTest
 
 - (void)testEnabledBreadcrumbNone {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    config.enabledBreadcrumbTypes = BSGEnabledBreadcrumbTypeNone;
-    XCTAssertTrue([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeManual]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeError]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeLog]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeNavigation]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeProcess]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeRequest]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeState]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeUser]);
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    config.enabledBreadcrumbTypes = RSCEnabledBreadcrumbTypeNone;
+    XCTAssertTrue([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeManual]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeError]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeLog]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeNavigation]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeProcess]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeRequest]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeState]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeUser]);
 }
 
 - (void)testEnabledBreadcrumbLog {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    config.enabledBreadcrumbTypes = BSGEnabledBreadcrumbTypeLog;
-    XCTAssertTrue([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeManual]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeError]);
-    XCTAssertTrue([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeLog]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeNavigation]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeProcess]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeRequest]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeState]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeUser]);
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    config.enabledBreadcrumbTypes = RSCEnabledBreadcrumbTypeLog;
+    XCTAssertTrue([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeManual]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeError]);
+    XCTAssertTrue([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeLog]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeNavigation]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeProcess]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeRequest]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeState]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeUser]);
 }
 
 - (void)testEnabledBreadcrumbMulti {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    config.enabledBreadcrumbTypes = BSGEnabledBreadcrumbTypeState | BSGEnabledBreadcrumbTypeNavigation;
-    XCTAssertTrue([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeManual]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeError]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeLog]);
-    XCTAssertTrue([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeNavigation]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeProcess]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeRequest]);
-    XCTAssertTrue([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeState]);
-    XCTAssertFalse([config shouldRecordBreadcrumbType:BSGBreadcrumbTypeUser]);
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    config.enabledBreadcrumbTypes = RSCEnabledBreadcrumbTypeState | RSCEnabledBreadcrumbTypeNavigation;
+    XCTAssertTrue([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeManual]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeError]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeLog]);
+    XCTAssertTrue([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeNavigation]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeProcess]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeRequest]);
+    XCTAssertTrue([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeState]);
+    XCTAssertFalse([config shouldRecordBreadcrumbType:RSCBreadcrumbTypeUser]);
 }
 
 @end

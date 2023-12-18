@@ -1,14 +1,14 @@
 //
-//  BugsnagMetadataTests.m
+//  RSCrashReporterMetadataTests.m
 //  Tests
 //
 //  Created by Robin Macharg on 12/02/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
-#import "BugsnagMetadata.h"
-#import "BugsnagMetadata+Private.h"
-#import "BSGDefines.h"
+#import "RSCrashReporterMetadata.h"
+#import "RSCrashReporterMetadata+Private.h"
+#import "RSCDefines.h"
 
 #import <XCTest/XCTest.h>
 #import <mach/mach_init.h>
@@ -16,9 +16,9 @@
 
 // MARK: - Expose tested-class internals
 
-@interface BugsnagMetadataTests : XCTestCase
+@interface RSCrashReporterMetadataTests : XCTestCase
 @property BOOL delegateCalled;
-@property BugsnagMetadata *metadata;
+@property RSCrashReporterMetadata *metadata;
 @end
 
 // MARK: - DummyClass
@@ -39,16 +39,16 @@
 
 // MARK: - Tests
 
-@implementation BugsnagMetadataTests
+@implementation RSCrashReporterMetadataTests
 
 @synthesize delegateCalled;
 @synthesize metadata;
 
 -(void) setUp {
-    metadata = [[BugsnagMetadata alloc] init];
+    metadata = [[RSCrashReporterMetadata alloc] init];
 
     __weak __typeof__(self) weakSelf = self;
-    metadata.observer = ^(BugsnagMetadata *metadata) {
+    metadata.observer = ^(RSCrashReporterMetadata *metadata) {
         weakSelf.delegateCalled = YES;
     };
 }
@@ -121,7 +121,7 @@
 
 - (void) test_addMetadata_values {
     // Creation
-    BugsnagMetadata *metadata = [BugsnagMetadata new];
+    RSCrashReporterMetadata *metadata = [RSCrashReporterMetadata new];
     XCTAssertNotNil(metadata);
     
     // Don't want to create a tab if none of the values are not valid
@@ -161,7 +161,7 @@
     // Check delegate method gets called
     delegateCalled = NO;
     __weak __typeof__(self) weakSelf = self;
-    [metadata setObserver:^(BugsnagMetadata *metadata) {
+    [metadata setObserver:^(RSCrashReporterMetadata *metadata) {
         weakSelf.delegateCalled = YES;
     }];
     [metadata addMetadata:@{@"key" : @"value"} toSection:@"OtherTab"];
@@ -172,7 +172,7 @@
 }
 
 -(void) test_addMetadata_values_invalid_key {
-    BugsnagMetadata *metadata = [[BugsnagMetadata alloc] init];
+    RSCrashReporterMetadata *metadata = [[RSCrashReporterMetadata alloc] init];
     XCTAssertNotNil(metadata);
     XCTAssertEqual(metadata.dictionary.count, 0);
 
@@ -192,7 +192,7 @@
     // Once more with a delegate
     delegateCalled = NO;
     __weak __typeof__(self) weakSelf = self;
-    [metadata setObserver:^(BugsnagMetadata *metadata) {
+    [metadata setObserver:^(RSCrashReporterMetadata *metadata) {
         weakSelf.delegateCalled = YES;
     }];
     [metadata addMetadata:@{dummyObj : @"someValue"} toSection:@"invalidKeyTab"];
@@ -202,10 +202,10 @@
 
 - (void)testDeepCopyWithZone {
     
-    BugsnagMetadata *metadata = [BugsnagMetadata new];
+    RSCrashReporterMetadata *metadata = [RSCrashReporterMetadata new];
     [metadata addMetadata:@"myKey" withKey:@"myValue" toSection:@"section1"];
     
-    BugsnagMetadata *clone = [metadata copy];
+    RSCrashReporterMetadata *clone = [metadata copy];
     XCTAssertNotEqual(metadata, clone);
     
     // Until/unless it's decided otherwise the copy is a shallow one.
@@ -217,7 +217,7 @@
 }
 
 -(void)testClearMetadataInSectionWithKey {
-    BugsnagMetadata *metadata = [BugsnagMetadata new];
+    RSCrashReporterMetadata *metadata = [RSCrashReporterMetadata new];
     [metadata addMetadata:@"myValue1" withKey:@"myKey1" toSection:@"section1"];
     [metadata addMetadata:@"myValue2" withKey:@"myKey2" toSection:@"section1"];
     [metadata addMetadata:@"myValue3" withKey:@"myKey3" toSection:@"section2"];
@@ -245,7 +245,7 @@
 }
 
 - (void)testGetMetadataSectionKey {
-    BugsnagMetadata *metadata = [BugsnagMetadata new];
+    RSCrashReporterMetadata *metadata = [RSCrashReporterMetadata new];
     [metadata addMetadata:@"myValue1" withKey:@"myKey1" toSection:@"section1"];
     [metadata addMetadata:@"myValue2" withKey:@"myKey2" toSection:@"section1"];
     [metadata addMetadata:@"myValue3" withKey:@"myKey3" toSection:@"section2"];
@@ -259,9 +259,9 @@
     XCTAssertNil([metadata getMetadataFromSection:@"noSection" withKey:@"noKey"]);
 }
 
-// MARK: - <BugsnagMetadataDelegate>
+// MARK: - <RSCrashReporterMetadataDelegate>
 - (void)testMetadataMutability {
-    BugsnagMetadata *metadata = [BugsnagMetadata new];
+    RSCrashReporterMetadata *metadata = [RSCrashReporterMetadata new];
 
     // Immutable in, mutable out
     [metadata addMetadata:@{@"foo" : @"bar"} toSection:@"section1"];
@@ -275,7 +275,7 @@
 }
 
 - (void)testSanitizeSection {
-    BugsnagMetadata *metadata = [[BugsnagMetadata alloc] initWithDictionary:@{
+    RSCrashReporterMetadata *metadata = [[RSCrashReporterMetadata alloc] initWithDictionary:@{
             @"custom": [NSNull null],
             @"foo": @{
                     @"bar": @YES
@@ -285,7 +285,7 @@
 }
 
 - (void)testSanitizeSectionValue {
-    BugsnagMetadata *metadata = [[BugsnagMetadata alloc] initWithDictionary:@{
+    RSCrashReporterMetadata *metadata = [[RSCrashReporterMetadata alloc] initWithDictionary:@{
             @"foo": @{
                     @"bar": @YES,
                     @"custom": [NSNull null]
@@ -296,7 +296,7 @@
 }
 
 - (void)testSanitizeNestedDict {
-    BugsnagMetadata *metadata = [[BugsnagMetadata alloc] initWithDictionary:@{
+    RSCrashReporterMetadata *metadata = [[RSCrashReporterMetadata alloc] initWithDictionary:@{
             @"foo": @{
                     @"bar": @YES,
                     @"custom": @{
@@ -309,7 +309,7 @@
 }
 
 - (void)testSanitizeNestedArray {
-    BugsnagMetadata *metadata = [[BugsnagMetadata alloc] initWithDictionary:@{
+    RSCrashReporterMetadata *metadata = [[RSCrashReporterMetadata alloc] initWithDictionary:@{
             @"foo": @{
                     @"bar": @YES,
                     @"custom": @[[NSNull null], @"foo"]
@@ -320,7 +320,7 @@
 }
 
 - (void)testSanitizeNestedArrayDict {
-    BugsnagMetadata *metadata = [[BugsnagMetadata alloc] initWithDictionary:@{
+    RSCrashReporterMetadata *metadata = [[RSCrashReporterMetadata alloc] initWithDictionary:@{
             @"foo": @{
                     @"bar": @[
                             @[
@@ -336,10 +336,10 @@
 }
 
 - (void)testObserverNotCalledIfMetadataNotChanged {
-    BugsnagMetadata *metadata = [[BugsnagMetadata alloc] initWithDictionary:@{}];
+    RSCrashReporterMetadata *metadata = [[RSCrashReporterMetadata alloc] initWithDictionary:@{}];
     
     __block BOOL didCallObserver = NO;
-    metadata.observer = ^(BugsnagMetadata *metadata) {
+    metadata.observer = ^(RSCrashReporterMetadata *metadata) {
         didCallObserver = YES;
     };
     
@@ -364,9 +364,9 @@
     XCTAssertEqualObjects([metadata getMetadataFromSection:@"foo"], @{@"foo": @"baz"});
 }
 
-#if BSG_HAVE_MACH_THREADS
+#if RSC_HAVE_MACH_THREADS
 - (void)testMetadataStorageBuffer {
-    BugsnagMetadata *metadata = [[BugsnagMetadata alloc] initWithDictionary:@{}];
+    RSCrashReporterMetadata *metadata = [[RSCrashReporterMetadata alloc] initWithDictionary:@{}];
     
     [metadata addMetadata:@"Hello" withKey:@"message1" toSection:@"custom"];
     

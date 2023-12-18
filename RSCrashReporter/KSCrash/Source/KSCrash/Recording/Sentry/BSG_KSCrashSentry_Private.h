@@ -1,5 +1,5 @@
 //
-//  BSG_KSCrashSentry_Private.h
+//  RSC_KSCrashSentry_Private.h
 //
 //  Created by Karl Stenerud on 2012-09-29.
 //
@@ -24,30 +24,30 @@
 // THE SOFTWARE.
 //
 
-#ifndef HDR_BSG_KSCrashSentry_Private_h
-#define HDR_BSG_KSCrashSentry_Private_h
+#ifndef HDR_RSC_KSCrashSentry_Private_h
+#define HDR_RSC_KSCrashSentry_Private_h
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "BSG_KSCrashSentry.h"
-#include "BSGDefines.h"
+#include "RSC_KSCrashSentry.h"
+#include "RSCDefines.h"
 
-#if BSG_HAVE_MACH_THREADS
+#if RSC_HAVE_MACH_THREADS
 /** Suspend all non-reserved threads.
  *
  * Reserved threads include the current thread and all threads in
  "reservedThreads" in the context.
  */
-void bsg_kscrashsentry_suspendThreads(void);
+void rsc_kscrashsentry_suspendThreads(void);
 
 /** Resume all non-reserved threads.
  *
  * Reserved threads include the current thread and all threads in
  * "reservedThreads" in the context.
  */
-void bsg_kscrashsentry_resumeThreads(void);
+void rsc_kscrashsentry_resumeThreads(void);
 #endif
 
 /**
@@ -58,7 +58,7 @@ void bsg_kscrashsentry_resumeThreads(void);
  * can be written.
  *
  * True is returned if this crash should be processed. The caller should fill in
- * the context's crash details and call bsg_g_context->onCrash(). The caller
+ * the context's crash details and call rsc_g_context->onCrash(). The caller
  * must call endHandlingCrash() once processing is complete. The process is
  * then expected to die once the default crash handler executes.
  *
@@ -67,17 +67,17 @@ void bsg_kscrashsentry_resumeThreads(void);
  * In this case the call to beginHandlingCrash() blocks until the crash handling
  * thread calls endHandlingCrash().
  */
-bool bsg_kscrashsentry_beginHandlingCrash(const thread_t offender);
+bool rsc_kscrashsentry_beginHandlingCrash(const thread_t offender);
 
 /**
  * Sentries must call this to unblock any sencondary crashed threads that are
  * waiting in beginHandlingCrash().
  */
-void bsg_kscrashsentry_endHandlingCrash(void);
+void rsc_kscrashsentry_endHandlingCrash(void);
 
 /** Clear a crash sentry context.
  */
-void bsg_kscrashsentry_clearContext(BSG_KSCrash_SentryContext *context);
+void rsc_kscrashsentry_clearContext(RSC_KSCrash_SentryContext *context);
 
 #ifdef __cplusplus
 }

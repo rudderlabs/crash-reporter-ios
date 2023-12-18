@@ -1,58 +1,58 @@
 //
-//  BSGEventUploadOperation.m
-//  Bugsnag
+//  RSCEventUploadOperation.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 17/02/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGEventUploadOperation.h"
+#import "RSCEventUploadOperation.h"
 
-#import "BSGFileLocations.h"
-#import "BSGInternalErrorReporter.h"
-#import "BSGJSONSerialization.h"
-#import "BSGKeys.h"
-#import "BugsnagAppWithState+Private.h"
-#import "BugsnagConfiguration+Private.h"
-#import "BugsnagError+Private.h"
-#import "BugsnagEvent+Private.h"
-#import "BugsnagInternals.h"
-#import "BugsnagLogger.h"
-#import "BugsnagNotifier.h"
+#import "RSCFileLocations.h"
+#import "RSCInternalErrorReporter.h"
+#import "RSCJSONSerialization.h"
+#import "RSCKeys.h"
+#import "RSCrashReporterAppWithState+Private.h"
+#import "RSCrashReporterConfiguration+Private.h"
+#import "RSCrashReporterError+Private.h"
+#import "RSCrashReporterEvent+Private.h"
+#import "RSCrashReporterInternals.h"
+#import "RSCrashReporterLogger.h"
+#import "RSCrashReporterNotifier.h"
 
 
 static NSString * const EventPayloadVersion = @"5.0";
 
-typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
-    BSGEventUploadOperationStateReady,
-    BSGEventUploadOperationStateExecuting,
-    BSGEventUploadOperationStateFinished,
+typedef NS_ENUM(NSUInteger, RSCEventUploadOperationState) {
+    RSCEventUploadOperationStateReady,
+    RSCEventUploadOperationStateExecuting,
+    RSCEventUploadOperationStateFinished,
 };
 
-@interface BSGEventUploadOperation ()
+@interface RSCEventUploadOperation ()
 
-@property (nonatomic) BSGEventUploadOperationState state;
+@property (nonatomic) RSCEventUploadOperationState state;
 
 @end
 
 // MARK: -
 
-@implementation BSGEventUploadOperation
+@implementation RSCEventUploadOperation
 
-- (instancetype)initWithDelegate:(id<BSGEventUploadOperationDelegate>)delegate {
+- (instancetype)initWithDelegate:(id<RSCEventUploadOperationDelegate>)delegate {
     if ((self = [super init])) {
         _delegate = delegate;
     }
     return self;
 }
 
-- (void)runWithDelegate:(id<BSGEventUploadOperationDelegate>)delegate completionHandler:(nonnull void (^)(void))completionHandler {
-    bsg_log_debug(@"Preparing event %@", self.name);
+- (void)runWithDelegate:(id<RSCEventUploadOperationDelegate>)delegate completionHandler:(nonnull void (^)(void))completionHandler {
+    rsc_log_debug(@"Preparing event %@", self.name);
     
     NSError *error = nil;
-    BugsnagEvent *event = [self loadEventAndReturnError:&error];
+    RSCrashReporterEvent *event = [self loadEventAndReturnError:&error];
     if (!event) {
-        bsg_log_err(@"Failed to load event %@ due to error %@", self.name, error);
+        rsc_log_err(@"Failed to load event %@ due to error %@", self.name, error);
         if (!(error.domain == NSCocoaErrorDomain && error.code == NSFileReadNoSuchFileError)) {
             [self deleteEvent];
         }
@@ -60,10 +60,10 @@ typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
         return;
     }
     
-    BugsnagConfiguration *configuration = delegate.configuration;
+    RSCrashReporterConfiguration *configuration = delegate.configuration;
     
     if (!configuration.shouldSendReports || ![event shouldBeSent]) {
-        bsg_log_info(@"Discarding event %@ because releaseStage not in enabledReleaseStages", self.name);
+        rsc_log_info(@"Discarding event %@ because releaseStage not in enabledReleaseStages", self.name);
         [self deleteEvent];
         completionHandler();
         return;
@@ -71,14 +71,14 @@ typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
     
     NSString *errorClass = event.errors.firstObject.errorClass;
     if ([configuration shouldDiscardErrorClass:errorClass]) {
-        bsg_log_info(@"Discarding event %@ because errorClass \"%@\" matches configuration.discardClasses", self.name, errorClass);
+        rsc_log_info(@"Discarding event %@ because errorClass \"%@\" matches configuration.discardClasses", self.name, errorClass);
         [self deleteEvent];
         completionHandler();
         return;
     }
     
     NSDictionary *retryPayload = nil;
-    for (BugsnagOnSendErrorBlock block in configuration.onSendBlocks) {
+    for (RSCrashReporterOnSendErrorBlock block in configuration.onSendBlocks) {
         @try {
             if (!retryPayload) {
                 // If OnSendError modifies the event and delivery fails, we need to persist the original state of the event.
@@ -90,7 +90,7 @@ typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
                 return;
             }
         } @catch (NSException *exception) {
-            bsg_log_err(@"Ignoring exception thrown by onSend callback: %@", exception);
+            rsc_log_err(@"Ignoring exception thrown by onSend callback: %@", exception);
         }
     }
     
@@ -103,9 +103,9 @@ typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
             retryPayload = eventPayload;
         }*/
     } @catch (NSException *exception) {
-        bsg_log_err(@"Discarding event %@ due to exception %@", self.name, exception);
-        [BSGInternalErrorReporter.sharedInstance reportException:exception diagnostics:nil groupingHash:
-         [NSString stringWithFormat:@"BSGEventUploadOperation -[runWithDelegate:completionHandler:] %@ %@",
+        rsc_log_err(@"Discarding event %@ due to exception %@", self.name, exception);
+        [RSCInternalErrorReporter.sharedInstance reportException:exception diagnostics:nil groupingHash:
+         [NSString stringWithFormat:@"RSCEventUploadOperation -[runWithDelegate:completionHandler:] %@ %@",
           exception.name, exception.reason]];
         [self deleteEvent];
         completionHandler();
@@ -115,27 +115,27 @@ typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
     NSString *apiKey = event.apiKey ?: configuration.apiKey;
     
     NSMutableDictionary *requestPayload = [NSMutableDictionary dictionary];
-    requestPayload[BSGKeyApiKey] = apiKey;
-    requestPayload[BSGKeyEvents] = @[eventPayload];
-    requestPayload[BSGKeyNotifier] = [delegate.notifier toDict];
-    requestPayload[BSGKeyPayloadVersion] = EventPayloadVersion;
+    requestPayload[RSCKeyApiKey] = apiKey;
+    requestPayload[RSCKeyEvents] = @[eventPayload];
+    requestPayload[RSCKeyNotifier] = [delegate.notifier toDict];
+    requestPayload[RSCKeyPayloadVersion] = EventPayloadVersion;
     
     // MARK: - Rudder Commented
     /*NSMutableDictionary *requestHeaders = [NSMutableDictionary dictionary];
-    requestHeaders[BugsnagHTTPHeaderNameApiKey] = apiKey;
-    requestHeaders[BugsnagHTTPHeaderNamePayloadVersion] = EventPayloadVersion;
-    requestHeaders[BugsnagHTTPHeaderNameStacktraceTypes] = [event.stacktraceTypes componentsJoinedByString:@","];*/
+    requestHeaders[RSCrashReporterHTTPHeaderNameApiKey] = apiKey;
+    requestHeaders[RSCrashReporterHTTPHeaderNamePayloadVersion] = EventPayloadVersion;
+    requestHeaders[RSCrashReporterHTTPHeaderNameStacktraceTypes] = [event.stacktraceTypes componentsJoinedByString:@","];*/
     
     NSURL *notifyURL = configuration.notifyURL;
     if (!notifyURL) {
-        bsg_log_err(@"Could not upload event %@ because notifyURL was nil", self.name);
+        rsc_log_err(@"Could not upload event %@ because notifyURL was nil", self.name);
         completionHandler();
         return;
     }
     
-    NSData *data = BSGJSONDataFromDictionary(requestPayload, NULL);
+    NSData *data = RSCJSONDataFromDictionary(requestPayload, NULL);
     if (!data) {
-        bsg_log_debug(@"Encoding failed; will discard event %@", self.name);
+        rsc_log_debug(@"Encoding failed; will discard event %@", self.name);
         [self deleteEvent];
         completionHandler();
         return;
@@ -144,17 +144,17 @@ typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
     if (data.length > MaxPersistedSize) {
         // Trim extra bytes to make space for "removed" message and usage telemetry.
         NSUInteger bytesToRemove = data.length - (MaxPersistedSize - 300);
-        bsg_log_debug(@"Trimming breadcrumbs; bytesToRemove = %lu", (unsigned long)bytesToRemove);
+        rsc_log_debug(@"Trimming breadcrumbs; bytesToRemove = %lu", (unsigned long)bytesToRemove);
         @try {
             [event trimBreadcrumbs:bytesToRemove];
             eventPayload = [event toJsonWithRedactedKeys:configuration.redactedKeys];
-            requestPayload[BSGKeyEvents] = @[eventPayload];
+            requestPayload[RSCKeyEvents] = @[eventPayload];
             // MARK: - Rudder Commented
-            // data = BSGJSONDataFromDictionary(requestPayload, NULL);
+            // data = RSCJSONDataFromDictionary(requestPayload, NULL);
         } @catch (NSException *exception) {
-            bsg_log_err(@"Discarding event %@ due to exception %@", self.name, exception);
-            [BSGInternalErrorReporter.sharedInstance reportException:exception diagnostics:nil groupingHash:
-             [NSString stringWithFormat:@"BSGEventUploadOperation -[runWithDelegate:completionHandler:] %@ %@",
+            rsc_log_err(@"Discarding event %@ due to exception %@", self.name, exception);
+            [RSCInternalErrorReporter.sharedInstance reportException:exception diagnostics:nil groupingHash:
+             [NSString stringWithFormat:@"RSCEventUploadOperation -[runWithDelegate:completionHandler:] %@ %@",
               exception.name, exception.reason]];
             [self deleteEvent];
             completionHandler();
@@ -169,20 +169,20 @@ typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
     completionHandler();
     
     // MARK: - Rudder Commented
-    /*BSGPostJSONData(configuration.sessionOrDefault, data, requestHeaders, notifyURL, ^(BSGDeliveryStatus status, __unused NSError *deliveryError) {
+    /*RSCPostJSONData(configuration.sessionOrDefault, data, requestHeaders, notifyURL, ^(RSCDeliveryStatus status, __unused NSError *deliveryError) {
         switch (status) {
-            case BSGDeliveryStatusDelivered:
-                bsg_log_debug(@"Uploaded event %@", self.name);
+            case RSCDeliveryStatusDelivered:
+                rsc_log_debug(@"Uploaded event %@", self.name);
                 [self deleteEvent];
                 break;
                 
-            case BSGDeliveryStatusFailed:
-                bsg_log_debug(@"Upload failed retryably for event %@", self.name);
+            case RSCDeliveryStatusFailed:
+                rsc_log_debug(@"Upload failed retryably for event %@", self.name);
                 [self prepareForRetry:retryPayload HTTPBodySize:data.length];
                 break;
                 
-            case BSGDeliveryStatusUndeliverable:
-                bsg_log_debug(@"Upload failed; will discard event %@", self.name);
+            case RSCDeliveryStatusUndeliverable:
+                rsc_log_debug(@"Upload failed; will discard event %@", self.name);
                 [self deleteEvent];
                 break;
         }
@@ -193,7 +193,7 @@ typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
 
 // MARK: Subclassing
 
-- (BugsnagEvent *)loadEventAndReturnError:(__unused NSError * __autoreleasing *)errorPtr {
+- (RSCrashReporterEvent *)loadEventAndReturnError:(__unused NSError * __autoreleasing *)errorPtr {
     // Must be implemented by all subclasses
     [self doesNotRecognizeSelector:_cmd];
     return nil;
@@ -217,13 +217,13 @@ typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
     
     id delegate = self.delegate;
     if (!delegate) {
-        bsg_log_err(@"Upload operation %@ has no delegate", self);
+        rsc_log_err(@"Upload operation %@ has no delegate", self);
         [self setFinished];
         return;
     }
     
     [self willChangeValueForKey:NSStringFromSelector(@selector(isExecuting))];
-    self.state = BSGEventUploadOperationStateExecuting;
+    self.state = RSCEventUploadOperationStateExecuting;
     [self didChangeValueForKey:NSStringFromSelector(@selector(isExecuting))];
     
     @try {
@@ -231,20 +231,20 @@ typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
             [self setFinished];
         }];
     } @catch (NSException *exception) {
-        [BSGInternalErrorReporter.sharedInstance reportException:exception diagnostics:nil groupingHash:
-         [NSString stringWithFormat:@"BSGEventUploadOperation -[runWithDelegate:completionHandler:] %@ %@",
+        [RSCInternalErrorReporter.sharedInstance reportException:exception diagnostics:nil groupingHash:
+         [NSString stringWithFormat:@"RSCEventUploadOperation -[runWithDelegate:completionHandler:] %@ %@",
           exception.name, exception.reason]];
         [self setFinished];
     }
 }
 
 - (void)setFinished {
-    if (self.state == BSGEventUploadOperationStateFinished) {
+    if (self.state == RSCEventUploadOperationStateFinished) {
         return;
     }
     [self willChangeValueForKey:NSStringFromSelector(@selector(isExecuting))];
     [self willChangeValueForKey:NSStringFromSelector(@selector(isFinished))];
-    self.state = BSGEventUploadOperationStateFinished;
+    self.state = RSCEventUploadOperationStateFinished;
     [self didChangeValueForKey:NSStringFromSelector(@selector(isExecuting))];
     [self didChangeValueForKey:NSStringFromSelector(@selector(isFinished))];
 }
@@ -254,15 +254,15 @@ typedef NS_ENUM(NSUInteger, BSGEventUploadOperationState) {
 }
 
 - (BOOL)isReady {
-    return self.state == BSGEventUploadOperationStateReady;
+    return self.state == RSCEventUploadOperationStateReady;
 }
 
 - (BOOL)isExecuting {
-    return self.state == BSGEventUploadOperationStateExecuting;
+    return self.state == RSCEventUploadOperationStateExecuting;
 }
 
 - (BOOL)isFinished {
-    return self.state == BSGEventUploadOperationStateFinished;
+    return self.state == RSCEventUploadOperationStateFinished;
 }
 
 @end

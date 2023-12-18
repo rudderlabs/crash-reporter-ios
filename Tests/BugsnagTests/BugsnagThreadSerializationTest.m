@@ -1,19 +1,19 @@
 //
 // Created by Jamie Lynch on 02/08/2018.
-// Copyright (c) 2018 Bugsnag. All rights reserved.
+// Copyright (c) 2018 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BugsnagEvent+Private.h"
+#import "RSCrashReporterEvent+Private.h"
 
-@interface BugsnagThreadSerializationTest : XCTestCase
+@interface RSCrashReporterThreadSerializationTest : XCTestCase
 @end
 
-@implementation BugsnagThreadSerializationTest
+@implementation RSCrashReporterThreadSerializationTest
 
 - (void)testEmptyThreads {
-    BugsnagEvent *event = [self generateReportWithThreads:@[]];
+    RSCrashReporterEvent *event = [self generateReportWithThreads:@[]];
     NSArray *threads = [event toJsonWithRedactedKeys:nil][@"threads"];
     XCTAssertTrue(threads.count == 0);
 }
@@ -26,7 +26,7 @@
                             @{
                                     @"instruction_addr": @4438096107,
                                     @"object_addr": @4438048768,
-                                    @"object_name": @"Bugsnag Test App",
+                                    @"object_name": @"RSCrashReporter Test App",
                                     @"symbol_addr": @4438048768,
                                     @"symbol_name": @"_mh_execute_header",
                             }
@@ -58,7 +58,7 @@
             },
     ];
 
-    BugsnagEvent *event = [self generateReportWithThreads:trace];
+    RSCrashReporterEvent *event = [self generateReportWithThreads:trace];
     NSArray *threads = [event toJsonWithRedactedKeys:nil][@"threads"];
     XCTAssertTrue(threads.count == 2);
 
@@ -79,8 +79,8 @@
     XCTAssertFalse([secondThread[@"errorReportingThread"] boolValue]);
 }
 
-- (BugsnagEvent *)generateReportWithThreads:(NSArray *)threads {
-    return [[BugsnagEvent alloc] initWithKSReport:@{@"crash": @{@"threads": threads}}];
+- (RSCrashReporterEvent *)generateReportWithThreads:(NSArray *)threads {
+    return [[RSCrashReporterEvent alloc] initWithKSReport:@{@"crash": @{@"threads": threads}}];
 }
 
 @end

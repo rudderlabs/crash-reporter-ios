@@ -1,9 +1,9 @@
 //
-//  BSGConnectivity.h
+//  RSCConnectivity.h
 //
 //  Created by Jamie Lynch on 2017-09-04.
 //
-//  Copyright (c) 2017 Bugsnag, Inc. All rights reserved.
+//  Copyright (c) 2017 RSCrashReporter, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +24,9 @@
 // THE SOFTWARE.
 //
 
-#import "BSGDefines.h"
+#import "RSCDefines.h"
 
-#if BSG_HAVE_REACHABILITY
+#if RSC_HAVE_REACHABILITY
 
 #import <Foundation/Foundation.h>
 #import <SystemConfiguration/SystemConfiguration.h>
@@ -34,28 +34,28 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * Function signature to connectivity monitoring callback of BSGConnectivity
+ * Function signature to connectivity monitoring callback of RSCConnectivity
  *
  * @param connected YES if the monitored URL is reachable
  * @param typeDescription a textual representation of the connection type
  */
-typedef void (^BSGConnectivityChangeBlock)(BOOL connected, NSString *typeDescription);
+typedef void (^RSCConnectivityChangeBlock)(BOOL connected, NSString *typeDescription);
 
 /**
  * Monitors network connectivity using SCNetworkReachability callbacks,
  * providing a customizable callback block invoked when connectivity changes.
  */
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSGConnectivity : NSObject
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCConnectivity : NSObject
 
 /**
  * Invoke a block each time network connectivity changes
  *
  * @param URL   The URL monitored for changes. Should be equivalent to
- *              BugsnagConfiguration.notifyURL
+ *              RSCrashReporterConfiguration.notifyURL
  * @param block The block called when connectivity changes
  */
-+ (void)monitorURL:(NSURL *)URL usingCallback:(BSGConnectivityChangeBlock)block;
++ (void)monitorURL:(NSURL *)URL usingCallback:(RSCConnectivityChangeBlock)block;
 
 /**
  * Stop monitoring the URL previously configured with monitorURL:usingCallback:
@@ -66,11 +66,11 @@ BSG_OBJC_DIRECT_MEMBERS
 
 @end
 
-void BSGConnectivityCallback(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void * _Nullable);
+void RSCConnectivityCallback(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void * _Nullable);
 
-NSString *BSGConnectivityFlagRepresentation(SCNetworkReachabilityFlags flags);
+NSString *RSCConnectivityFlagRepresentation(SCNetworkReachabilityFlags flags);
 
-BOOL BSGConnectivityShouldReportChange(SCNetworkReachabilityFlags flags);
+BOOL RSCConnectivityShouldReportChange(SCNetworkReachabilityFlags flags);
 
 NS_ASSUME_NONNULL_END
 

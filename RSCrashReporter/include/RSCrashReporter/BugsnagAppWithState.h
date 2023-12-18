@@ -1,22 +1,22 @@
 //
-//  BugsnagAppWithState.h
-//  Bugsnag
+//  RSCrashReporterAppWithState.h
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 01/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-#import <RSCrashReporter/BugsnagApp.h>
-#import <RSCrashReporter/BugsnagDefines.h>
+#import <RSCrashReporter/RSCrashReporterApp.h>
+#import <RSCrashReporter/RSCrashReporterDefines.h>
 
 /**
  * Stateful information set by the notifier about your app can be found on this class. These values
  * can be accessed and amended if necessary.
  */
-BUGSNAG_EXTERN
-@interface BugsnagAppWithState : BugsnagApp
+RSCRASHREPORTER_EXTERN
+@interface RSCrashReporterAppWithState : RSCrashReporterApp
 
 /**
  * The number of milliseconds the application was running before the event occurred

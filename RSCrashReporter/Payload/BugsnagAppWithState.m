@@ -1,21 +1,21 @@
 //
-//  BugsnagAppWithState.m
-//  Bugsnag
+//  RSCrashReporterAppWithState.m
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 01/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
-#import "BugsnagAppWithState+Private.h"
+#import "RSCrashReporterAppWithState+Private.h"
 
-#import "BSGKeys.h"
-#import "BSG_KSCrashReportFields.h"
-#import "BugsnagApp+Private.h"
+#import "RSCKeys.h"
+#import "RSC_KSCrashReportFields.h"
+#import "RSCrashReporterApp+Private.h"
 
-@implementation BugsnagAppWithState
+@implementation RSCrashReporterAppWithState
 
-+ (BugsnagAppWithState *)appFromJson:(NSDictionary *)json {
-    BugsnagAppWithState *app = [BugsnagAppWithState new];
++ (RSCrashReporterAppWithState *)appFromJson:(NSDictionary *)json {
+    RSCrashReporterAppWithState *app = [RSCrashReporterAppWithState new];
 
     id duration = json[@"duration"];
     if ([duration isKindOfClass:[NSNumber class]]) {
@@ -49,23 +49,23 @@
     return app;
 }
 
-+ (BugsnagAppWithState *)appWithDictionary:(NSDictionary *)event
-                                    config:(BugsnagConfiguration *)config
++ (RSCrashReporterAppWithState *)appWithDictionary:(NSDictionary *)event
+                                    config:(RSCrashReporterConfiguration *)config
                               codeBundleId:(NSString *)codeBundleId
 {
-    BugsnagAppWithState *app = [BugsnagAppWithState new];
-    NSDictionary *system = event[BSGKeySystem];
-    NSDictionary *stats = system[@BSG_KSCrashField_AppStats];
+    RSCrashReporterAppWithState *app = [RSCrashReporterAppWithState new];
+    NSDictionary *system = event[RSCKeySystem];
+    NSDictionary *stats = system[@RSC_KSCrashField_AppStats];
 
     // convert from seconds to milliseconds
-    NSNumber *activeTimeSinceLaunch = @((int)([stats[@BSG_KSCrashField_ActiveTimeSinceLaunch] doubleValue] * 1000.0));
-    NSNumber *backgroundTimeSinceLaunch = @((int)([stats[@BSG_KSCrashField_BGTimeSinceLaunch] doubleValue] * 1000.0));
+    NSNumber *activeTimeSinceLaunch = @((int)([stats[@RSC_KSCrashField_ActiveTimeSinceLaunch] doubleValue] * 1000.0));
+    NSNumber *backgroundTimeSinceLaunch = @((int)([stats[@RSC_KSCrashField_BGTimeSinceLaunch] doubleValue] * 1000.0));
 
     app.durationInForeground = activeTimeSinceLaunch;
     app.duration = @([activeTimeSinceLaunch longValue] + [backgroundTimeSinceLaunch longValue]);
-    app.inForeground = [stats[@BSG_KSCrashField_AppInFG] boolValue];
+    app.inForeground = [stats[@RSC_KSCrashField_AppInFG] boolValue];
     app.isLaunching = [[event valueForKeyPath:@"user.isLaunching"] boolValue];
-    [BugsnagApp populateFields:app dictionary:event config:config codeBundleId:codeBundleId];
+    [RSCrashReporterApp populateFields:app dictionary:event config:config codeBundleId:codeBundleId];
     return app;
 }
 

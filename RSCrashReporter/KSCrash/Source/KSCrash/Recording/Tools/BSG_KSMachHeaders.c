@@ -1,15 +1,15 @@
 //
-//  BSG_KSMachHeaders.c
-//  Bugsnag
+//  RSC_KSMachHeaders.c
+//  RSCrashReporter
 //
 //  Created by Robin Macharg on 04/05/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
-#include "BSG_KSMachHeaders.h"
+#include "RSC_KSMachHeaders.h"
 
-#include "BSG_KSLogger.h"
-#include "BSG_KSMach.h"
+#include "RSC_KSLogger.h"
+#include "RSC_KSMach.h"
 
 #include <dispatch/dispatch.h>
 #include <dlfcn.h>
@@ -39,7 +39,7 @@ static void remove_image(const struct mach_header *header, intptr_t slide);
 static void register_dyld_images(void);
 static void register_for_changes(void);
 static intptr_t compute_slide(const struct mach_header *header);
-static bool contains_address(BSG_Mach_Header_Info *image, vm_address_t address);
+static bool contains_address(RSC_Mach_Header_Info *image, vm_address_t address);
 static const char * get_path(const struct mach_header *header);
 
 static const struct dyld_all_image_infos *g_all_image_infos;
@@ -48,13 +48,13 @@ static const struct dyld_all_image_infos *g_all_image_infos;
 
 // The list head is implemented as a dummy entry to simplify the algorithm.
 // We fetch g_head_dummy.next to get the real head of the list.
-static BSG_Mach_Header_Info g_head_dummy;
-static _Atomic(BSG_Mach_Header_Info *) g_images_tail = &g_head_dummy;
-static BSG_Mach_Header_Info *g_self_image;
+static RSC_Mach_Header_Info g_head_dummy;
+static _Atomic(RSC_Mach_Header_Info *) g_images_tail = &g_head_dummy;
+static RSC_Mach_Header_Info *g_self_image;
 
 static _Atomic(bool) is_mach_headers_initialized;
 
-void bsg_mach_headers_initialize(void) {
+void rsc_mach_headers_initialize(void) {
     bool expected = false;
     if (!atomic_compare_exchange_strong(&is_mach_headers_initialized, &expected, true)) {
         // Already called
@@ -65,12 +65,12 @@ void bsg_mach_headers_initialize(void) {
     register_for_changes();
 }
 
-BSG_Mach_Header_Info *bsg_mach_headers_get_images(void) {
+RSC_Mach_Header_Info *rsc_mach_headers_get_images(void) {
     return atomic_load(&g_head_dummy.next);
 }
 
-BSG_Mach_Header_Info *bsg_mach_headers_get_main_image(void) {
-    for (BSG_Mach_Header_Info *img = bsg_mach_headers_get_images(); img != NULL; img = atomic_load(&img->next)) {
+RSC_Mach_Header_Info *rsc_mach_headers_get_main_image(void) {
+    for (RSC_Mach_Header_Info *img = rsc_mach_headers_get_images(); img != NULL; img = atomic_load(&img->next)) {
         if (img->header->filetype == MH_EXECUTE) {
             return img;
         }
@@ -78,7 +78,7 @@ BSG_Mach_Header_Info *bsg_mach_headers_get_main_image(void) {
     return NULL;
 }
 
-BSG_Mach_Header_Info *bsg_mach_headers_get_self_image(void) {
+RSC_Mach_Header_Info *rsc_mach_headers_get_self_image(void) {
     return g_self_image;
 }
 
@@ -104,7 +104,7 @@ static void register_dyld_images(void) {
         }
 #endif
     } else {
-        BSG_KSLOG_ERROR("task_info TASK_DYLD_INFO failed: %s", mach_error_string(kr));
+        RSC_KSLOG_ERROR("task_info TASK_DYLD_INFO failed: %s", mach_error_string(kr));
     }
 }
 
@@ -125,20 +125,20 @@ static void register_for_changes(void) {
  *
  * @returns a boolean indicating success
  */
-bool bsg_mach_headers_populate_info(const struct mach_header *header, intptr_t slide, BSG_Mach_Header_Info *info) {
+bool rsc_mach_headers_populate_info(const struct mach_header *header, intptr_t slide, RSC_Mach_Header_Info *info) {
     
     // Early exit conditions; this is not a valid/useful binary image
     // 1. We can't find a sensible Mach command
-    uintptr_t cmdPtr = bsg_mach_headers_first_cmd_after_header(header);
+    uintptr_t cmdPtr = rsc_mach_headers_first_cmd_after_header(header);
     if (cmdPtr == 0) {
-        BSG_KSLOG_ERROR("Invalid mach header @ %p", header);
+        RSC_KSLOG_ERROR("Invalid mach header @ %p", header);
         return false;
     }
 
     // 2. The image doesn't have a name.  Note: running with a debugger attached causes this condition to match.
     const char *imageName = get_path(header);
     if (!imageName) {
-        BSG_KSLOG_ERROR("Could not find name for mach header @ %p", header);
+        RSC_KSLOG_ERROR("Could not find name for mach header @ %p", header);
         return false;
     }
     
@@ -179,7 +179,7 @@ bool bsg_mach_headers_populate_info(const struct mach_header *header, intptr_t s
     
     // Sanity checks that should never fail
     if (((uintptr_t)imageVmAddr + (uintptr_t)slide) != (uintptr_t)header) {
-        BSG_KSLOG_ERROR("Mach header != (vmaddr + slide) for %s; symbolication will be compromised.", imageName);
+        RSC_KSLOG_ERROR("Mach header != (vmaddr + slide) for %s; symbolication will be compromised.", imageName);
     }
     
     info->header = header;
@@ -195,17 +195,17 @@ bool bsg_mach_headers_populate_info(const struct mach_header *header, intptr_t s
 }
 
 static void add_image(const struct mach_header *header, intptr_t slide) {
-    BSG_Mach_Header_Info *newImage = calloc(1, sizeof(BSG_Mach_Header_Info));
+    RSC_Mach_Header_Info *newImage = calloc(1, sizeof(RSC_Mach_Header_Info));
     if (newImage == NULL) {
         return;
     }
 
-    if (!bsg_mach_headers_populate_info(header, slide, newImage)) {
+    if (!rsc_mach_headers_populate_info(header, slide, newImage)) {
         free(newImage);
         return;
     }
 
-    BSG_Mach_Header_Info *oldTail = atomic_exchange(&g_images_tail, newImage);
+    RSC_Mach_Header_Info *oldTail = atomic_exchange(&g_images_tail, newImage);
     atomic_store(&oldTail->next, newImage);
 
     if (header == &__dso_handle) {
@@ -214,12 +214,12 @@ static void add_image(const struct mach_header *header, intptr_t slide) {
 }
 
 static void remove_image(const struct mach_header *header, intptr_t slide) {
-    BSG_Mach_Header_Info existingImage = { 0 };
-    if (!bsg_mach_headers_populate_info(header, slide, &existingImage)) {
+    RSC_Mach_Header_Info existingImage = { 0 };
+    if (!rsc_mach_headers_populate_info(header, slide, &existingImage)) {
         return;
     }
 
-    for (BSG_Mach_Header_Info *img = bsg_mach_headers_get_images(); img != NULL; img = atomic_load(&img->next)) {
+    for (RSC_Mach_Header_Info *img = rsc_mach_headers_get_images(); img != NULL; img = atomic_load(&img->next)) {
         if (img->imageVmAddr == existingImage.imageVmAddr) {
             // To avoid a destructive operation that could lead thread safety problems,
             // we maintain the image record, but mark it as unloaded
@@ -228,11 +228,11 @@ static void remove_image(const struct mach_header *header, intptr_t slide) {
     }
 }
 
-BSG_Mach_Header_Info *bsg_mach_headers_image_named(const char *const imageName, bool exactMatch) {
+RSC_Mach_Header_Info *rsc_mach_headers_image_named(const char *const imageName, bool exactMatch) {
         
     if (imageName != NULL) {
         
-        for (BSG_Mach_Header_Info *img = bsg_mach_headers_get_images(); img != NULL; img = atomic_load(&img->next)) {
+        for (RSC_Mach_Header_Info *img = rsc_mach_headers_get_images(); img != NULL; img = atomic_load(&img->next)) {
             if (img->name == NULL) {
                 continue; // name is null if the index is out of range per dyld(3)
             } else if (img->unloaded == true) {
@@ -252,8 +252,8 @@ BSG_Mach_Header_Info *bsg_mach_headers_image_named(const char *const imageName, 
     return NULL;
 }
 
-BSG_Mach_Header_Info *bsg_mach_headers_image_at_address(const uintptr_t address) {
-    for (BSG_Mach_Header_Info *img = bsg_mach_headers_get_images(); img; img = atomic_load(&img->next)) {
+RSC_Mach_Header_Info *rsc_mach_headers_image_at_address(const uintptr_t address) {
+    for (RSC_Mach_Header_Info *img = rsc_mach_headers_get_images(); img; img = atomic_load(&img->next)) {
         if (contains_address(img, address)) {
             return img;
         }
@@ -261,7 +261,7 @@ BSG_Mach_Header_Info *bsg_mach_headers_image_at_address(const uintptr_t address)
     return NULL;
 }
 
-uintptr_t bsg_mach_headers_first_cmd_after_header(const struct mach_header *const header) {
+uintptr_t rsc_mach_headers_first_cmd_after_header(const struct mach_header *const header) {
     if (header == NULL) {
       return 0;
     }
@@ -278,8 +278,8 @@ uintptr_t bsg_mach_headers_first_cmd_after_header(const struct mach_header *cons
     }
 }
 
-static uintptr_t bsg_mach_header_info_get_section_addr_named(const BSG_Mach_Header_Info *header, const char *name) {
-    uintptr_t cmdPtr = bsg_mach_headers_first_cmd_after_header(header->header);
+static uintptr_t rsc_mach_header_info_get_section_addr_named(const RSC_Mach_Header_Info *header, const char *name) {
+    uintptr_t cmdPtr = rsc_mach_headers_first_cmd_after_header(header->header);
     if (!cmdPtr) {
         return 0;
     }
@@ -311,13 +311,13 @@ static uintptr_t bsg_mach_header_info_get_section_addr_named(const BSG_Mach_Head
     return 0;
 }
 
-const char *bsg_mach_headers_get_crash_info_message(const BSG_Mach_Header_Info *header) {
+const char *rsc_mach_headers_get_crash_info_message(const RSC_Mach_Header_Info *header) {
     struct crashreporter_annotations_t info;
-    uintptr_t sectionAddress = bsg_mach_header_info_get_section_addr_named(header, CRASHREPORTER_ANNOTATIONS_SECTION);
+    uintptr_t sectionAddress = rsc_mach_header_info_get_section_addr_named(header, CRASHREPORTER_ANNOTATIONS_SECTION);
     if (!sectionAddress) {
         return NULL;
     }
-    if (bsg_ksmachcopyMem((void *)sectionAddress, &info, sizeof(info)) != KERN_SUCCESS) {
+    if (rsc_ksmachcopyMem((void *)sectionAddress, &info, sizeof(info)) != KERN_SUCCESS) {
         return NULL;
     }
     // Version 4 was in use until iOS 9 / Swift 2.0 when the version was bumped to 5.
@@ -330,7 +330,7 @@ const char *bsg_mach_headers_get_crash_info_message(const BSG_Mach_Header_Info *
     // Probe the string to ensure it's safe to read.
     for (uintptr_t i = 0; i < 500; i++) {
         char c;
-        if (bsg_ksmachcopyMem((void *)(info.message + i), &c, sizeof(c)) != KERN_SUCCESS) {
+        if (rsc_ksmachcopyMem((void *)(info.message + i), &c, sizeof(c)) != KERN_SUCCESS) {
             // String is not readable.
             return NULL;
         }
@@ -343,7 +343,7 @@ const char *bsg_mach_headers_get_crash_info_message(const BSG_Mach_Header_Info *
 }
 
 static intptr_t compute_slide(const struct mach_header *header) {
-    uintptr_t cmdPtr = bsg_mach_headers_first_cmd_after_header(header);
+    uintptr_t cmdPtr = rsc_mach_headers_first_cmd_after_header(header);
     if (!cmdPtr) {
         return 0;
     }
@@ -368,7 +368,7 @@ static intptr_t compute_slide(const struct mach_header *header) {
     return 0;
 }
 
-static bool contains_address(BSG_Mach_Header_Info *img, vm_address_t address) {
+static bool contains_address(RSC_Mach_Header_Info *img, vm_address_t address) {
     if (img->unloaded) {
         return false;
     }
@@ -396,10 +396,10 @@ static const char * get_path(const struct mach_header *header) {
     return NULL;
 }
 
-void bsg_test_support_mach_headers_reset(void) {
+void rsc_test_support_mach_headers_reset(void) {
     // Erase all current images
-    BSG_Mach_Header_Info *next = NULL;
-    for (BSG_Mach_Header_Info *img = bsg_mach_headers_get_images(); img != NULL; img = next) {
+    RSC_Mach_Header_Info *next = NULL;
+    for (RSC_Mach_Header_Info *img = rsc_mach_headers_get_images(); img != NULL; img = next) {
         next = atomic_load(&img->next);
         free(img);
     }
@@ -409,14 +409,14 @@ void bsg_test_support_mach_headers_reset(void) {
     atomic_store(&g_images_tail, &g_head_dummy);
     g_self_image = NULL;
 
-    // Force bsg_mach_headers_initialize to run again when requested.
+    // Force rsc_mach_headers_initialize to run again when requested.
     atomic_store(&is_mach_headers_initialized, false);
 }
 
-void bsg_test_support_mach_headers_add_image(const struct mach_header *header, intptr_t slide) {
+void rsc_test_support_mach_headers_add_image(const struct mach_header *header, intptr_t slide) {
     add_image(header, slide);
 }
 
-void bsg_test_support_mach_headers_remove_image(const struct mach_header *header, intptr_t slide) {
+void rsc_test_support_mach_headers_remove_image(const struct mach_header *header, intptr_t slide) {
     remove_image(header, slide);
 }

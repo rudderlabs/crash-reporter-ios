@@ -27,7 +27,7 @@
     @throw NSInternalInconsistencyException;
 }
 
-- (void)notifyCrashEvent:(BugsnagEvent * _Nullable)event withRequestPayload:(NSMutableDictionary * _Nullable)requestPayload {
+- (void)notifyCrashEvent:(RSCrashReporterEvent * _Nullable)event withRequestPayload:(NSMutableDictionary * _Nullable)requestPayload {
     NSError *error;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:requestPayload
                                                        options:NSJSONWritingPrettyPrinted // Pass 0 if you don't care about the readability of the generated string

@@ -1,23 +1,23 @@
 //
-//  BSGNetworkBreadcrumbTests.m
-//  Bugsnag
+//  RSCNetworkBreadcrumbTests.m
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 22/09/2021.
 //
 
-#import "BSGNetworkBreadcrumb.h"
+#import "RSCNetworkBreadcrumb.h"
 
 #import <XCTest/XCTest.h>
 
-@interface BSGNetworkBreadcrumbTests : XCTestCase
+@interface RSCNetworkBreadcrumbTests : XCTestCase
 
 @end
 
-@implementation BSGNetworkBreadcrumbTests
+@implementation RSCNetworkBreadcrumbTests
 
 - (void)testUrlParamsForQueryItems {
 #define TEST(url, expected) \
-XCTAssertEqualObjects(BSGURLParamsForQueryItems([NSURLComponents componentsWithString:url].queryItems), expected)
+XCTAssertEqualObjects(RSCURLParamsForQueryItems([NSURLComponents componentsWithString:url].queryItems), expected)
     
     TEST(@"http://example.com", nil);
     
@@ -48,7 +48,7 @@ XCTAssertEqualObjects(BSGURLParamsForQueryItems([NSURLComponents componentsWithS
 
 - (void)testURLStringWithoutQueryForComponents {
 #define TEST(url, expected) \
-XCTAssertEqualObjects(BSGURLStringForComponents([NSURLComponents componentsWithString:url]), expected)
+XCTAssertEqualObjects(RSCURLStringForComponents([NSURLComponents componentsWithString:url]), expected)
     
     TEST(@"http://example.com",
          @"http://example.com");

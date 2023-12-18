@@ -1,20 +1,20 @@
 //
-//  BugsnagErrorTypes.h
-//  Bugsnag
+//  RSCrashReporterErrorTypes.h
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 22/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-#import <RSCrashReporter/BugsnagDefines.h>
+#import <RSCrashReporter/RSCrashReporterDefines.h>
 
 /**
  * The types of error that should be reported.
  */
-BUGSNAG_EXTERN
-@interface BugsnagErrorTypes : NSObject
+RSCRASHREPORTER_EXTERN
+@interface RSCrashReporterErrorTypes : NSObject
 
 /**
  * Determines whether App Hang events should be reported to bugsnag.
@@ -68,7 +68,7 @@ BUGSNAG_EXTERN
 @property (nonatomic) BOOL machExceptions API_UNAVAILABLE(watchos);
 
 /**
- * Sets whether Bugsnag should automatically capture and report unhandled promise rejections.
+ * Sets whether RSCrashReporter should automatically capture and report unhandled promise rejections.
  * This only applies to React Native apps.
  * By default, this value is true.
  */

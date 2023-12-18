@@ -1,31 +1,31 @@
 //
-//  BSGEventUploader.h
-//  Bugsnag
+//  RSCEventUploader.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 16/02/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-#import "BSGDefines.h"
-#import "BugsnagClient.h"
+#import "RSCDefines.h"
+#import "RSCrashReporterClient.h"
 
-@class BugsnagApiClient;
-@class BugsnagConfiguration;
-@class BugsnagEvent;
-@class BugsnagNotifier;
+@class RSCrashReporterApiClient;
+@class RSCrashReporterConfiguration;
+@class RSCrashReporterEvent;
+@class RSCrashReporterNotifier;
 
 NS_ASSUME_NONNULL_BEGIN
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BSGEventUploader : NSObject
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCEventUploader : NSObject
 
-- (instancetype)initWithConfiguration:(BugsnagConfiguration *)configuration notifier:(BugsnagNotifier *)notifier delegate:(id<RSCrashReporterNotifyDelegate> _Nullable)delegate;
+- (instancetype)initWithConfiguration:(RSCrashReporterConfiguration *)configuration notifier:(RSCrashReporterNotifier *)notifier delegate:(id<RSCrashReporterNotifyDelegate> _Nullable)delegate;
 
-- (void)storeEvent:(BugsnagEvent *)event;
+- (void)storeEvent:(RSCrashReporterEvent *)event;
 
-- (void)uploadEvent:(BugsnagEvent *)event completionHandler:(nullable void (^)(void))completionHandler;
+- (void)uploadEvent:(RSCrashReporterEvent *)event completionHandler:(nullable void (^)(void))completionHandler;
 
 - (void)uploadKSCrashReportWithFile:(NSString *)file completionHandler:(nullable void (^)(void))completionHandler;
 

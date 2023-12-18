@@ -1,29 +1,29 @@
 //
-//  BugsnagSessionTrackerStopTest.m
+//  RSCrashReporterSessionTrackerStopTest.m
 //  Tests
 //
 //  Created by Jamie Lynch on 15/02/2019.
-//  Copyright © 2019 Bugsnag. All rights reserved.
+//  Copyright © 2019 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BugsnagSession+Private.h"
-#import "BugsnagSessionTracker.h"
-#import "BugsnagTestConstants.h"
+#import "RSCrashReporterSession+Private.h"
+#import "RSCrashReporterSessionTracker.h"
+#import "RSCrashReporterTestConstants.h"
 
-@interface BugsnagSessionTrackerStopTest : XCTestCase
-@property BugsnagConfiguration *configuration;
-@property BugsnagSessionTracker *tracker;
+@interface RSCrashReporterSessionTrackerStopTest : XCTestCase
+@property RSCrashReporterConfiguration *configuration;
+@property RSCrashReporterSessionTracker *tracker;
 @end
 
-@implementation BugsnagSessionTrackerStopTest
+@implementation RSCrashReporterSessionTrackerStopTest
 
 - (void)setUp {
     [super setUp];
-    self.configuration = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    self.configuration = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
     self.configuration.autoTrackSessions = NO;
-    self.tracker = [[BugsnagSessionTracker alloc] initWithConfig:self.configuration client:nil];
+    self.tracker = [[RSCrashReporterSessionTracker alloc] initWithConfig:self.configuration client:nil];
 }
 
 /**
@@ -31,7 +31,7 @@
  */
 - (void)testResumeFromStoppedSession {
     [self.tracker startNewSession];
-    BugsnagSession *original = self.tracker.runningSession;
+    RSCrashReporterSession *original = self.tracker.runningSession;
     XCTAssertNotNil(original);
 
     [self.tracker pauseSession];
@@ -56,7 +56,7 @@
  */
 - (void)testStartNewAfterStoppedSession {
     [self.tracker startNewSession];
-    BugsnagSession *originalSession = self.tracker.runningSession;
+    RSCrashReporterSession *originalSession = self.tracker.runningSession;
 
     [self.tracker pauseSession];
     [self.tracker startNewSession];
@@ -68,7 +68,7 @@
  */
 - (void)testMultipleResumesHaveNoEffect {
     [self.tracker startNewSession];
-    BugsnagSession *original = self.tracker.runningSession;
+    RSCrashReporterSession *original = self.tracker.runningSession;
     [self.tracker pauseSession];
 
     XCTAssertTrue([self.tracker resumeSession]);

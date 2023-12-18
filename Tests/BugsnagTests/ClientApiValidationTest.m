@@ -1,30 +1,30 @@
 //
 //  ClientApiValidationTest.m
-//  Bugsnag
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 10/06/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 #import <RSCrashReporter/RSCrashReporter.h>
-#import "BugsnagTestConstants.h"
+#import "RSCrashReporterTestConstants.h"
 
 /**
 * Validates that the Client API interface handles any invalid input gracefully.
 */
 @interface ClientApiValidationTest : XCTestCase
-@property BugsnagClient *client;
+@property RSCrashReporterClient *client;
 @end
 
 @implementation ClientApiValidationTest
 
 - (void)setUp {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    [config addOnSendErrorBlock:^BOOL(BugsnagEvent *event) {
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    [config addOnSendErrorBlock:^BOOL(RSCrashReporterEvent *event) {
         return NO;
     }];
-    self.client = [[BugsnagClient alloc]initWithConfiguration:config delegate:nil];
+    self.client = [[RSCrashReporterClient alloc]initWithConfiguration:config delegate:nil];
 }
 
 - (void)testValidNotify {
@@ -34,7 +34,7 @@
 - (void)testValidNotifyBlock {
     NSException *exc = [NSException exceptionWithName:@"FooException" reason:@"whoops" userInfo:nil];
     [self.client notify:exc block:nil];
-    [self.client notify:exc block:^BOOL(BugsnagEvent *event) {
+    [self.client notify:exc block:^BOOL(RSCrashReporterEvent *event) {
         return NO;
     }];
 }
@@ -47,7 +47,7 @@
 - (void)testValidNotifyErrorBlock {
     NSError *error = [NSError errorWithDomain:@"BarError" code:500 userInfo:nil];
     [self.client notifyError:error block:nil];
-    [self.client notifyError:error block:^BOOL(BugsnagEvent *event) {
+    [self.client notifyError:error block:^BOOL(RSCrashReporterEvent *event) {
         return NO;
     }];
 }
@@ -61,8 +61,8 @@
 }
 
 - (void)testValidLeaveBreadcrumbWithMessageMetadata {
-    [self.client leaveBreadcrumbWithMessage:@"Foo" metadata:nil andType:BSGBreadcrumbTypeProcess];
-    [self.client leaveBreadcrumbWithMessage:@"Foo" metadata:@{@"test": @2} andType:BSGBreadcrumbTypeState];
+    [self.client leaveBreadcrumbWithMessage:@"Foo" metadata:nil andType:RSCBreadcrumbTypeProcess];
+    [self.client leaveBreadcrumbWithMessage:@"Foo" metadata:@{@"test": @2} andType:RSCBreadcrumbTypeState];
 }
 
 - (void)testValidStartSession {
@@ -103,14 +103,14 @@
 }
 
 - (void)testValidOnSessionBlock {
-    BugsnagOnSessionRef callback = [self.client addOnSessionBlock:^BOOL(BugsnagSession *session) {
+    RSCrashReporterOnSessionRef callback = [self.client addOnSessionBlock:^BOOL(RSCrashReporterSession *session) {
         return NO;
     }];
     [self.client removeOnSession:callback];
 }
 
 - (void)testValidOnBreadcrumbBlock {
-    BugsnagOnBreadcrumbRef callback = [self.client addOnBreadcrumbBlock:^BOOL(BugsnagBreadcrumb *breadcrumb) {
+    RSCrashReporterOnBreadcrumbRef callback = [self.client addOnBreadcrumbBlock:^BOOL(RSCrashReporterBreadcrumb *breadcrumb) {
         return NO;
     }];
     [self.client removeOnBreadcrumb:callback];

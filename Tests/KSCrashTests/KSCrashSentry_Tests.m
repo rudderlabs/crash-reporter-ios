@@ -27,16 +27,16 @@
 
 #import <XCTest/XCTest.h>
 
-#import "BSG_KSCrashSentry.h"
-#import "BSG_KSCrashSentry_Private.h"
-#import "BSGDefines.h"
+#import "RSC_KSCrashSentry.h"
+#import "RSC_KSCrashSentry_Private.h"
+#import "RSCDefines.h"
 
 static void onCrash(void *context)
 {
     // Do nothing
 }
 
-static BSG_KSCrash_SentryContext context;
+static RSC_KSCrash_SentryContext context;
 
 @interface KSCrashSentry_Tests : XCTestCase @end
 
@@ -44,16 +44,16 @@ static BSG_KSCrash_SentryContext context;
 @implementation KSCrashSentry_Tests
 
 - (void) setUp {
-    bsg_kscrashsentry_installWithContext(&context, BSG_KSCrashTypeAll, onCrash);
+    rsc_kscrashsentry_installWithContext(&context, RSC_KSCrashTypeAll, onCrash);
 }
 
-#if BSG_HAVE_MACH_THREADS
+#if RSC_HAVE_MACH_THREADS
 - (void) testSuspendResumeThreads
 {
-    bsg_kscrashsentry_suspendThreads();
-    bsg_kscrashsentry_suspendThreads();
-    bsg_kscrashsentry_resumeThreads();
-    bsg_kscrashsentry_resumeThreads();
+    rsc_kscrashsentry_suspendThreads();
+    rsc_kscrashsentry_suspendThreads();
+    rsc_kscrashsentry_resumeThreads();
+    rsc_kscrashsentry_resumeThreads();
 }
 #endif
 

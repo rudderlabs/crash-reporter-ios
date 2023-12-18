@@ -1,9 +1,9 @@
 //
 //  UIApplicationStub.m
-//  Bugsnag
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 06/12/2021.
-//  Copyright © 2021 Bugsnag Inc. All rights reserved.
+//  Copyright © 2021 RSCrashReporter Inc. All rights reserved.
 //
 
 #import "UIApplicationStub.h"

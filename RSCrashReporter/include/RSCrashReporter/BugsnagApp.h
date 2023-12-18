@@ -1,21 +1,21 @@
 //
-//  BugsnagApp.h
-//  Bugsnag
+//  RSCrashReporterApp.h
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 01/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-#import <RSCrashReporter/BugsnagDefines.h>
+#import <RSCrashReporter/RSCrashReporterDefines.h>
 
 /**
  * Stateless information set by the notifier about your app can be found on this class. These values
  * can be accessed and amended if necessary.
  */
-BUGSNAG_EXTERN
-@interface BugsnagApp : NSObject
+RSCRASHREPORTER_EXTERN
+@interface RSCrashReporterApp : NSObject
 
 /**
  * The architecture of the running binary

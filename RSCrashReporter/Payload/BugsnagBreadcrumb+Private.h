@@ -1,18 +1,18 @@
 //
-//  BugsnagBreadcrumb+Private.h
-//  Bugsnag
+//  RSCrashReporterBreadcrumb+Private.h
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 04/12/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BSGDefines.h"
-#import "BugsnagInternals.h"
+#import "RSCDefines.h"
+#import "RSCrashReporterInternals.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BugsnagBreadcrumb ()
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCrashReporterBreadcrumb ()
 
 - (BOOL)isValid;
 

@@ -3,7 +3,7 @@
 //
 //  Created by Conrad Irwin on 2014-10-01.
 //
-//  Copyright (c) 2014 Bugsnag, Inc. All rights reserved.
+//  Copyright (c) 2014 RSCrashReporter, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,30 +25,30 @@
 //
 #import <Foundation/Foundation.h>
 
-#import <RSCrashReporter/BugsnagApp.h>
-#import <RSCrashReporter/BugsnagAppWithState.h>
-#import <RSCrashReporter/BugsnagClient.h>
-#import <RSCrashReporter/BugsnagConfiguration.h>
-#import <RSCrashReporter/BugsnagDefines.h>
-#import <RSCrashReporter/BugsnagDevice.h>
-#import <RSCrashReporter/BugsnagDeviceWithState.h>
-#import <RSCrashReporter/BugsnagEndpointConfiguration.h>
-#import <RSCrashReporter/BugsnagError.h>
-#import <RSCrashReporter/BugsnagErrorTypes.h>
-#import <RSCrashReporter/BugsnagEvent.h>
-#import <RSCrashReporter/BugsnagFeatureFlag.h>
-#import <RSCrashReporter/BugsnagLastRunInfo.h>
-#import <RSCrashReporter/BugsnagMetadata.h>
-#import <RSCrashReporter/BugsnagPlugin.h>
-#import <RSCrashReporter/BugsnagSession.h>
-#import <RSCrashReporter/BugsnagStackframe.h>
-#import <RSCrashReporter/BugsnagThread.h>
+#import <RSCrashReporter/RSCrashReporterApp.h>
+#import <RSCrashReporter/RSCrashReporterAppWithState.h>
+#import <RSCrashReporter/RSCrashReporterClient.h>
+#import <RSCrashReporter/RSCrashReporterConfiguration.h>
+#import <RSCrashReporter/RSCrashReporterDefines.h>
+#import <RSCrashReporter/RSCrashReporterDevice.h>
+#import <RSCrashReporter/RSCrashReporterDeviceWithState.h>
+#import <RSCrashReporter/RSCrashReporterEndpointConfiguration.h>
+#import <RSCrashReporter/RSCrashReporterError.h>
+#import <RSCrashReporter/RSCrashReporterErrorTypes.h>
+#import <RSCrashReporter/RSCrashReporterEvent.h>
+#import <RSCrashReporter/RSCrashReporterFeatureFlag.h>
+#import <RSCrashReporter/RSCrashReporterLastRunInfo.h>
+#import <RSCrashReporter/RSCrashReporterMetadata.h>
+#import <RSCrashReporter/RSCrashReporterPlugin.h>
+#import <RSCrashReporter/RSCrashReporterSession.h>
+#import <RSCrashReporter/RSCrashReporterStackframe.h>
+#import <RSCrashReporter/RSCrashReporterThread.h>
 
 /**
  * Static access to a RSCrashReporter Client, the easiest way to use RSCrashReporter in your app.
  */
-BUGSNAG_EXTERN
-@interface RSCrashReporter : NSObject <BugsnagClassLevelMetadataStore>
+RSCRASHREPORTER_EXTERN
+@interface RSCrashReporter : NSObject <RSCrashReporterClassLevelMetadataStore>
 
 /**
  * All RSCrashReporter access is class-level.  Prevent the creation of instances.
@@ -68,25 +68,25 @@ BUGSNAG_EXTERN
 + (void)startWithDelegate:(id<RSCrashReporterNotifyDelegate> _Nullable)delegate;
 
 /**
- * @return YES if Bugsnag has been started and the previous launch crashed
+ * @return YES if RSCrashReporter has been started and the previous launch crashed
  */
-+ (BOOL)appDidCrashLastLaunch BUGSNAG_DEPRECATED_WITH_REPLACEMENT("lastRunInfo.crashed");
++ (BOOL)appDidCrashLastLaunch RSCRASHREPORTER_DEPRECATED_WITH_REPLACEMENT("lastRunInfo.crashed");
 
 /**
- * @return YES if and only if a Bugsnag.start() has been called
- * and Bugsnag has initialized such that any calls to the Bugsnag methods can succeed
+ * @return YES if and only if a RSCrashReporter.start() has been called
+ * and RSCrashReporter has initialized such that any calls to the RSCrashReporter methods can succeed
  */
 + (BOOL)isStarted;
 
 /**
  * Information about the last run of the app, and whether it crashed.
  */
-@property (class, readonly, nullable, nonatomic) BugsnagLastRunInfo *lastRunInfo;
+@property (class, readonly, nullable, nonatomic) RSCrashReporterLastRunInfo *lastRunInfo;
 
 /**
- * Tells Bugsnag that your app has finished launching.
+ * Tells RSCrashReporter that your app has finished launching.
  *
- * Errors reported after calling this method will have the `BugsnagAppWithState.isLaunching`
+ * Errors reported after calling this method will have the `RSCrashReporterAppWithState.isLaunching`
  * property set to false.
  */
 + (void)markLaunchCompleted;
@@ -96,9 +96,9 @@ BUGSNAG_EXTERN
 // =============================================================================
 
 /**
- * Send a custom or caught exception to Bugsnag.
+ * Send a custom or caught exception to RSCrashReporter.
  *
- * The exception will be sent to Bugsnag in the background allowing your
+ * The exception will be sent to RSCrashReporter in the background allowing your
  * app to continue running.
  *
  * @param exception  The exception.
@@ -106,29 +106,29 @@ BUGSNAG_EXTERN
 + (void)notify:(NSException *_Nonnull)exception;
 
 /**
- *  Send a custom or caught exception to Bugsnag
+ *  Send a custom or caught exception to RSCrashReporter
  *
  *  @param exception The exception
  *  @param block     A block for optionally configuring the error report
  */
 + (void)notify:(NSException *_Nonnull)exception
-         block:(BugsnagOnErrorBlock _Nullable)block;
+         block:(RSCrashReporterOnErrorBlock _Nullable)block;
 
 /**
- *  Send an error to Bugsnag
+ *  Send an error to RSCrashReporter
  *
  *  @param error The error
  */
 + (void)notifyError:(NSError *_Nonnull)error;
 
 /**
- *  Send an error to Bugsnag
+ *  Send an error to RSCrashReporter
  *
  *  @param error The error
  *  @param block A block for optionally configuring the error report
  */
 + (void)notifyError:(NSError *_Nonnull)error
-              block:(BugsnagOnErrorBlock _Nullable)block;
+              block:(RSCrashReporterOnErrorBlock _Nullable)block;
 
 // =============================================================================
 // MARK: - Breadcrumbs
@@ -158,11 +158,11 @@ BUGSNAG_EXTERN
  * @param message The log message to leave.
  * @param metadata Diagnostic data relating to the breadcrumb.
  *                 Values should be serializable to JSON with NSJSONSerialization.
- * @param type A BSGBreadcrumbTypeValue denoting the type of breadcrumb.
+ * @param type A RSCBreadcrumbTypeValue denoting the type of breadcrumb.
  */
 + (void)leaveBreadcrumbWithMessage:(NSString *_Nonnull)message
                           metadata:(NSDictionary *_Nullable)metadata
-                           andType:(BSGBreadcrumbType)type
+                           andType:(RSCBreadcrumbType)type
     NS_SWIFT_NAME(leaveBreadcrumb(_:metadata:type:));
 
 /**
@@ -176,9 +176,9 @@ BUGSNAG_EXTERN
 /**
  * Returns the current buffer of breadcrumbs that will be sent with captured events. This
  * ordered list represents the most recent breadcrumbs to be captured up to the limit
- * set in `BugsnagConfiguration.maxBreadcrumbs`
+ * set in `RSCrashReporterConfiguration.maxBreadcrumbs`
  */
-+ (NSArray<BugsnagBreadcrumb *> *_Nonnull)breadcrumbs;
++ (NSArray<RSCrashReporterBreadcrumb *> *_Nonnull)breadcrumbs;
 
 // =============================================================================
 // MARK: - Session
@@ -232,7 +232,7 @@ BUGSNAG_EXTERN
  *
  * You should call this at the appropriate time in your application when you wish to
  * resume a previously started session. Any subsequent errors which occur in your application
- * will be reported to Bugsnag and will count towards your application's stability score.
+ * will be reported to RSCrashReporter and will count towards your application's stability score.
  *
  * @see startSession:
  * @see pauseSession:
@@ -262,7 +262,7 @@ BUGSNAG_EXTERN
 /**
  * The current user
  */
-+ (BugsnagUser *_Nonnull)user;
++ (RSCrashReporterUser *_Nonnull)user;
 
 /**
  *  Set user metadata
@@ -271,7 +271,7 @@ BUGSNAG_EXTERN
  *  @param name   Name of the user
  *  @param email  Email address of the user
  *
- *  If user ID is nil, a Bugsnag-generated Device ID is used for the `user.id` property of events and sessions.
+ *  If user ID is nil, a RSCrashReporter-generated Device ID is used for the `user.id` property of events and sessions.
  */
 + (void)setUser:(NSString *_Nullable)userId
       withEmail:(NSString *_Nullable)email
@@ -287,7 +287,7 @@ NS_SWIFT_NAME(addFeatureFlag(name:variant:));
 + (void)addFeatureFlagWithName:(nonnull NSString *)name
 NS_SWIFT_NAME(addFeatureFlag(name:));
 
-+ (void)addFeatureFlags:(nonnull NSArray<BugsnagFeatureFlag *> *)featureFlags
++ (void)addFeatureFlags:(nonnull NSArray<RSCrashReporterFeatureFlag *> *)featureFlags
 NS_SWIFT_NAME(addFeatureFlags(_:));
 
 + (void)clearFeatureFlagWithName:(nonnull NSString *)name
@@ -300,28 +300,28 @@ NS_SWIFT_NAME(clearFeatureFlag(name:));
 // =============================================================================
 
 /**
- *  Add a callback to be invoked before a session is sent to Bugsnag.
+ *  Add a callback to be invoked before a session is sent to RSCrashReporter.
  *
  *  @param block A block which can modify the session
  *
  *  @returns An opaque reference to the callback which can be passed to `removeOnSession:`
  */
-+ (nonnull BugsnagOnSessionRef)addOnSessionBlock:(nonnull BugsnagOnSessionBlock)block
++ (nonnull RSCrashReporterOnSessionRef)addOnSessionBlock:(nonnull RSCrashReporterOnSessionBlock)block
 NS_SWIFT_NAME(addOnSession(block:));
 
 /**
- * Remove a callback that would be invoked before a session is sent to Bugsnag.
+ * Remove a callback that would be invoked before a session is sent to RSCrashReporter.
  *
  * @param callback The opaque reference of the callback, returned by `addOnSessionBlock:`
  */
-+ (void)removeOnSession:(nonnull BugsnagOnSessionRef)callback
++ (void)removeOnSession:(nonnull RSCrashReporterOnSessionRef)callback
 NS_SWIFT_NAME(removeOnSession(_:));
 
 /**
  * Deprecated
  */
-+ (void)removeOnSessionBlock:(BugsnagOnSessionBlock _Nonnull)block
-BUGSNAG_DEPRECATED_WITH_REPLACEMENT("removeOnSession:")
++ (void)removeOnSessionBlock:(RSCrashReporterOnSessionBlock _Nonnull)block
+RSCRASHREPORTER_DEPRECATED_WITH_REPLACEMENT("removeOnSession:")
 NS_SWIFT_NAME(removeOnSession(block:));
 
 // =============================================================================
@@ -329,14 +329,14 @@ NS_SWIFT_NAME(removeOnSession(block:));
 // =============================================================================
 
 /**
- *  Add a callback to be invoked when a breadcrumb is captured by Bugsnag, to
+ *  Add a callback to be invoked when a breadcrumb is captured by RSCrashReporter, to
  *  change the breadcrumb contents as needed
  *
  *  @param block A block which returns YES if the breadcrumb should be captured
  *
  *  @returns An opaque reference to the callback which can be passed to `removeOnBreadcrumb:`
  */
-+ (nonnull BugsnagOnBreadcrumbRef)addOnBreadcrumbBlock:(nonnull BugsnagOnBreadcrumbBlock)block
++ (nonnull RSCrashReporterOnBreadcrumbRef)addOnBreadcrumbBlock:(nonnull RSCrashReporterOnBreadcrumbBlock)block
 NS_SWIFT_NAME(addOnBreadcrumb(block:));
 
 /**
@@ -344,14 +344,14 @@ NS_SWIFT_NAME(addOnBreadcrumb(block:));
  *
  * @param callback The opaque reference of the callback, returned by `addOnBreadcrumbBlock:`
  */
-+ (void)removeOnBreadcrumb:(nonnull BugsnagOnBreadcrumbRef)callback
++ (void)removeOnBreadcrumb:(nonnull RSCrashReporterOnBreadcrumbRef)callback
 NS_SWIFT_NAME(removeOnBreadcrumb(_:));
 
 /**
  * Deprecated
  */
-+ (void)removeOnBreadcrumbBlock:(BugsnagOnBreadcrumbBlock _Nonnull)block
-BUGSNAG_DEPRECATED_WITH_REPLACEMENT("removeOnBreadcrumb:")
++ (void)removeOnBreadcrumbBlock:(RSCrashReporterOnBreadcrumbBlock _Nonnull)block
+RSCRASHREPORTER_DEPRECATED_WITH_REPLACEMENT("removeOnBreadcrumb:")
 NS_SWIFT_NAME(removeOnBreadcrumb(block:));
 
 @end

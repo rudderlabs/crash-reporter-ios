@@ -1,15 +1,15 @@
-#import "BSGSerialization.h"
+#import "RSCSerialization.h"
 
-#import "BSGJSONSerialization.h"
-#import "BugsnagLogger.h"
+#import "RSCJSONSerialization.h"
+#import "RSCrashReporterLogger.h"
 
-static NSArray * BSGSanitizeArray(NSArray *input);
+static NSArray * RSCSanitizeArray(NSArray *input);
 
-id BSGSanitizeObject(id obj) {
+id RSCSanitizeObject(id obj) {
     if ([obj isKindOfClass:[NSArray class]]) {
-        return BSGSanitizeArray(obj);
+        return RSCSanitizeArray(obj);
     } else if ([obj isKindOfClass:[NSDictionary class]]) {
-        return BSGSanitizeDict(obj);
+        return RSCSanitizeDict(obj);
     } else if ([obj isKindOfClass:[NSString class]]) {
         return obj;
     } else if ([obj isKindOfClass:[NSNumber class]]
@@ -20,20 +20,20 @@ id BSGSanitizeObject(id obj) {
     return nil;
 }
 
-NSMutableDictionary * BSGSanitizePossibleDict(NSDictionary *input) {
+NSMutableDictionary * RSCSanitizePossibleDict(NSDictionary *input) {
     if (![input isKindOfClass:[NSDictionary class]]) {
         return nil;
     }
-    return BSGSanitizeDict(input);
+    return RSCSanitizeDict(input);
 }
 
-NSMutableDictionary * BSGSanitizeDict(NSDictionary *input) {
+NSMutableDictionary * RSCSanitizeDict(NSDictionary *input) {
     __block NSMutableDictionary *output =
         [NSMutableDictionary dictionaryWithCapacity:[input count]];
     [input enumerateKeysAndObjectsUsingBlock:^(id _Nonnull key, id _Nonnull obj,
                                                __unused BOOL *_Nonnull stop) {
       if ([key isKindOfClass:[NSString class]]) {
-          id cleanedObject = BSGSanitizeObject(obj);
+          id cleanedObject = RSCSanitizeObject(obj);
           if (cleanedObject)
               output[key] = cleanedObject;
       }
@@ -41,24 +41,24 @@ NSMutableDictionary * BSGSanitizeDict(NSDictionary *input) {
     return output;
 }
 
-static NSArray * BSGSanitizeArray(NSArray *input) {
+static NSArray * RSCSanitizeArray(NSArray *input) {
     NSMutableArray *output = [NSMutableArray arrayWithCapacity:[input count]];
     for (id obj in input) {
-        id cleanedObject = BSGSanitizeObject(obj);
+        id cleanedObject = RSCSanitizeObject(obj);
         if (cleanedObject)
             [output addObject:cleanedObject];
     }
     return output;
 }
 
-NSString * BSGTruncatePossibleString(BSGTruncateContext *context, NSString *string) {
+NSString * RSCTruncatePossibleString(RSCTruncateContext *context, NSString *string) {
     if (![string isKindOfClass:[NSString class]]) {
         return nil;
     }
-    return BSGTruncateString(context, string);
+    return RSCTruncateString(context, string);
 }
 
-NSString * BSGTruncateString(BSGTruncateContext *context, NSString *string) {
+NSString * RSCTruncateString(RSCTruncateContext *context, NSString *string) {
     const NSUInteger inputLength = string.length;
     if (inputLength <= context->maxLength) return string;
     // Prevent chopping in the middle of a composed character sequence
@@ -70,22 +70,22 @@ NSString * BSGTruncateString(BSGTruncateContext *context, NSString *string) {
     return [output stringByAppendingFormat:@"\n***%lu CHARS TRUNCATED***", (unsigned long)count];
 }
 
-id BSGTruncateStrings(BSGTruncateContext *context, id object) {
+id RSCTruncateStrings(RSCTruncateContext *context, id object) {
     if ([object isKindOfClass:[NSString class]]) {
-        return BSGTruncateString(context, object);
+        return RSCTruncateString(context, object);
     }
     if ([object isKindOfClass:[NSDictionary class]]) {
         NSMutableDictionary *output = [NSMutableDictionary dictionaryWithCapacity:((NSDictionary *)object).count];
         for (NSString *key in (NSDictionary *)object) {
             id value = ((NSDictionary *)object)[key];
-            output[key] = BSGTruncateStrings(context, value);
+            output[key] = RSCTruncateStrings(context, value);
         }
         return output;
     }
     if ([object isKindOfClass:[NSArray class]]) {
         NSMutableArray *output = [NSMutableArray arrayWithCapacity:((NSArray *)object).count];
         for (id element in (NSArray *)object) {
-            [output addObject:BSGTruncateStrings(context, element)];
+            [output addObject:RSCTruncateStrings(context, element)];
         }
         return output;
     }

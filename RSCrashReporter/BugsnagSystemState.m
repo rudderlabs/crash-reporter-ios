@@ -1,27 +1,27 @@
 //
-//  BugsnagSystemState.m
-//  Bugsnag
+//  RSCrashReporterSystemState.m
+//  RSCrashReporter
 //
 //  Created by Karl Stenerud on 21.09.20.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
-#import "BugsnagSystemState.h"
+#import "RSCrashReporterSystemState.h"
 
 #if TARGET_OS_OSX
-#import "BSGAppKit.h"
+#import "RSCAppKit.h"
 #else
-#import "BSGUIKit.h"
+#import "RSCUIKit.h"
 #endif
 
 #import <RSCrashReporter/RSCrashReporter.h>
 
-#import "BSGFileLocations.h"
-#import "BSGJSONSerialization.h"
-#import "BSGUtils.h"
-#import "BSG_KSCrashState.h"
-#import "BSG_KSSystemInfo.h"
-#import "BugsnagLogger.h"
+#import "RSCFileLocations.h"
+#import "RSCJSONSerialization.h"
+#import "RSCUtils.h"
+#import "RSC_KSCrashState.h"
+#import "RSC_KSSystemInfo.h"
+#import "RSCrashReporterLogger.h"
 
 #import <stdatomic.h>
 
@@ -30,10 +30,10 @@ static NSString * const InternalKey = @"internal";
 
 static NSDictionary * loadPreviousState(NSString *jsonPath) {
     NSError *error = nil;
-    NSMutableDictionary *state = (NSMutableDictionary *)BSGJSONDictionaryFromFile(jsonPath, NSJSONReadingMutableContainers, &error);
+    NSMutableDictionary *state = (NSMutableDictionary *)RSCJSONDictionaryFromFile(jsonPath, NSJSONReadingMutableContainers, &error);
     if(![state isKindOfClass:[NSMutableDictionary class]]) {
         if (!(error.domain == NSCocoaErrorDomain && error.code == NSFileReadNoSuchFileError)) {
-            bsg_log_err(@"Could not load system_state.json: %@", error);
+            rsc_log_err(@"Could not load system_state.json: %@", error);
         }
         return @{};
     }
@@ -48,52 +48,52 @@ id blankIfNil(id value) {
     return value;
 }
 
-static NSMutableDictionary * initCurrentState(BugsnagConfiguration *config) {
-    NSDictionary *systemInfo = [BSG_KSSystemInfo systemInfo];
+static NSMutableDictionary * initCurrentState(RSCrashReporterConfiguration *config) {
+    NSDictionary *systemInfo = [RSC_KSSystemInfo systemInfo];
 
     NSMutableDictionary *app = [NSMutableDictionary new];
-    app[BSGKeyId] = blankIfNil(systemInfo[@BSG_KSSystemField_BundleID]);
-    app[BSGKeyName] = blankIfNil(systemInfo[@BSG_KSSystemField_BundleName]);
-    app[BSGKeyReleaseStage] = config.releaseStage;
-    app[BSGKeyVersion] = blankIfNil(systemInfo[@BSG_KSSystemField_BundleShortVersion]);
-    app[BSGKeyBundleVersion] = blankIfNil(systemInfo[@BSG_KSSystemField_BundleVersion]);
-    app[BSGKeyMachoUUID] = systemInfo[@BSG_KSSystemField_AppUUID];
-    app[@"binaryArch"] = systemInfo[@BSG_KSSystemField_BinaryArch];
+    app[RSCKeyId] = blankIfNil(systemInfo[@RSC_KSSystemField_BundleID]);
+    app[RSCKeyName] = blankIfNil(systemInfo[@RSC_KSSystemField_BundleName]);
+    app[RSCKeyReleaseStage] = config.releaseStage;
+    app[RSCKeyVersion] = blankIfNil(systemInfo[@RSC_KSSystemField_BundleShortVersion]);
+    app[RSCKeyBundleVersion] = blankIfNil(systemInfo[@RSC_KSSystemField_BundleVersion]);
+    app[RSCKeyMachoUUID] = systemInfo[@RSC_KSSystemField_AppUUID];
+    app[@"binaryArch"] = systemInfo[@RSC_KSSystemField_BinaryArch];
 #if TARGET_OS_TV
-    app[BSGKeyType] = @"tvOS";
+    app[RSCKeyType] = @"tvOS";
 #elif TARGET_OS_IOS
-    app[BSGKeyType] = @"iOS";
+    app[RSCKeyType] = @"iOS";
 #elif TARGET_OS_OSX
-    app[BSGKeyType] = @"macOS";
+    app[RSCKeyType] = @"macOS";
 #elif TARGET_OS_WATCH
-    app[BSGKeyType] = @"watchOS";
+    app[RSCKeyType] = @"watchOS";
 #endif
 
     NSMutableDictionary *device = [NSMutableDictionary new];
-    device[@"id"] = systemInfo[@BSG_KSSystemField_DeviceAppHash];
-    device[@"jailbroken"] = systemInfo[@BSG_KSSystemField_Jailbroken];
-    device[@"osBuild"] = systemInfo[@BSG_KSSystemField_OSVersion];
-    device[@"osVersion"] = systemInfo[@BSG_KSSystemField_SystemVersion];
-    device[@"osName"] = systemInfo[@BSG_KSSystemField_SystemName];
+    device[@"id"] = systemInfo[@RSC_KSSystemField_DeviceAppHash];
+    device[@"jailbroken"] = systemInfo[@RSC_KSSystemField_Jailbroken];
+    device[@"osBuild"] = systemInfo[@RSC_KSSystemField_OSVersion];
+    device[@"osVersion"] = systemInfo[@RSC_KSSystemField_SystemVersion];
+    device[@"osName"] = systemInfo[@RSC_KSSystemField_SystemName];
     // Translated from 'iDeviceMaj,Min' into human-readable "iPhone X" description on the server
-    device[@"model"] = systemInfo[@BSG_KSSystemField_Machine];
-    device[@"modelNumber"] = systemInfo[@ BSG_KSSystemField_Model];
+    device[@"model"] = systemInfo[@RSC_KSSystemField_Machine];
+    device[@"modelNumber"] = systemInfo[@ RSC_KSSystemField_Model];
     device[@"wordSize"] = @(PLATFORM_WORD_SIZE);
     device[@"locale"] = [[NSLocale currentLocale] localeIdentifier];
     device[@"runtimeVersions"] = @{
-        @"clangVersion": systemInfo[@BSG_KSSystemField_ClangVersion] ?: @"",
-        @"osBuild": systemInfo[@BSG_KSSystemField_OSVersion] ?: @""
+        @"clangVersion": systemInfo[@RSC_KSSystemField_ClangVersion] ?: @"",
+        @"osBuild": systemInfo[@RSC_KSSystemField_OSVersion] ?: @""
     };
 #if TARGET_OS_SIMULATOR
     device[@"simulator"] = @YES;
 #else
     device[@"simulator"] = @NO;
 #endif
-    device[@"totalMemory"] = systemInfo[@ BSG_KSSystemField_Memory][@ BSG_KSSystemField_Size];
+    device[@"totalMemory"] = systemInfo[@ RSC_KSSystemField_Memory][@ RSC_KSSystemField_Size];
 
     NSMutableDictionary *state = [NSMutableDictionary new];
-    state[BSGKeyApp] = app;
-    state[BSGKeyDevice] = device;
+    state[RSCKeyApp] = app;
+    state[RSCKeyDevice] = device;
 
     return state;
 }
@@ -106,8 +106,8 @@ static NSDictionary *copyDictionary(NSDictionary *launchState) {
     return dictionary;
 }
 
-BSG_OBJC_DIRECT_MEMBERS
-@interface BugsnagSystemState ()
+RSC_OBJC_DIRECT_MEMBERS
+@interface RSCrashReporterSystemState ()
 
 @property(readwrite,atomic) NSDictionary *currentLaunchState;
 @property(readwrite,nonatomic) NSDictionary *lastLaunchState;
@@ -115,12 +115,12 @@ BSG_OBJC_DIRECT_MEMBERS
 
 @end
 
-BSG_OBJC_DIRECT_MEMBERS
-@implementation BugsnagSystemState
+RSC_OBJC_DIRECT_MEMBERS
+@implementation RSCrashReporterSystemState
 
-- (instancetype)initWithConfiguration:(BugsnagConfiguration *)config {
+- (instancetype)initWithConfiguration:(RSCrashReporterConfiguration *)config {
     if ((self = [super init])) {
-        _persistenceFilePath = [BSGFileLocations current].systemState;
+        _persistenceFilePath = [RSCFileLocations current].systemState;
         _lastLaunchState = loadPreviousState(_persistenceFilePath);
         _currentLaunchState = initCurrentState(config);
         _consecutiveLaunchCrashes = [_lastLaunchState[InternalKey][ConsecutiveLaunchCrashesKey] unsignedIntegerValue];
@@ -130,7 +130,7 @@ BSG_OBJC_DIRECT_MEMBERS
 }
 
 - (void)setCodeBundleID:(NSString*)codeBundleID {
-    [self setValue:codeBundleID forAppKey:BSGKeyCodeBundleId];
+    [self setValue:codeBundleID forAppKey:RSCKeyCodeBundleId];
 }
 
 - (void)setConsecutiveLaunchCrashes:(NSUInteger)consecutiveLaunchCrashes {
@@ -169,7 +169,7 @@ BSG_OBJC_DIRECT_MEMBERS
         }
     }
     // Run on a BG thread so we don't monopolize the notification queue.
-    dispatch_async(BSGGetFileSystemQueue(), ^(void){
+    dispatch_async(RSCGetFileSystemQueue(), ^(void){
         atomic_store(&writePending, NO);
         [self sync];
     });
@@ -178,8 +178,8 @@ BSG_OBJC_DIRECT_MEMBERS
 - (void)sync {
     NSDictionary *state = self.currentLaunchState;
     NSError *error = nil;
-    if (!BSGJSONWriteToFileAtomically(state, self.persistenceFilePath, &error)) {
-        bsg_log_err(@"System state cannot be written as JSON: %@", error);
+    if (!RSCJSONWriteToFileAtomically(state, self.persistenceFilePath, &error)) {
+        rsc_log_err(@"System state cannot be written as JSON: %@", error);
     }
 }
 
@@ -187,7 +187,7 @@ BSG_OBJC_DIRECT_MEMBERS
     NSFileManager *fm = [NSFileManager defaultManager];
     NSError *error = nil;
     if(![fm removeItemAtPath:self.persistenceFilePath error:&error]) {
-        bsg_log_err(@"Could not remove persistence file: %@", error);
+        rsc_log_err(@"Could not remove persistence file: %@", error);
     }
     self.lastLaunchState = loadPreviousState(self.persistenceFilePath);
 }

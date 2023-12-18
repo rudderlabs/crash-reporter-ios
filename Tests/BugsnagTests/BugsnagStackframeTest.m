@@ -1,43 +1,43 @@
 //
-//  BugsnagStackframeTest.m
+//  RSCrashReporterStackframeTest.m
 //  Tests
 //
 //  Created by Jamie Lynch on 06/04/2020.
-//  Copyright © 2020 Bugsnag. All rights reserved.
+//  Copyright © 2020 RSCrashReporter. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-#import "BSG_KSMachHeaders.h"
-#import "BugsnagStackframe+Private.h"
+#import "RSC_KSMachHeaders.h"
+#import "RSCrashReporterStackframe+Private.h"
 
-@interface BugsnagStackframeTest : XCTestCase
+@interface RSCrashReporterStackframeTest : XCTestCase
 @property NSDictionary *frameDict;
 @property NSArray *binaryImages;
 @end
 
-@implementation BugsnagStackframeTest
+@implementation RSCrashReporterStackframeTest
 
 - (void)setUp {
     self.frameDict = @{
             @"symbol_addr": @0x10b574fa0,
             @"instruction_addr": @0x10b5756bf,
             @"object_addr": @0x10b54b000,
-            @"object_name": @"/Library/bar/Bugsnag.h",
-            @"symbol_name": @"-[BugsnagClient notify:handledState:block:]",
+            @"object_name": @"/Library/bar/RSCrashReporter.h",
+            @"symbol_name": @"-[RSCrashReporterClient notify:handledState:block:]",
     };
     self.binaryImages = @[@{
             @"image_addr": @0x10b54b000,
             @"image_vmaddr": @0x102340922,
             @"uuid": @"B6D80CB5-A772-3D2F-B5A1-A3A137B8B58F",
-            @"name": @"/Users/foo/Bugsnag.h",
+            @"name": @"/Users/foo/RSCrashReporter.h",
     }];
 }
 
 - (void)testStackframeFromDict {
-    BugsnagStackframe *frame = [BugsnagStackframe frameFromDict:self.frameDict withImages:self.binaryImages];
-    XCTAssertEqualObjects(@"-[BugsnagClient notify:handledState:block:]", frame.method);
-    XCTAssertEqualObjects(@"/Users/foo/Bugsnag.h", frame.machoFile);
+    RSCrashReporterStackframe *frame = [RSCrashReporterStackframe frameFromDict:self.frameDict withImages:self.binaryImages];
+    XCTAssertEqualObjects(@"-[RSCrashReporterClient notify:handledState:block:]", frame.method);
+    XCTAssertEqualObjects(@"/Users/foo/RSCrashReporter.h", frame.machoFile);
     XCTAssertEqualObjects(@"B6D80CB5-A772-3D2F-B5A1-A3A137B8B58F", frame.machoUuid);
     XCTAssertEqualObjects(@0x102340922, frame.machoVmAddress);
     XCTAssertEqualObjects(@0x10b574fa0, frame.symbolAddress);
@@ -49,11 +49,11 @@
 }
 
 - (void)testStackframeToDict {
-    BugsnagStackframe *frame = [BugsnagStackframe frameFromDict:self.frameDict withImages:self.binaryImages];
+    RSCrashReporterStackframe *frame = [RSCrashReporterStackframe frameFromDict:self.frameDict withImages:self.binaryImages];
     NSDictionary *dict = [frame toDictionary];
     XCTAssertTrue([NSJSONSerialization isValidJSONObject:dict]);
-    XCTAssertEqualObjects(@"-[BugsnagClient notify:handledState:block:]", dict[@"method"]);
-    XCTAssertEqualObjects(@"/Users/foo/Bugsnag.h", dict[@"machoFile"]);
+    XCTAssertEqualObjects(@"-[RSCrashReporterClient notify:handledState:block:]", dict[@"method"]);
+    XCTAssertEqualObjects(@"/Users/foo/RSCrashReporter.h", dict[@"machoFile"]);
     XCTAssertEqualObjects(@"B6D80CB5-A772-3D2F-B5A1-A3A137B8B58F", dict[@"machoUUID"]);
     XCTAssertEqualObjects(@"0x102340922", dict[@"machoVMAddress"]);
     XCTAssertEqualObjects(@"0x10b574fa0", dict[@"symbolAddress"]);
@@ -65,18 +65,18 @@
 }
 
 - (void)testStackframeFromJson {
-    BugsnagStackframe *frame = [BugsnagStackframe frameFromJson:@{
+    RSCrashReporterStackframe *frame = [RSCrashReporterStackframe frameFromJson:@{
         @"columnNumber":        @72,
         @"frameAddress":        @"0x10b5756bf",
         @"inProject":           @YES,
         @"isLR":                @NO,
         @"isPC":                @YES,
         @"lineNumber":          @42,
-        @"machoFile":           @"/Users/foo/Bugsnag.h",
+        @"machoFile":           @"/Users/foo/RSCrashReporter.h",
         @"machoLoadAddress":    @"0x10b54b000",
         @"machoUUID":           @"B6D80CB5-A772-3D2F-B5A1-A3A137B8B58F",
         @"machoVMAddress":      @"0x102340922",
-        @"method":              @"-[BugsnagClient notify:handledState:block:]",
+        @"method":              @"-[RSCrashReporterClient notify:handledState:block:]",
         @"symbolAddress":       @"0x10b574fa0",
         @"type":                @"cocoa",
     }];
@@ -86,17 +86,17 @@
     XCTAssertEqualObjects(frame.frameAddress,       @0x10b5756bf);
     XCTAssertEqualObjects(frame.inProject,          @YES);
     XCTAssertEqualObjects(frame.lineNumber,         @42);
-    XCTAssertEqualObjects(frame.machoFile,          @"/Users/foo/Bugsnag.h");
+    XCTAssertEqualObjects(frame.machoFile,          @"/Users/foo/RSCrashReporter.h");
     XCTAssertEqualObjects(frame.machoLoadAddress,   @0x10b54b000);
     XCTAssertEqualObjects(frame.machoUuid,          @"B6D80CB5-A772-3D2F-B5A1-A3A137B8B58F");
     XCTAssertEqualObjects(frame.machoVmAddress,     @0x102340922);
-    XCTAssertEqualObjects(frame.method,             @"-[BugsnagClient notify:handledState:block:]");
+    XCTAssertEqualObjects(frame.method,             @"-[RSCrashReporterClient notify:handledState:block:]");
     XCTAssertEqualObjects(frame.symbolAddress,      @0x10b574fa0);
-    XCTAssertEqualObjects(frame.type,               BugsnagStackframeTypeCocoa);
+    XCTAssertEqualObjects(frame.type,               RSCrashReporterStackframeTypeCocoa);
 }
 
 - (void)testStackframeFromJsonWithNullValues {
-    BugsnagStackframe *frame = [BugsnagStackframe frameFromJson:@{
+    RSCrashReporterStackframe *frame = [RSCrashReporterStackframe frameFromJson:@{
         @"columnNumber":        [NSNull null],
         @"frameAddress":        [NSNull null],
         @"inProject":           [NSNull null],
@@ -127,12 +127,12 @@
 }
 
 - (void)testStackframeFromJsonWithoutType {
-    BugsnagStackframe *frame = [BugsnagStackframe frameFromJson:@{}];
+    RSCrashReporterStackframe *frame = [RSCrashReporterStackframe frameFromJson:@{}];
     XCTAssertNil(frame.type);
 }
 
 - (void)testStackframeToDictPcLr {
-    BugsnagStackframe *frame = [BugsnagStackframe frameFromDict:self.frameDict withImages:self.binaryImages];
+    RSCrashReporterStackframe *frame = [RSCrashReporterStackframe frameFromDict:self.frameDict withImages:self.binaryImages];
     frame.isPc = true;
     frame.isLr = true;
     NSDictionary *dict = [frame toDictionary];
@@ -145,12 +145,12 @@
             @"symbol_addr": @0x10b574fa0,
             @"instruction_addr": @0x10b5756bf,
             @"object_addr": @0x10b54b000,
-            @"object_name": @"/Users/foo/Bugsnag.h",
-            @"symbol_name": @"-[BugsnagClient notify:handledState:block:]",
+            @"object_name": @"/Users/foo/RSCrashReporter.h",
+            @"symbol_name": @"-[RSCrashReporterClient notify:handledState:block:]",
             @"isPC": @YES,
             @"isLR": @NO
     };
-    BugsnagStackframe *frame = [BugsnagStackframe frameFromDict:dict withImages:self.binaryImages];
+    RSCrashReporterStackframe *frame = [RSCrashReporterStackframe frameFromDict:dict withImages:self.binaryImages];
     XCTAssertTrue(frame.isPc);
     XCTAssertFalse(frame.isLr);
 }
@@ -158,11 +158,11 @@
 - (void)testInvalidFrame {
     // Sample 2nd frame from EXC_BREAKPOINT mach exception
     NSDictionary *dict = @{@"instruction_addr": @0x232e968186bc223c, @"isLR": @YES};
-    BugsnagStackframe *frame = [BugsnagStackframe frameFromDict:dict withImages:@[]];
+    RSCrashReporterStackframe *frame = [RSCrashReporterStackframe frameFromDict:dict withImages:@[]];
     XCTAssertNil(frame);
     
     // Sample bottom frame from NSException on macOS
-    XCTAssertNil([BugsnagStackframe frameFromDict:@{@"instruction_addr": @0x1} withImages:@[]]);
+    XCTAssertNil([RSCrashReporterStackframe frameFromDict:@{@"instruction_addr": @0x1} withImages:@[]]);
 }
 
 #define AssertStackframeValues(stackframe_, machoFile_, frameAddress_, method_) \
@@ -172,12 +172,12 @@
     XCTAssertNil(stackframe_.type);
 
 - (void)testDummyCallStackSymbols {
-    bsg_mach_headers_initialize(); // Prevent symbolication
+    rsc_mach_headers_initialize(); // Prevent symbolication
     
-    NSArray<BugsnagStackframe *> *stackframes = [BugsnagStackframe stackframesWithCallStackSymbols:@[]];
+    NSArray<RSCrashReporterStackframe *> *stackframes = [RSCrashReporterStackframe stackframesWithCallStackSymbols:@[]];
     XCTAssertEqual(stackframes.count, 0);
     
-    stackframes = [BugsnagStackframe stackframesWithCallStackSymbols:@[
+    stackframes = [RSCrashReporterStackframe stackframesWithCallStackSymbols:@[
         @"",
         @"1",
         @"ReactNativeTest",
@@ -185,7 +185,7 @@
         @"__invoking___ + 140"]];
     XCTAssertEqual(stackframes.count, 0, @"Invalid stack frame strings should be ignored");
     
-    stackframes = [BugsnagStackframe stackframesWithCallStackSymbols:@[
+    stackframes = [RSCrashReporterStackframe stackframesWithCallStackSymbols:@[
         @"0   ReactNativeTest                     0x000000010fda7f1b RCTJSErrorFromCodeMessageAndNSError + 79",
         @"1   ReactNativeTest                     0x000000010fd76897 __41-[RCTModuleMethod processMethodSignature]_block_invoke_2.103 + 97",
         @"2   ReactNativeTest                     0x000000010fccd9c3 -[BenCrash asyncReject:rejecter:] + 106",
@@ -204,7 +204,7 @@
     AssertStackframeValues(stackframes[6], @"ReactNativeTest",  0x000000010fd76eae, @"-[RCTModuleMethod invokeWithBridge:module:arguments:]");
     AssertStackframeValues(stackframes[7], @"ReactNativeTest",  0x000000010fd79138, @"_ZN8facebook5reactL11invokeInnerEP9RCTBridgeP13RCTModuleDatajRKN5folly7dynamicE");
     
-    stackframes = [BugsnagStackframe stackframesWithCallStackSymbols:@[
+    stackframes = [RSCrashReporterStackframe stackframesWithCallStackSymbols:@[
         @"0   ReactNativeTest                     0x000000010fda7f1b",
         @"1   ReactNativeTest                     0x000000010fd76897",
         @"2   ReactNativeTest                     0x000000010fccd9c3",
@@ -223,7 +223,7 @@
     AssertStackframeValues(stackframes[6], @"ReactNativeTest",  0x000000010fd76eae, @"0x000000010fd76eae");
     AssertStackframeValues(stackframes[7], @"ReactNative App",  0x000000010fd79138, @"0x000000010fd79138");
     
-    stackframes = [BugsnagStackframe stackframesWithCallStackSymbols:@[
+    stackframes = [RSCrashReporterStackframe stackframesWithCallStackSymbols:@[
         @"57  ???                                 0x0000000104eb90f4 0x0 + 4377514228",
         @"58  ???                                 0x1855800000000000 0x0 + 1753448367419031552"]];
     
@@ -232,14 +232,14 @@
 }
 
 - (void)testRealCallStackSymbols {
-    bsg_mach_headers_initialize();
-    bsg_mach_headers_get_images(); // Ensure call stack can be symbolicated
+    rsc_mach_headers_initialize();
+    rsc_mach_headers_get_images(); // Ensure call stack can be symbolicated
     
     NSArray<NSString *> *callStackSymbols = [NSThread callStackSymbols];
-    NSArray<BugsnagStackframe *> *stackframes = [BugsnagStackframe stackframesWithCallStackSymbols:callStackSymbols];
+    NSArray<RSCrashReporterStackframe *> *stackframes = [RSCrashReporterStackframe stackframesWithCallStackSymbols:callStackSymbols];
     XCTAssertEqual(stackframes.count, callStackSymbols.count, @"All valid stack frame strings should be parsed");
     BOOL __block didSeeMain = NO;
-    [stackframes enumerateObjectsUsingBlock:^(BugsnagStackframe *stackframe, NSUInteger idx, BOOL *stop) {
+    [stackframes enumerateObjectsUsingBlock:^(RSCrashReporterStackframe *stackframe, NSUInteger idx, BOOL *stop) {
         XCTAssertNotNil(stackframe.frameAddress);
         XCTAssertNotNil(stackframe.machoFile);
         XCTAssertNotNil(stackframe.method);

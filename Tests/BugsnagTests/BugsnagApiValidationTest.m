@@ -1,24 +1,24 @@
 //
-//  BugsnagApiValidationTest.m
-//  Bugsnag
+//  RSCrashReporterApiValidationTest.m
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 10/06/2020.
-//  Copyright © 2020 Bugsnag Inc. All rights reserved.
+//  Copyright © 2020 RSCrashReporter Inc. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 #import <RSCrashReporter/RSCrashReporter.h>
-#import "BugsnagTestConstants.h"
+#import "RSCrashReporterTestConstants.h"
 #import "TestSupport.h"
 
 /**
- * Validates that the Bugsnag API interface handles any invalid input gracefully.
+ * Validates that the RSCrashReporter API interface handles any invalid input gracefully.
  */
-@interface BugsnagApiValidationTest : XCTestCase
+@interface RSCrashReporterApiValidationTest : XCTestCase
 
 @end
 
-@implementation BugsnagApiValidationTest
+@implementation RSCrashReporterApiValidationTest
 
 - (void)setUp {
     [TestSupport purgePersistentData];
@@ -26,7 +26,7 @@
 }
 /*
 - (void)testAppDidCrashLastLaunch {
-    XCTAssertFalse(Bugsnag.lastRunInfo.crashed);
+    XCTAssertFalse(RSCrashReporter.lastRunInfo.crashed);
 }
 */
 - (void)testValidNotify {
@@ -36,7 +36,7 @@
 - (void)testValidNotifyBlock {
     NSException *exc = [NSException exceptionWithName:@"FooException" reason:@"whoops" userInfo:nil];
     [RSCrashReporter notify:exc block:nil];
-    [RSCrashReporter notify:exc block:^BOOL(BugsnagEvent *event) {
+    [RSCrashReporter notify:exc block:^BOOL(RSCrashReporterEvent *event) {
         return NO;
     }];
 }
@@ -49,7 +49,7 @@
 - (void)testValidNotifyErrorBlock {
     NSError *error = [NSError errorWithDomain:@"BarError" code:500 userInfo:nil];
     [RSCrashReporter notifyError:error block:nil];
-    [RSCrashReporter notifyError:error block:^BOOL(BugsnagEvent *event) {
+    [RSCrashReporter notifyError:error block:^BOOL(RSCrashReporterEvent *event) {
         return NO;
     }];
 }
@@ -63,8 +63,8 @@
 }
 
 - (void)testValidLeaveBreadcrumbWithMessageMetadata {
-    [RSCrashReporter leaveBreadcrumbWithMessage:@"Foo" metadata:nil andType:BSGBreadcrumbTypeProcess];
-    [RSCrashReporter leaveBreadcrumbWithMessage:@"Foo" metadata:@{@"test": @2} andType:BSGBreadcrumbTypeState];
+    [RSCrashReporter leaveBreadcrumbWithMessage:@"Foo" metadata:nil andType:RSCBreadcrumbTypeProcess];
+    [RSCrashReporter leaveBreadcrumbWithMessage:@"Foo" metadata:@{@"test": @2} andType:RSCBreadcrumbTypeState];
 }
 /*
 - (void)testValidStartSession {
@@ -80,39 +80,39 @@
 }
 
 - (void)testValidContext {
-    Bugsnag.context = nil;
-    XCTAssertNil(Bugsnag.context);
-    Bugsnag.context = @"Foo";
-    XCTAssertEqualObjects(@"Foo", Bugsnag.context);
+    RSCrashReporter.context = nil;
+    XCTAssertNil(RSCrashReporter.context);
+    RSCrashReporter.context = @"Foo";
+    XCTAssertEqualObjects(@"Foo", RSCrashReporter.context);
 }
 
 - (void)testValidAppDidCrashLastLaunch {
-    XCTAssertFalse(Bugsnag.lastRunInfo.crashed);
+    XCTAssertFalse(RSCrashReporter.lastRunInfo.crashed);
 }
 
 - (void)testValidUser {
     [RSCrashReporter setUser:nil withEmail:nil andName:nil];
-    XCTAssertNotNil(Bugsnag.user);
-    XCTAssertNil(Bugsnag.user.id);
-    XCTAssertNil(Bugsnag.user.email);
-    XCTAssertNil(Bugsnag.user.name);
+    XCTAssertNotNil(RSCrashReporter.user);
+    XCTAssertNil(RSCrashReporter.user.id);
+    XCTAssertNil(RSCrashReporter.user.email);
+    XCTAssertNil(RSCrashReporter.user.name);
 
     [RSCrashReporter setUser:@"123" withEmail:@"joe@foo.com" andName:@"Joe"];
-    XCTAssertNotNil(Bugsnag.user);
-    XCTAssertEqualObjects(@"123", Bugsnag.user.id);
-    XCTAssertEqualObjects(@"joe@foo.com", Bugsnag.user.email);
-    XCTAssertEqualObjects(@"Joe", Bugsnag.user.name);
+    XCTAssertNotNil(RSCrashReporter.user);
+    XCTAssertEqualObjects(@"123", RSCrashReporter.user.id);
+    XCTAssertEqualObjects(@"joe@foo.com", RSCrashReporter.user.email);
+    XCTAssertEqualObjects(@"Joe", RSCrashReporter.user.name);
 }
 
 - (void)testValidOnSessionBlock {
-    BugsnagOnSessionRef callback = [RSCrashReporter addOnSessionBlock:^BOOL(BugsnagSession *session) {
+    RSCrashReporterOnSessionRef callback = [RSCrashReporter addOnSessionBlock:^BOOL(RSCrashReporterSession *session) {
         return NO;
     }];
     [RSCrashReporter removeOnSession:callback];
 }
 
 - (void)testValidOnBreadcrumbBlock {
-    BugsnagOnBreadcrumbRef callback = [RSCrashReporter addOnBreadcrumbBlock:^BOOL(BugsnagBreadcrumb *breadcrumb) {
+    RSCrashReporterOnBreadcrumbRef callback = [RSCrashReporter addOnBreadcrumbBlock:^BOOL(RSCrashReporterBreadcrumb *breadcrumb) {
         return NO;
     }];
     [RSCrashReporter removeOnBreadcrumb:callback];

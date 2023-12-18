@@ -27,15 +27,15 @@
 /* Utility functions for querying the mach kernel.
  */
 
-#ifndef HDR_BSG_KSMach_h
-#define HDR_BSG_KSMach_h
+#ifndef HDR_RSC_KSMach_h
+#define HDR_RSC_KSMach_h
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "BSG_KSArchSpecific.h"
-#include "BSGDefines.h"
+#include "RSC_KSArchSpecific.h"
+#include "RSCDefines.h"
 
 #include <mach/mach.h>
 #include <pthread.h>
@@ -50,7 +50,7 @@ extern "C" {
  *
  * @return The current architecture.
  */
-const char *bsg_ksmachcurrentCPUArch(void);
+const char *rsc_ksmachcurrentCPUArch(void);
 
 /** Get the name of a mach exception.
  *
@@ -58,7 +58,7 @@ const char *bsg_ksmachcurrentCPUArch(void);
  *
  * @return The exception's name or NULL if not found.
  */
-const char *bsg_ksmachexceptionName(exception_type_t exceptionType);
+const char *rsc_ksmachexceptionName(exception_type_t exceptionType);
 
 /** Get the name of a mach kernel return code.
  *
@@ -66,13 +66,13 @@ const char *bsg_ksmachexceptionName(exception_type_t exceptionType);
  *
  * @return The code's name or NULL if not found.
  */
-const char *bsg_ksmachkernelReturnCodeName(const kern_return_t returnCode);
+const char *rsc_ksmachkernelReturnCodeName(const kern_return_t returnCode);
 
 // ============================================================================
 #pragma mark - Thread State Info -
 // ============================================================================
 
-#if BSG_HAVE_MACH_THREADS
+#if RSC_HAVE_MACH_THREADS
 /** Fill in state information about a thread.
  *
  * @param thread The thread to get information about.
@@ -85,7 +85,7 @@ const char *bsg_ksmachkernelReturnCodeName(const kern_return_t returnCode);
  *
  * @return true if state fetching was successful.
  */
-bool bsg_ksmachfillState(thread_t thread, thread_state_t state,
+bool rsc_ksmachfillState(thread_t thread, thread_state_t state,
                          thread_state_flavor_t flavor,
                          mach_msg_type_number_t stateCount);
 #endif
@@ -97,7 +97,7 @@ bool bsg_ksmachfillState(thread_t thread, thread_state_t state,
  *
  * @return The context's frame pointer.
  */
-uintptr_t bsg_ksmachframePointer(const BSG_STRUCT_MCONTEXT_L *machineContext);
+uintptr_t rsc_ksmachframePointer(const RSC_STRUCT_MCONTEXT_L *machineContext);
 
 /** Get the current stack pointer for a machine context.
  *
@@ -105,7 +105,7 @@ uintptr_t bsg_ksmachframePointer(const BSG_STRUCT_MCONTEXT_L *machineContext);
  *
  * @return The context's stack pointer.
  */
-uintptr_t bsg_ksmachstackPointer(const BSG_STRUCT_MCONTEXT_L *machineContext);
+uintptr_t rsc_ksmachstackPointer(const RSC_STRUCT_MCONTEXT_L *machineContext);
 
 /** Get the address of the instruction about to be, or being executed by a
  * machine context.
@@ -115,7 +115,7 @@ uintptr_t bsg_ksmachstackPointer(const BSG_STRUCT_MCONTEXT_L *machineContext);
  * @return The context's next instruction address.
  */
 uintptr_t
-bsg_ksmachinstructionAddress(const BSG_STRUCT_MCONTEXT_L *machineContext);
+rsc_ksmachinstructionAddress(const RSC_STRUCT_MCONTEXT_L *machineContext);
 
 /** Get the address stored in the link register (arm only). This may
  * contain the first return address of the stack.
@@ -124,7 +124,7 @@ bsg_ksmachinstructionAddress(const BSG_STRUCT_MCONTEXT_L *machineContext);
  *
  * @return The link register value.
  */
-uintptr_t bsg_ksmachlinkRegister(const BSG_STRUCT_MCONTEXT_L *machineContext);
+uintptr_t rsc_ksmachlinkRegister(const RSC_STRUCT_MCONTEXT_L *machineContext);
 
 /** Get the address whose access caused the last fault.
  *
@@ -132,9 +132,9 @@ uintptr_t bsg_ksmachlinkRegister(const BSG_STRUCT_MCONTEXT_L *machineContext);
  *
  * @return The faulting address.
  */
-uintptr_t bsg_ksmachfaultAddress(const BSG_STRUCT_MCONTEXT_L *machineContext);
+uintptr_t rsc_ksmachfaultAddress(const RSC_STRUCT_MCONTEXT_L *machineContext);
 
-#if BSG_HAVE_MACH_THREADS
+#if RSC_HAVE_MACH_THREADS
 /** Get a thread's thread state and place it in a machine context.
  *
  * @param thread The thread to fetch state for.
@@ -143,8 +143,8 @@ uintptr_t bsg_ksmachfaultAddress(const BSG_STRUCT_MCONTEXT_L *machineContext);
  *
  * @return true if successful.
  */
-bool bsg_ksmachthreadState(thread_t thread,
-                           BSG_STRUCT_MCONTEXT_L *machineContext);
+bool rsc_ksmachthreadState(thread_t thread,
+                           RSC_STRUCT_MCONTEXT_L *machineContext);
 
 /** Get a thread's floating point state and place it in a machine context.
  *
@@ -154,8 +154,8 @@ bool bsg_ksmachthreadState(thread_t thread,
  *
  * @return true if successful.
  */
-bool bsg_ksmachfloatState(thread_t thread,
-                          BSG_STRUCT_MCONTEXT_L *machineContext);
+bool rsc_ksmachfloatState(thread_t thread,
+                          RSC_STRUCT_MCONTEXT_L *machineContext);
 
 /** Get a thread's exception state and place it in a machine context.
  *
@@ -165,8 +165,8 @@ bool bsg_ksmachfloatState(thread_t thread,
  *
  * @return true if successful.
  */
-bool bsg_ksmachexceptionState(thread_t thread,
-                              BSG_STRUCT_MCONTEXT_L *machineContext);
+bool rsc_ksmachexceptionState(thread_t thread,
+                              RSC_STRUCT_MCONTEXT_L *machineContext);
 #endif
 
 /** Get the number of normal (not floating point or exception) registers the
@@ -174,7 +174,7 @@ bool bsg_ksmachexceptionState(thread_t thread,
  *
  * @return The number of registers.
  */
-int bsg_ksmachnumRegisters(void);
+int rsc_ksmachnumRegisters(void);
 
 /** Get the name of a normal register.
  *
@@ -182,7 +182,7 @@ int bsg_ksmachnumRegisters(void);
  *
  * @return The register's name or NULL if not found.
  */
-const char *bsg_ksmachregisterName(int regNumber);
+const char *rsc_ksmachregisterName(int regNumber);
 
 /** Get the value stored in a normal register.
  *
@@ -190,14 +190,14 @@ const char *bsg_ksmachregisterName(int regNumber);
  *
  * @return The register's current value.
  */
-uint64_t bsg_ksmachregisterValue(const BSG_STRUCT_MCONTEXT_L *machineContext,
+uint64_t rsc_ksmachregisterValue(const RSC_STRUCT_MCONTEXT_L *machineContext,
                                  int regNumber);
 
 /** Get the number of exception registers the currently running CPU has.
  *
  * @return The number of registers.
  */
-int bsg_ksmachnumExceptionRegisters(void);
+int rsc_ksmachnumExceptionRegisters(void);
 
 /** Get the name of an exception register.
  *
@@ -205,7 +205,7 @@ int bsg_ksmachnumExceptionRegisters(void);
  *
  * @return The register's name or NULL if not found.
  */
-const char *bsg_ksmachexceptionRegisterName(int regNumber);
+const char *rsc_ksmachexceptionRegisterName(int regNumber);
 
 /** Get the value stored in an exception register.
  *
@@ -214,14 +214,14 @@ const char *bsg_ksmachexceptionRegisterName(int regNumber);
  * @return The register's current value.
  */
 uint64_t
-bsg_ksmachexceptionRegisterValue(const BSG_STRUCT_MCONTEXT_L *machineContext,
+rsc_ksmachexceptionRegisterValue(const RSC_STRUCT_MCONTEXT_L *machineContext,
                                  int regNumber);
 
 /** Get the direction in which the stack grows on the current architecture.
  *
  * @return 1 or -1, depending on which direction the stack grows in.
  */
-int bsg_ksmachstackGrowDirection(void);
+int rsc_ksmachstackGrowDirection(void);
 
 /** Get a thread's name. Internally, a thread name will
  * never be more than 64 characters long.
@@ -234,7 +234,7 @@ int bsg_ksmachstackGrowDirection(void);
  *
  * @return true if a name was found.
  */
-bool bsg_ksmachgetThreadName(const thread_t thread, char *const buffer,
+bool rsc_ksmachgetThreadName(const thread_t thread, char *const buffer,
                              size_t bufLength);
 
 /** Get the name of a thread's dispatch queue. Internally, a queue name will
@@ -248,7 +248,7 @@ bool bsg_ksmachgetThreadName(const thread_t thread, char *const buffer,
  *
  * @return true if a name or label was found.
  */
-bool bsg_ksmachgetThreadQueueName(thread_t thread, char *buffer,
+bool rsc_ksmachgetThreadQueueName(thread_t thread, char *buffer,
                                   size_t bufLength);
 
 /**
@@ -258,7 +258,7 @@ bool bsg_ksmachgetThreadQueueName(thread_t thread, char *buffer,
  *
  * @return The thread's run state or -1 if an error occurred.
  */
-integer_t bsg_ksmachgetThreadState(const thread_t thread);
+integer_t rsc_ksmachgetThreadState(const thread_t thread);
 
 // ============================================================================
 #pragma mark - Utility -
@@ -271,23 +271,23 @@ integer_t bsg_ksmachgetThreadState(const thread_t thread);
  *
  * @return The current thread ID.
  */
-thread_t bsg_ksmachthread_self(void);
+thread_t rsc_ksmachthread_self(void);
 
-/** Get a list of all current threads. This list is kernel-allocated, and so must be freed using bsg_ksmachfreeThreads.
+/** Get a list of all current threads. This list is kernel-allocated, and so must be freed using rsc_ksmachfreeThreads.
  *
  * @param threadCount pointer to location to store the count of all threads.
  *
  * @return A list of threads.
  */
-thread_t *bsg_ksmachgetAllThreads(unsigned *threadCount);
+thread_t *rsc_ksmachgetAllThreads(unsigned *threadCount);
 
-/** Free a previously allocated thread list. This should only be called on a thread list allocated from bsg_ksmachgetAllThreads.
+/** Free a previously allocated thread list. This should only be called on a thread list allocated from rsc_ksmachgetAllThreads.
  *
  * @param threads The list of threads to free.
  *
  * @param threadCount The number of threads in the list.
  */
-void bsg_ksmachfreeThreads(thread_t *threads, unsigned threadCount);
+void rsc_ksmachfreeThreads(thread_t *threads, unsigned threadCount);
 
 /** Get the run states of a list of threads.
  *
@@ -297,7 +297,7 @@ void bsg_ksmachfreeThreads(thread_t *threads, unsigned threadCount);
  *
  * @param threadCount The number of threads in the threads list.
  */
-void bsg_ksmachgetThreadStates(thread_t *threads, integer_t *states, unsigned threadCount);
+void rsc_ksmachgetThreadStates(thread_t *threads, integer_t *states, unsigned threadCount);
 
 /** Fill out a list containing a source list's contents, with certain threads removed.
  *
@@ -315,11 +315,11 @@ void bsg_ksmachgetThreadStates(thread_t *threads, integer_t *states, unsigned th
  *
  * @return The number of threads put into the destination list.
  */
-unsigned bsg_ksmachremoveThreadsFromList(thread_t *srcThreads, unsigned srcThreadCount,
+unsigned rsc_ksmachremoveThreadsFromList(thread_t *srcThreads, unsigned srcThreadCount,
                                          thread_t *omitThreads, unsigned omitThreadsCount,
                                          thread_t *dstThreads, unsigned maxDstThreads);
 
-#if BSG_HAVE_MACH_THREADS
+#if RSC_HAVE_MACH_THREADS
 /** Suspend a list of threads.
  * Note: The current thread cannot be suspended via this function.
  *
@@ -327,7 +327,7 @@ unsigned bsg_ksmachremoveThreadsFromList(thread_t *srcThreads, unsigned srcThrea
  *
  * @param threadsCount The number of threads in the list.
  */
-void bsg_ksmachsuspendThreads(thread_t *threads, unsigned threadsCount);
+void rsc_ksmachsuspendThreads(thread_t *threads, unsigned threadsCount);
 
 /** Resume a list of threads.
  * Note: The current thread cannot be resumed via this function.
@@ -336,7 +336,7 @@ void bsg_ksmachsuspendThreads(thread_t *threads, unsigned threadsCount);
  *
  * @param threadsCount The number of threads in the list.
  */
-void bsg_ksmachresumeThreads(thread_t *threads, unsigned threadsCount);
+void rsc_ksmachresumeThreads(thread_t *threads, unsigned threadsCount);
 #endif
 
 /** Copy memory safely. If the memory is not accessible, returns false
@@ -350,7 +350,7 @@ void bsg_ksmachresumeThreads(thread_t *threads, unsigned threadsCount);
  *
  * @return KERN_SUCCESS or an error code.
  */
-kern_return_t bsg_ksmachcopyMem(const void *src, void *dst, size_t numBytes);
+kern_return_t rsc_ksmachcopyMem(const void *src, void *dst, size_t numBytes);
 
 /** Get the difference in seconds between two timestamps fetched via
  * mach_absolute_time().
@@ -361,13 +361,13 @@ kern_return_t bsg_ksmachcopyMem(const void *src, void *dst, size_t numBytes);
  *
  * @return The difference between the two timestamps in seconds.
  */
-double bsg_ksmachtimeDifferenceInSeconds(uint64_t endTime, uint64_t startTime);
+double rsc_ksmachtimeDifferenceInSeconds(uint64_t endTime, uint64_t startTime);
 
 /** Check if the current process is being traced or not.
  *
  * @return true if we're being traced.
  */
-bool bsg_ksmachisBeingTraced(void);
+bool rsc_ksmachisBeingTraced(void);
 
 #ifdef __cplusplus
 }
