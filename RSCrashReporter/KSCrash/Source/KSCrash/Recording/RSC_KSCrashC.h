@@ -111,7 +111,7 @@ void rsc_kscrash_setThreadTracingEnabled(bool threadTracingEnabled);
 /**
  * The current crash context
  */
-RSC_KSCrash_Context *crashContext(void);
+RSC_KSCrash_Context *crashContextRSC(void);
 
 #ifdef __cplusplus
 }

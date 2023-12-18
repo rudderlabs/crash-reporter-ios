@@ -211,7 +211,7 @@ void rsc_ksmachexc_i_restoreExceptionPorts(void) {
  * Wait for an exception message, uninstall our exception port, record the
  * exception information, and write a report.
  */
-void *ksmachexc_i_handleExceptions(void *const userData) {
+void *rsc_ksmachexc_i_handleExceptions(void *const userData) {
     MachExceptionMessage exceptionMessage = {{0}};
     MachReplyMessage replyMessage = {{0}};
 
@@ -283,7 +283,7 @@ void *ksmachexc_i_handleExceptions(void *const userData) {
         rsc_g_context->mach.subcode = exceptionMessage.code[1] & (int64_t)MACH_ERROR_CODE_MASK;
 
         RSC_KSLOG_DEBUG("Calling main crash handler.");
-        rsc_g_context->onCrash(crashContext());
+        rsc_g_context->onCrash(crashContextRSC());
 
         RSC_KSLOG_DEBUG(
             "Crash handling complete. Restoring original handlers.");
@@ -291,7 +291,7 @@ void *ksmachexc_i_handleExceptions(void *const userData) {
         rsc_kscrashsentry_resumeThreads();
 
         // Must run before endHandlingCrash unblocks secondary crashed threads.
-        RSC_KSCrash_Context *context = crashContext();
+        RSC_KSCrash_Context *context = crashContextRSC();
         if (context->crash.attemptDelivery) {
             RSC_KSLOG_DEBUG("Attempting delivery.");
             context->crash.attemptDelivery();
@@ -393,7 +393,7 @@ bool rsc_kscrashsentry_installMachHandler(
     attributes_created = true;
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     error = pthread_create(&rsc_g_secondaryPThread, &attr,
-                           &ksmachexc_i_handleExceptions, kThreadSecondary);
+                           &rsc_ksmachexc_i_handleExceptions, kThreadSecondary);
     if (error != 0) {
         RSC_KSLOG_ERROR("pthread_create_suspended_np: %s", strerror(error));
         goto failed;
@@ -404,7 +404,7 @@ bool rsc_kscrashsentry_installMachHandler(
 
     RSC_KSLOG_DEBUG("Creating primary exception thread.");
     error = pthread_create(&rsc_g_primaryPThread, &attr,
-                           &ksmachexc_i_handleExceptions, kThreadPrimary);
+                           &rsc_ksmachexc_i_handleExceptions, kThreadPrimary);
     if (error != 0) {
         RSC_KSLOG_ERROR("pthread_create: %s", strerror(error));
         goto failed;

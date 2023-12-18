@@ -37,7 +37,7 @@
     
     uintptr_t stackTrace[500];
     
-    RSC_KSCrash_Context *context = crashContext();
+    RSC_KSCrash_Context *context = crashContextRSC();
     context->crash.crashType = RSC_KSCrashTypeNSException;
     context->crash.offendingThread = rsc_ksmachthread_self();
     context->crash.registersAreValid = false;
@@ -90,7 +90,7 @@
         assert(stackTrace[i] != 0);
     }
     
-    RSC_KSCrash_Context *context = crashContext();
+    RSC_KSCrash_Context *context = crashContextRSC();
     context->crash.crashType = RSC_KSCrashTypeNSException;
     context->crash.offendingThread = rsc_ksmachthread_self();
     context->crash.registersAreValid = false;

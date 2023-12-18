@@ -99,7 +99,7 @@ void rsc_ksnsexc_i_handleException(NSException *exception) {
         rsc_kscrashsentry_uninstall(RSC_KSCrashTypeAll);
 
         // Must run before endHandlingCrash unblocks secondary crashed threads.
-        RSC_KSCrash_Context *context = crashContext();
+        RSC_KSCrash_Context *context = crashContextRSC();
         if (context->crash.attemptDelivery) {
             RSC_KSLOG_DEBUG("Attempting delivery.");
             context->crash.attemptDelivery();
@@ -156,7 +156,7 @@ void rsc_recordException(NSException *exception) {
 #endif
 
         RSC_KSLOG_DEBUG("Calling main crash handler.");
-        rsc_g_context->onCrash(crashContext());
+        rsc_g_context->onCrash(crashContextRSC());
 
 #if RSC_HAVE_MACH_THREADS
         rsc_kscrashsentry_resumeThreads();

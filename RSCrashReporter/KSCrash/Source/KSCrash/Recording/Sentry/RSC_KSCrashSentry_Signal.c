@@ -117,7 +117,7 @@ void rsc_kssighndl_i_handleSignal(int sigNum, siginfo_t *signalInfo,
         rsc_g_context->signal.signalInfo = signalInfo;
 
         RSC_KSLOG_DEBUG("Calling main crash handler.");
-        rsc_g_context->onCrash(crashContext());
+        rsc_g_context->onCrash(crashContextRSC());
 
         RSC_KSLOG_DEBUG(
             "Crash handling complete. Restoring original handlers.");

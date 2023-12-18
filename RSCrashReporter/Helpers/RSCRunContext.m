@@ -404,7 +404,7 @@ static void UpdateHostMemory(void) {
     }
 }
 
-void setMemoryUsage(uint64_t footprint, uint64_t available) {
+void setMemoryUsageRSC(uint64_t footprint, uint64_t available) {
     uint64_t limit = footprint + available;
     ATOMIC_SET(rsc_runContext->memoryAvailable, available);
     ATOMIC_SET(rsc_runContext->memoryLimit, limit);
@@ -427,11 +427,11 @@ static void UpdateTaskMemory(void) {
     // this code must be compiled out when building with older SDKs.
 #ifdef TASK_VM_INFO_REV4_COUNT
     if (task_vm.limit_bytes_remaining) {
-        setMemoryUsage(footprint, task_vm.limit_bytes_remaining);
+        setMemoryUsageRSC(footprint, task_vm.limit_bytes_remaining);
     } else {
 #if !TARGET_OS_OSX
     if (@available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)) {
-        setMemoryUsage(footprint, os_proc_available_memory());
+        setMemoryUsageRSC(footprint, os_proc_available_memory());
     }
 #endif
     }

@@ -396,7 +396,7 @@ RSC_OBJC_DIRECT_MEMBERS
     }
 
     rsc_kscrashstate_updateDurationStats();
-    RSC_KSCrash_State state = crashContext()->state;
+    RSC_KSCrash_State state = crashContextRSC()->state;
     NSMutableDictionary *statsInfo = [NSMutableDictionary dictionary];
     statsInfo[@ RSC_KSCrashField_ActiveTimeSinceLaunch] = @(state.foregroundDurationSinceLaunch);
     statsInfo[@ RSC_KSCrashField_BGTimeSinceLaunch] = @(state.backgroundDurationSinceLaunch);

@@ -58,7 +58,7 @@ static char *rsc_g_stateFilePath;
 #pragma mark - Utility -
 // ============================================================================
 
-RSC_KSCrash_Context *crashContext(void) {
+RSC_KSCrash_Context *crashContextRSC(void) {
     return &rsc_g_crashReportContext;
 }
 
@@ -102,7 +102,7 @@ RSC_KSCrashType rsc_kscrash_install(const char *const crashReportFilePath,
                                     const char *crashID) {
     RSC_KSLOG_DEBUG("Installing crash reporter.");
 
-    RSC_KSCrash_Context *context = crashContext();
+    RSC_KSCrash_Context *context = crashContextRSC();
     
     if (rsc_g_installed) {
         RSC_KSLOG_DEBUG("Crash reporter already installed.");
@@ -136,7 +136,7 @@ void rsc_kscrash_reinstall(const char *const crashReportFilePath,
 
     rsc_ksstring_replace(&rsc_g_stateFilePath, stateFilePath);
 
-    RSC_KSCrash_Context *context = crashContext();
+    RSC_KSCrash_Context *context = crashContextRSC();
     rsc_ksstring_replace(&context->config.crashReportFilePath,
                          crashReportFilePath);
     rsc_ksstring_replace(&context->config.recrashReportFilePath,
@@ -149,7 +149,7 @@ void rsc_kscrash_reinstall(const char *const crashReportFilePath,
 }
 
 RSC_KSCrashType rsc_kscrash_setHandlingCrashTypes(RSC_KSCrashType crashTypes) {
-    RSC_KSCrash_Context *context = crashContext();
+    RSC_KSCrash_Context *context = crashContextRSC();
     context->config.handlingCrashTypes = crashTypes;
 
     if (rsc_g_installed) {
@@ -166,12 +166,12 @@ RSC_KSCrashType rsc_kscrash_setHandlingCrashTypes(RSC_KSCrashType crashTypes) {
 void rsc_kscrash_setCrashNotifyCallback(
     const RSC_KSReportWriteCallback onCrashNotify) {
     RSC_KSLOG_TRACE("Set onCrashNotify to %p", onCrashNotify);
-    crashContext()->config.onCrashNotify = onCrashNotify;
+    crashContextRSC()->config.onCrashNotify = onCrashNotify;
 }
 
 void rsc_kscrash_setThreadTracingEnabled(bool threadTracingEnabled) {
 #if RSC_HAVE_MACH_THREADS
-    crashContext()->crash.threadTracingEnabled = threadTracingEnabled;
+    crashContextRSC()->crash.threadTracingEnabled = threadTracingEnabled;
 #else
     (void)threadTracingEnabled;
 #endif

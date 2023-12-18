@@ -42,7 +42,7 @@ void RSCCrashSentryInstall(RSCrashReporterConfiguration *config, RSC_KSReportWri
         }
         if (config.attemptDeliveryOnCrash) {
             rsc_log_debug(@"Enabling on-crash delivery");
-            crashContext()->crash.attemptDelivery = RSCCrashSentryAttemptyDelivery;
+            crashContextRSC()->crash.attemptDelivery = RSCCrashSentryAttemptyDelivery;
         }
     }
 
@@ -78,7 +78,7 @@ RSC_KSCrashType RSC_KSCrashTypeFromRSCrashReporterErrorTypes(RSCrashReporterErro
 }
 
 static void RSCCrashSentryAttemptyDelivery(void) {
-    NSString *file = @(crashContext()->config.crashReportFilePath);
+    NSString *file = @(crashContextRSC()->config.crashReportFilePath);
     rsc_log_info(@"Attempting crash-time delivery of %@", file);
     int64_t timeout = (int64_t)(RSCCrashSentryDeliveryTimeout * NSEC_PER_SEC);
     dispatch_time_t deadline = dispatch_time(DISPATCH_TIME_NOW, timeout);

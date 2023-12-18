@@ -41,7 +41,7 @@ static NSDictionary * loadPreviousState(NSString *jsonPath) {
     return state;
 }
 
-id blankIfNil(id value) {
+id blankIfNilRSC(id value) {
     if(value == nil || [value isKindOfClass:[NSNull class]]) {
         return @"";
     }
@@ -52,11 +52,11 @@ static NSMutableDictionary * initCurrentState(RSCrashReporterConfiguration *conf
     NSDictionary *systemInfo = [RSC_KSSystemInfo systemInfo];
 
     NSMutableDictionary *app = [NSMutableDictionary new];
-    app[RSCKeyId] = blankIfNil(systemInfo[@RSC_KSSystemField_BundleID]);
-    app[RSCKeyName] = blankIfNil(systemInfo[@RSC_KSSystemField_BundleName]);
+    app[RSCKeyId] = blankIfNilRSC(systemInfo[@RSC_KSSystemField_BundleID]);
+    app[RSCKeyName] = blankIfNilRSC(systemInfo[@RSC_KSSystemField_BundleName]);
     app[RSCKeyReleaseStage] = config.releaseStage;
-    app[RSCKeyVersion] = blankIfNil(systemInfo[@RSC_KSSystemField_BundleShortVersion]);
-    app[RSCKeyBundleVersion] = blankIfNil(systemInfo[@RSC_KSSystemField_BundleVersion]);
+    app[RSCKeyVersion] = blankIfNilRSC(systemInfo[@RSC_KSSystemField_BundleShortVersion]);
+    app[RSCKeyBundleVersion] = blankIfNilRSC(systemInfo[@RSC_KSSystemField_BundleVersion]);
     app[RSCKeyMachoUUID] = systemInfo[@RSC_KSSystemField_AppUUID];
     app[@"binaryArch"] = systemInfo[@RSC_KSSystemField_BinaryArch];
 #if TARGET_OS_TV
