@@ -1,6 +1,6 @@
 //
 //  URLSessionMock.h
-//  Bugsnag
+//  RSCrashReporter
 //
 //  Created by Nick Dowell on 19/11/2020.
 //  Copyright © 2020 Bugsnag Inc. All rights reserved.

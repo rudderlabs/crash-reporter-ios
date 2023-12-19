@@ -1,9 +1,9 @@
 //
-//  Bugsnag.m
+//  RSCrashReporter.m
 //
 //  Created by Conrad Irwin on 2014-10-01.
 //
-//  Copyright (c) 2014 Bugsnag, Inc. All rights reserved.
+//  Copyright (c) 2014 Bugsnag Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,32 +26,32 @@
 
 #import "RSCrashReporter.h"
 
-#import "BSGStorageMigratorV0V1.h"
-#import "Bugsnag+Private.h"
-#import "BugsnagBreadcrumbs.h"
-#import "BugsnagClient+Private.h"
-#import "BugsnagInternals.h"
-#import "BugsnagLogger.h"
+#import "RSCStorageMigratorV0V1.h"
+#import "RSCrashReporter+Private.h"
+#import "RSCrashReporterBreadcrumbs.h"
+#import "RSCrashReporterClient+Private.h"
+#import "RSCrashReporterInternals.h"
+#import "RSCrashReporterLogger.h"
 
-static BugsnagClient *bsg_g_bugsnag_client = NULL;
+static RSCrashReporterClient *rsc_g_bugsnag_client = NULL;
 
-BSG_OBJC_DIRECT_MEMBERS
+RSC_OBJC_DIRECT_MEMBERS
 @implementation RSCrashReporter
 
 + (void)startWithDelegate:(id<RSCrashReporterNotifyDelegate> _Nullable)delegate {
     @synchronized(self) {
-        if (bsg_g_bugsnag_client == nil) {
-            [BSGStorageMigratorV0V1 migrate];
-            bsg_g_bugsnag_client = [[BugsnagClient alloc] initWithConfiguration:[BugsnagConfiguration loadConfig] delegate:delegate];
-            [bsg_g_bugsnag_client start];
+        if (rsc_g_bugsnag_client == nil) {
+            [RSCStorageMigratorV0V1 migrate];
+            rsc_g_bugsnag_client = [[RSCrashReporterClient alloc] initWithConfiguration:[RSCrashReporterConfiguration loadConfig] delegate:delegate];
+            [rsc_g_bugsnag_client start];
         } else {
-            bsg_log_warn(@"Multiple RSCrashReporter.start calls detected. Ignoring.");
+            rsc_log_warn(@"Multiple RSCrashReporter.start calls detected. Ignoring.");
         }
     }
 }
 
 + (BOOL)isStarted {
-    return bsg_g_bugsnag_client.isStarted;
+    return rsc_g_bugsnag_client.isStarted;
 }
 
 /**
@@ -60,11 +60,11 @@ BSG_OBJC_DIRECT_MEMBERS
  */
 
 + (void)purge {
-    bsg_g_bugsnag_client = nil;
+    rsc_g_bugsnag_client = nil;
 }
 
-+ (BugsnagClient *)client {
-    return bsg_g_bugsnag_client;
++ (RSCrashReporterClient *)client {
+    return rsc_g_bugsnag_client;
 }
 
 + (BOOL)appDidCrashLastLaunch {
@@ -74,7 +74,7 @@ BSG_OBJC_DIRECT_MEMBERS
     return NO;
 }
 
-+ (BugsnagLastRunInfo *)lastRunInfo {
++ (RSCrashReporterLastRunInfo *)lastRunInfo {
     if ([self bugsnagReadyForInternalCalls]) {
         return self.client.lastRunInfo;
     }
@@ -93,7 +93,7 @@ BSG_OBJC_DIRECT_MEMBERS
     }
 }
 
-+ (void)notify:(NSException *)exception block:(BugsnagOnErrorBlock)block {
++ (void)notify:(NSException *)exception block:(RSCrashReporterOnErrorBlock)block {
     if ([self bugsnagReadyForInternalCalls]) {
         [self.client notify:exception block:block];
     }
@@ -105,7 +105,7 @@ BSG_OBJC_DIRECT_MEMBERS
     }
 }
 
-+ (void)notifyError:(NSError *)error block:(BugsnagOnErrorBlock)block {
++ (void)notifyError:(NSError *)error block:(RSCrashReporterOnErrorBlock)block {
     if ([self bugsnagReadyForInternalCalls]) {
         [self.client notifyError:error block:block];
     }
@@ -133,7 +133,7 @@ BSG_OBJC_DIRECT_MEMBERS
 
 + (void)leaveBreadcrumbWithMessage:(NSString *_Nonnull)message
                           metadata:(NSDictionary *_Nullable)metadata
-                           andType:(BSGBreadcrumbType)type
+                           andType:(RSCBreadcrumbType)type
 {
     if ([self bugsnagReadyForInternalCalls]) {
         [self.client leaveBreadcrumbWithMessage:message
@@ -149,7 +149,7 @@ BSG_OBJC_DIRECT_MEMBERS
     }
 }
 
-+ (NSArray<BugsnagBreadcrumb *> *_Nonnull)breadcrumbs {
++ (NSArray<RSCrashReporterBreadcrumb *> *_Nonnull)breadcrumbs {
     if ([self bugsnagReadyForInternalCalls]) {
         return self.client.breadcrumbs;
     } else {
@@ -179,7 +179,7 @@ BSG_OBJC_DIRECT_MEMBERS
 }
 
 // =============================================================================
-// MARK: - <BugsnagFeatureFlagStore>
+// MARK: - <RSCrashReporterFeatureFlagStore>
 // =============================================================================
 
 + (void)addFeatureFlagWithName:(NSString *)name variant:(nullable NSString *)variant {
@@ -194,7 +194,7 @@ BSG_OBJC_DIRECT_MEMBERS
     }*/
 }
 
-+ (void)addFeatureFlags:(NSArray<BugsnagFeatureFlag *> *)featureFlags {
++ (void)addFeatureFlags:(NSArray<RSCrashReporterFeatureFlag *> *)featureFlags {
     /*if ([self bugsnagReadyForInternalCalls]) {
         [self.client addFeatureFlags:featureFlags];
     }*/
@@ -213,11 +213,11 @@ BSG_OBJC_DIRECT_MEMBERS
 }
 
 // =============================================================================
-// MARK: - <BugsnagClassLevelMetadataStore>
+// MARK: - <RSCrashReporterClassLevelMetadataStore>
 // =============================================================================
 
 /**
- * Add custom data to send to Bugsnag with every exception. If value is nil,
+ * Add custom data to send to RSCrashReporter with every exception. If value is nil,
  * delete the current value for attributeName
  *
  * @param metadata The metadata to add
@@ -292,7 +292,7 @@ BSG_OBJC_DIRECT_MEMBERS
     return nil;
 }
 
-+ (BugsnagUser *)user {
++ (RSCrashReporterUser *)user {
     return self.client.user;
 }
 
@@ -304,7 +304,7 @@ BSG_OBJC_DIRECT_MEMBERS
     }*/
 }
 
-+ (nonnull BugsnagOnSessionRef)addOnSessionBlock:(nonnull BugsnagOnSessionBlock)block {
++ (nonnull RSCrashReporterOnSessionRef)addOnSessionBlock:(nonnull RSCrashReporterOnSessionBlock)block {
     /*if ([self bugsnagReadyForInternalCalls]) {
         return [self.client addOnSessionBlock:block];
     } else {*/
@@ -313,13 +313,13 @@ BSG_OBJC_DIRECT_MEMBERS
     //}
 }
 
-+ (void)removeOnSession:(nonnull BugsnagOnSessionRef)callback {
++ (void)removeOnSession:(nonnull RSCrashReporterOnSessionRef)callback {
     /*if ([self bugsnagReadyForInternalCalls]) {
         [self.client removeOnSession:callback];
     }*/
 }
 
-+ (void)removeOnSessionBlock:(BugsnagOnSessionBlock _Nonnull )block {
++ (void)removeOnSessionBlock:(RSCrashReporterOnSessionBlock _Nonnull )block {
     /*if ([self bugsnagReadyForInternalCalls]) {
         [self.client removeOnSessionBlock:block];
     }*/
@@ -329,7 +329,7 @@ BSG_OBJC_DIRECT_MEMBERS
 // MARK: - OnBreadcrumb
 // =============================================================================
 
-+ (nonnull BugsnagOnBreadcrumbRef)addOnBreadcrumbBlock:(nonnull BugsnagOnBreadcrumbBlock)block {
++ (nonnull RSCrashReporterOnBreadcrumbRef)addOnBreadcrumbBlock:(nonnull RSCrashReporterOnBreadcrumbBlock)block {
     /*if ([self bugsnagReadyForInternalCalls]) {
         return [self.client addOnBreadcrumbBlock:block];
     } else {*/
@@ -338,13 +338,13 @@ BSG_OBJC_DIRECT_MEMBERS
     //}
 }
 
-+ (void)removeOnBreadcrumb:(nonnull BugsnagOnBreadcrumbRef)callback {
++ (void)removeOnBreadcrumb:(nonnull RSCrashReporterOnBreadcrumbRef)callback {
     /*if ([self bugsnagReadyForInternalCalls]) {
         [self.client removeOnBreadcrumb:callback];
     }*/
 }
 
-+ (void)removeOnBreadcrumbBlock:(BugsnagOnBreadcrumbBlock _Nonnull)block {
++ (void)removeOnBreadcrumbBlock:(RSCrashReporterOnBreadcrumbBlock _Nonnull)block {
     /*if ([self bugsnagReadyForInternalCalls]) {
         [self.client removeOnBreadcrumbBlock:block];
     }*/

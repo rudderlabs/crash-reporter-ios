@@ -1,6 +1,6 @@
 //
 //  TestSupport.m
-//  Bugsnag
+//  RSCrashReporter
 //
 //  Created by Karl Stenerud on 25.09.20.
 //  Copyright © 2020 Bugsnag Inc. All rights reserved.
@@ -8,19 +8,19 @@
 
 #import "TestSupport.h"
 
-#import "BSG_KSCrashC.h"
-#import "BSG_KSCrashState.h"
-#import "BSGFileLocations.h"
-#import "BSGRunContext.h"
-#import "BSGUtils.h"
-#import "Bugsnag+Private.h"
+#import "RSC_KSCrashC.h"
+#import "RSC_KSCrashState.h"
+#import "RSCFileLocations.h"
+#import "RSCRunContext.h"
+#import "RSCUtils.h"
+#import "RSCrashReporter+Private.h"
 
 
 @implementation TestSupport
 
 + (void) purgePersistentData {
-    dispatch_sync(BSGGetFileSystemQueue(), ^{
-        NSString *dir = [[BSGFileLocations current].events stringByDeletingLastPathComponent];
+    dispatch_sync(RSCGetFileSystemQueue(), ^{
+        NSString *dir = [[RSCFileLocations current].events stringByDeletingLastPathComponent];
         NSError *error = nil;
         if (![NSFileManager.defaultManager removeItemAtPath:dir error:&error] &&
             !([error.domain isEqual:NSCocoaErrorDomain] && error.code == NSFileNoSuchFileError)) {
@@ -30,7 +30,7 @@
     
     [RSCrashReporter purge];
     
-    bsg_lastRunContext = NULL;
+    rsc_lastRunContext = NULL;
 }
 
 @end

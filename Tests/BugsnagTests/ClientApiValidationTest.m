@@ -1,6 +1,6 @@
 //
 //  ClientApiValidationTest.m
-//  Bugsnag
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 10/06/2020.
 //  Copyright © 2020 Bugsnag Inc. All rights reserved.
@@ -8,132 +8,141 @@
 
 #import <XCTest/XCTest.h>
 #import <RSCrashReporter/RSCrashReporter.h>
-#import "BugsnagTestConstants.h"
+#import "RSCrashReporterTestConstants.h"
 
 /**
 * Validates that the Client API interface handles any invalid input gracefully.
 */
 @interface ClientApiValidationTest : XCTestCase
-@property BugsnagClient *client;
+@property RSCrashReporterClient *client;
 @end
 
 @implementation ClientApiValidationTest
 
 - (void)setUp {
-    BugsnagConfiguration *config = [[BugsnagConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
-    [config addOnSendErrorBlock:^BOOL(BugsnagEvent *event) {
+    RSCrashReporterConfiguration *config = [[RSCrashReporterConfiguration alloc] initWithApiKey:DUMMY_APIKEY_32CHAR_1];
+    [config addOnSendErrorBlock:^BOOL(RSCrashReporterEvent *event) {
         return NO;
     }];
-    self.client = [[BugsnagClient alloc]initWithConfiguration:config delegate:nil];
+    [RSCrashReporter startWithDelegate:nil];
 }
 
 - (void)testValidNotify {
-    [self.client notify:[NSException exceptionWithName:@"FooException" reason:@"whoops" userInfo:nil]];
+    [RSCrashReporter notify:[NSException exceptionWithName:@"FooException" reason:@"whoops" userInfo:nil]];
 }
 
 - (void)testValidNotifyBlock {
     NSException *exc = [NSException exceptionWithName:@"FooException" reason:@"whoops" userInfo:nil];
-    [self.client notify:exc block:nil];
-    [self.client notify:exc block:^BOOL(BugsnagEvent *event) {
+    [RSCrashReporter notify:exc block:nil];
+    [RSCrashReporter notify:exc block:^BOOL(RSCrashReporterEvent *event) {
         return NO;
     }];
 }
 
 - (void)testValidNotifyError {
     NSError *error = [NSError errorWithDomain:@"BarError" code:500 userInfo:nil];
-    [self.client notifyError:error];
+    [RSCrashReporter notifyError:error];
 }
 
 - (void)testValidNotifyErrorBlock {
     NSError *error = [NSError errorWithDomain:@"BarError" code:500 userInfo:nil];
-    [self.client notifyError:error block:nil];
-    [self.client notifyError:error block:^BOOL(BugsnagEvent *event) {
+    [RSCrashReporter notifyError:error block:nil];
+    [RSCrashReporter notifyError:error block:^BOOL(RSCrashReporterEvent *event) {
         return NO;
     }];
 }
 
 - (void)testValidLeaveBreadcrumbWithMessage {
-    [self.client leaveBreadcrumbWithMessage:@"Foo"];
+    [RSCrashReporter leaveBreadcrumbWithMessage:@"Foo"];
 }
 
 - (void)testValidLeaveBreadcrumbForNotificationName {
-    [self.client leaveBreadcrumbForNotificationName:@"some invalid value"];
+    [RSCrashReporter leaveBreadcrumbForNotificationName:@"some invalid value"];
 }
 
 - (void)testValidLeaveBreadcrumbWithMessageMetadata {
-    [self.client leaveBreadcrumbWithMessage:@"Foo" metadata:nil andType:BSGBreadcrumbTypeProcess];
-    [self.client leaveBreadcrumbWithMessage:@"Foo" metadata:@{@"test": @2} andType:BSGBreadcrumbTypeState];
+    [RSCrashReporter leaveBreadcrumbWithMessage:@"Foo" metadata:nil andType:RSCBreadcrumbTypeProcess];
+    [RSCrashReporter leaveBreadcrumbWithMessage:@"Foo" metadata:@{@"test": @2} andType:RSCBreadcrumbTypeState];
 }
 
 - (void)testValidStartSession {
-    [self.client startSession];
+    [RSCrashReporter startSession];
 }
 
 - (void)testValidPauseSession {
-    [self.client pauseSession];
+    [RSCrashReporter pauseSession];
 }
 
 - (void)testValidResumeSession {
-    [self.client resumeSession];
+    [RSCrashReporter resumeSession];
 }
 
-- (void)testValidContext {
-    self.client.context = nil;
-    XCTAssertNil(self.client.context);
-    self.client.context = @"Foo";
-    XCTAssertEqualObjects(@"Foo", self.client.context);
-}
+/**
+ // MARK: - Rudder Commented
+ Not needed for us as the relevant logic is commented out.
+ */
+
+//- (void)testValidContext {
+//    RSCrashReporter.context = nil;
+//    XCTAssertNil(RSCrashReporter.context);
+//    RSCrashReporter.context = @"Foo";
+//    XCTAssertEqualObjects(@"Foo", RSCrashReporter.context);
+//}
 
 - (void)testValidAppDidCrashLastLaunch {
-    XCTAssertFalse(self.client.lastRunInfo.crashed);
+    XCTAssertFalse(RSCrashReporter.lastRunInfo.crashed);
 }
 
-- (void)testValidUser {
-    [self.client setUser:nil withEmail:nil andName:nil];
-    XCTAssertNotNil(self.client.user);
-    XCTAssertNil(self.client.user.id);
-    XCTAssertNil(self.client.user.email);
-    XCTAssertNil(self.client.user.name);
-
-    [self.client setUser:@"123" withEmail:@"joe@foo.com" andName:@"Joe"];
-    XCTAssertNotNil(self.client.user);
-    XCTAssertEqualObjects(@"123", self.client.user.id);
-    XCTAssertEqualObjects(@"joe@foo.com", self.client.user.email);
-    XCTAssertEqualObjects(@"Joe", self.client.user.name);
-}
+/**
+ // MARK: - Rudder Commented
+ Not needed for us as the relevant logic is commented out.
+ */
+//- (void)testValidUser {
+//    [RSCrashReporter setUser:nil withEmail:nil andName:nil];
+//    XCTAssertNotNil(RSCrashReporter.user);
+//    XCTAssertNil(RSCrashReporter.user.id);
+//    XCTAssertNil(RSCrashReporter.user.email);
+//    XCTAssertNil(RSCrashReporter.user.name);
+//
+//    [RSCrashReporter setUser:@"123" withEmail:@"joe@foo.com" andName:@"Joe"];
+//    XCTAssertNotNil(RSCrashReporter.user);
+//    XCTAssertEqualObjects(@"123", RSCrashReporter.user.id);
+//    XCTAssertEqualObjects(@"joe@foo.com", RSCrashReporter.user.email);
+//    XCTAssertEqualObjects(@"Joe", RSCrashReporter.user.name);
+//}
 
 - (void)testValidOnSessionBlock {
-    BugsnagOnSessionRef callback = [self.client addOnSessionBlock:^BOOL(BugsnagSession *session) {
+    RSCrashReporterOnSessionRef callback = [RSCrashReporter addOnSessionBlock:^BOOL(RSCrashReporterSession *session) {
         return NO;
     }];
-    [self.client removeOnSession:callback];
+    [RSCrashReporter removeOnSession:callback];
 }
 
 - (void)testValidOnBreadcrumbBlock {
-    BugsnagOnBreadcrumbRef callback = [self.client addOnBreadcrumbBlock:^BOOL(BugsnagBreadcrumb *breadcrumb) {
+    RSCrashReporterOnBreadcrumbRef callback = [RSCrashReporter addOnBreadcrumbBlock:^BOOL(RSCrashReporterBreadcrumb *breadcrumb) {
         return NO;
     }];
-    [self.client removeOnBreadcrumb:callback];
+    [RSCrashReporter removeOnBreadcrumb:callback];
 }
 
 - (void)testValidAddMetadata {
-    [self.client addMetadata:@{} toSection:@"foo"];
-    XCTAssertNil([self.client getMetadataFromSection:@"foo"]);
+    [RSCrashReporter addMetadata:@{} toSection:@"foo"];
+    XCTAssertNil([RSCrashReporter getMetadataFromSection:@"foo"]);
 
-    [self.client addMetadata:nil withKey:@"nom" toSection:@"foo"];
-    [self.client addMetadata:@"" withKey:@"bar" toSection:@"foo"];
-    XCTAssertNil([self.client getMetadataFromSection:@"foo" withKey:@"nom"]);
-    XCTAssertEqualObjects(@"", [self.client getMetadataFromSection:@"foo" withKey:@"bar"]);
+    [RSCrashReporter addMetadata:nil withKey:@"nom" toSection:@"foo"];
+    [RSCrashReporter addMetadata:@"" withKey:@"bar" toSection:@"foo"];
+    XCTAssertNil([RSCrashReporter getMetadataFromSection:@"foo" withKey:@"nom"]);
+    XCTAssertEqualObjects(@"", [RSCrashReporter getMetadataFromSection:@"foo" withKey:@"bar"]);
 }
 
 - (void)testValidClearMetadata {
-    [self.client clearMetadataFromSection:@""];
-    [self.client clearMetadataFromSection:@"" withKey:@""];
+    [RSCrashReporter clearMetadataFromSection:@""];
+    [RSCrashReporter clearMetadataFromSection:@"" withKey:@""];
 }
 
 - (void)testValidGetMetadata {
-    [self.client getMetadataFromSection:@""];
-    [self.client getMetadataFromSection:@"" withKey:@""];
+    [RSCrashReporter getMetadataFromSection:@""];
+    [RSCrashReporter getMetadataFromSection:@"" withKey:@""];
 }
 
 @end
