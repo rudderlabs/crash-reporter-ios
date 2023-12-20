@@ -4,4 +4,4 @@
 
 #import <RSCrashReporter/RSCrashReporter.h>
 
-#import "BugsnagTestConstants.h"
+#import "RSCrashReporterTestConstants.h"

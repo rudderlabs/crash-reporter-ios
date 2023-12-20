@@ -1,6 +1,6 @@
 //
 //  EventApiValidationTest.m
-//  Bugsnag
+//  RSCrashReporter
 //
 //  Created by Jamie Lynch on 10/06/2020.
 //  Copyright © 2020 Bugsnag Inc. All rights reserved.
@@ -9,19 +9,19 @@
 #import <XCTest/XCTest.h>
 
 #import <RSCrashReporter/RSCrashReporter.h>
-#import "BugsnagEvent+Private.h"
+#import "RSCrashReporterEvent+Private.h"
 
 /**
 * Validates that the Event API interface handles any invalid input gracefully.
 */
 @interface EventApiValidationTest : XCTestCase
-@property BugsnagEvent *event;
+@property RSCrashReporterEvent *event;
 @end
 
 @implementation EventApiValidationTest
 
 - (void)setUp {
-    self.event = [[BugsnagEvent alloc] initWithKSReport:@{@"user": @{}}];
+    self.event = [[RSCrashReporterEvent alloc] initWithKSReport:@{@"user": @{}}];
 }
 
 - (void)testValidContext {
@@ -32,12 +32,12 @@
 }
 
 - (void)testValidSeverity {
-    self.event.severity = BSGSeverityInfo;
-    XCTAssertEqual(BSGSeverityInfo, self.event.severity);
-    self.event.severity = BSGSeverityWarning;
-    XCTAssertEqual(BSGSeverityWarning, self.event.severity);
-    self.event.severity = BSGSeverityError;
-    XCTAssertEqual(BSGSeverityError, self.event.severity);
+    self.event.severity = RSCSeverityInfo;
+    XCTAssertEqual(RSCSeverityInfo, self.event.severity);
+    self.event.severity = RSCSeverityWarning;
+    XCTAssertEqual(RSCSeverityWarning, self.event.severity);
+    self.event.severity = RSCSeverityError;
+    XCTAssertEqual(RSCSeverityError, self.event.severity);
 }
 
 - (void)testValidGroupingHash {
@@ -82,7 +82,7 @@
 }
 
 - (void)testValidApp {
-    BugsnagAppWithState *app = self.event.app;
+    RSCrashReporterAppWithState *app = self.event.app;
     XCTAssertNotNil(app);
 
     app.duration = nil;
@@ -137,7 +137,7 @@
 }
 
 - (void)testValidDevice {
-    BugsnagDeviceWithState *device = self.event.device;
+    RSCrashReporterDeviceWithState *device = self.event.device;
     XCTAssertNotNil(device);
 
     device.freeDisk = nil;
@@ -215,7 +215,7 @@
     self.event.breadcrumbs = @[];
     XCTAssertEqualObjects(@[], self.event.breadcrumbs);
 
-    BugsnagBreadcrumb *crumb = [BugsnagBreadcrumb new];
+    RSCrashReporterBreadcrumb *crumb = [RSCrashReporterBreadcrumb new];
     crumb.message = @"Hello";
     self.event.breadcrumbs = @[crumb];
     XCTAssertEqualObjects(@[crumb], self.event.breadcrumbs);
@@ -225,19 +225,19 @@
     self.event.threads = @[];
     XCTAssertEqualObjects(@[], self.event.threads);
 
-    BugsnagThread *emptyThread = [BugsnagThread new];
+    RSCrashReporterThread *emptyThread = [RSCrashReporterThread new];
     emptyThread.id = nil;
     XCTAssertNil(emptyThread.id);
     emptyThread.name = nil;
     XCTAssertNil(emptyThread.name);
 
-    BugsnagThread *thread = [BugsnagThread new];
+    RSCrashReporterThread *thread = [RSCrashReporterThread new];
     thread.id = @"1";
     XCTAssertEqualObjects(@"1", thread.id);
     thread.name = @"thread-delivery";
     XCTAssertEqualObjects(@"thread-delivery", thread.name);
-    thread.type = BSGThreadTypeReactNativeJs;
-    XCTAssertEqual(BSGThreadTypeReactNativeJs, thread.type);
+    thread.type = RSCThreadTypeReactNativeJs;
+    XCTAssertEqual(RSCThreadTypeReactNativeJs, thread.type);
 
     NSArray *expected = @[thread, emptyThread];
     self.event.threads = expected;
@@ -248,19 +248,19 @@
     self.event.errors = @[];
     XCTAssertEqualObjects(@[], self.event.errors);
 
-    BugsnagError *emptyError = [BugsnagError new];
+    RSCrashReporterError *emptyError = [RSCrashReporterError new];
     emptyError.errorMessage = nil;
     XCTAssertNil(emptyError.errorMessage);
     emptyError.errorClass = nil;
     XCTAssertNil(emptyError.errorClass);
 
-    BugsnagError *error = [BugsnagError new];
+    RSCrashReporterError *error = [RSCrashReporterError new];
     error.errorMessage = @"Something went wrong";
     XCTAssertEqualObjects(@"Something went wrong", error.errorMessage);
     error.errorClass = @"FooException";
     XCTAssertEqualObjects(@"FooException", error.errorClass);
-    error.type = BSGErrorTypeC;
-    XCTAssertEqual(BSGErrorTypeC, error.type);
+    error.type = RSCErrorTypeC;
+    XCTAssertEqual(RSCErrorTypeC, error.type);
 
     NSArray *expected = @[error, emptyError];
     self.event.errors = expected;
@@ -268,7 +268,7 @@
 }
 
 - (void)testValidStackframes {
-    BugsnagStackframe *stackframe = [BugsnagStackframe new];
+    RSCrashReporterStackframe *stackframe = [RSCrashReporterStackframe new];
 
     stackframe.isPc = true;
     XCTAssertTrue(stackframe.isPc);

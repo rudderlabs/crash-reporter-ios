@@ -37,7 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 }
 
 extension AppDelegate: RSCrashReporterNotifyDelegate {
-    func notifyCrash(_ event: BugsnagEvent?, withRequestPayload requestPayload: [AnyHashable : Any]?) {
+    func notifyCrash(_ event: RSCrashReporterEvent?, withRequestPayload requestPayload: [AnyHashable : Any]?) {
         
     }
 }

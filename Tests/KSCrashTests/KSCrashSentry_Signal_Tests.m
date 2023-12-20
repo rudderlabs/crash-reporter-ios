@@ -27,7 +27,7 @@
 
 #import <XCTest/XCTest.h>
 
-#import "BSG_KSCrashSentry_Signal.h"
+#import "RSC_KSCrashSentry_Signal.h"
 
 
 @interface KSCrashSentry_Signal_Tests : XCTestCase @end
@@ -38,23 +38,23 @@
 - (void) testInstallAndRemove
 {
     bool success;
-    BSG_KSCrash_SentryContext context;
-    success = bsg_kscrashsentry_installSignalHandler(&context);
+    RSC_KSCrash_SentryContext context;
+    success = rsc_kscrashsentry_installSignalHandler(&context);
     XCTAssertTrue(success, @"");
     [NSThread sleepForTimeInterval:0.1];
-    bsg_kscrashsentry_uninstallSignalHandler();
+    rsc_kscrashsentry_uninstallSignalHandler();
 }
 
 - (void) testDoubleInstallAndRemove
 {
     bool success;
-    BSG_KSCrash_SentryContext context;
-    success = bsg_kscrashsentry_installSignalHandler(&context);
+    RSC_KSCrash_SentryContext context;
+    success = rsc_kscrashsentry_installSignalHandler(&context);
     XCTAssertTrue(success, @"");
-    success = bsg_kscrashsentry_installSignalHandler(&context);
+    success = rsc_kscrashsentry_installSignalHandler(&context);
     XCTAssertTrue(success, @"");
-    bsg_kscrashsentry_uninstallSignalHandler();
-    bsg_kscrashsentry_uninstallSignalHandler();
+    rsc_kscrashsentry_uninstallSignalHandler();
+    rsc_kscrashsentry_uninstallSignalHandler();
 }
 
 @end

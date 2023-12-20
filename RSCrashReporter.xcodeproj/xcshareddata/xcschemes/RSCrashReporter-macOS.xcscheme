@@ -52,9 +52,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CB487A8426D7B144004F6B87"
-               BuildableName = "BugsnagNetworkRequestPlugin-macOSTests.xctest"
-               BlueprintName = "BugsnagNetworkRequestPlugin-macOSTests"
-               ReferencedContainer = "container:BugsnagNetworkRequestPlugin/BugsnagNetworkRequestPlugin.xcodeproj">
+               BuildableName = "RSCrashReporterNetworkRequestPlugin-macOSTests.xctest"
+               BlueprintName = "RSCrashReporterNetworkRequestPlugin-macOSTests"
+               ReferencedContainer = "container:RSCrashReporterNetworkRequestPlugin/RSCrashReporterNetworkRequestPlugin.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>

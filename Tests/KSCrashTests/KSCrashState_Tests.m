@@ -1,5 +1,5 @@
 //
-//  bsg_kscrashstate_Tests.m
+//  rsc_kscrashstate_Tests.m
 //
 //  Created by Karl Stenerud on 2012-02-05.
 //
@@ -27,28 +27,28 @@
 
 #import "FileBasedTestCase.h"
 
-#import "BSGRunContext.h"
-#import "BSG_KSCrashState.h"
-#import "BSG_KSCrashC.h"
+#import "RSCRunContext.h"
+#import "RSC_KSCrashState.h"
+#import "RSC_KSCrashC.h"
 
 
-@interface bsg_kscrashstate_Tests : FileBasedTestCase
+@interface rsc_kscrashstate_Tests : FileBasedTestCase
 @end
 
 
-@implementation bsg_kscrashstate_Tests
+@implementation rsc_kscrashstate_Tests
 
 #if TARGET_OS_OSX || TARGET_OS_TV // Not needed on iOS because there the tests are injected into a host app
 
 - (void)setUp
 {
     
-    struct BSGRunContext *oldContext = bsg_runContext;
-    static struct BSGRunContext context = {0};
+    struct RSCRunContext *oldContext = rsc_runContext;
+    static struct RSCRunContext context = {0};
     context.isForeground = YES; // These tests assume applicationState == .active
-    bsg_runContext = &context;
+    rsc_runContext = &context;
     [self addTeardownBlock:^{
-        bsg_runContext = oldContext;
+        rsc_runContext = oldContext;
     }];
     
     [super setUp];
@@ -58,10 +58,10 @@
 
 - (void) testInitRelaunch
 {
-    BSG_KSCrash_State context = {0};
+    RSC_KSCrash_State context = {0};
     NSString* stateFile = [self.tempPath stringByAppendingPathComponent:@"state.json"];
 
-        bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+        rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                       &context);
 
     XCTAssertTrue(context.applicationIsInForeground, @"");
@@ -75,7 +75,7 @@
     XCTAssertFalse(context.crashedLastLaunch, @"");
 
     memset(&context, 0, sizeof(context));
-    bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+    rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                       &context);
 
     XCTAssertTrue(context.applicationIsInForeground, @"");
@@ -91,16 +91,16 @@
 
 - (void) testInitCrash
 {
-    BSG_KSCrash_State context = {0};
+    RSC_KSCrash_State context = {0};
     NSString* stateFile = [self.tempPath stringByAppendingPathComponent:@"state.json"];
 
-    bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+    rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                       &context);
-    BSG_KSCrash_State checkpoint0 = context;
+    RSC_KSCrash_State checkpoint0 = context;
 
     usleep(1);
-    bsg_kscrashstate_notifyAppCrash();
-    BSG_KSCrash_State checkpointC = context;
+    rsc_kscrashstate_notifyAppCrash();
+    RSC_KSCrash_State checkpointC = context;
 
     XCTAssertTrue(checkpointC.applicationIsInForeground ==
                  checkpoint0.applicationIsInForeground, @"");
@@ -115,7 +115,7 @@
     XCTAssertFalse(checkpointC.crashedLastLaunch, @"");
 
     memset(&context, 0, sizeof(context));
-    bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+    rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                       &context);
 
     XCTAssertTrue(context.applicationIsInForeground, @"");
@@ -129,32 +129,32 @@
 
 - (void)testCrashThisLaunch
 {
-    BSG_KSCrash_State context = {0};
+    RSC_KSCrash_State context = {0};
     NSString* stateFile = [self.tempPath stringByAppendingPathComponent:@"state.json"];
 
-    bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+    rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                           &context);
-    bsg_kscrashstate_notifyAppCrash();
+    rsc_kscrashstate_notifyAppCrash();
     XCTAssertTrue(context.crashedThisLaunch, @"");
 }
 
 - (void)testRelaunch
 {
-    BSG_KSCrash_State context = {0};
+    RSC_KSCrash_State context = {0};
     NSString* stateFile = [self.tempPath stringByAppendingPathComponent:@"state.json"];
 
-    bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+    rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                       &context);
-    BSG_KSCrash_State checkpoint1 = context;
+    RSC_KSCrash_State checkpoint1 = context;
 
     XCTAssertFalse(checkpoint1.crashedThisLaunch, @"");
     XCTAssertFalse(checkpoint1.crashedLastLaunch, @"");
 
     usleep(1);
     memset(&context, 0, sizeof(context));
-    bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+    rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                       &context);
-    BSG_KSCrash_State checkpointR = context;
+    RSC_KSCrash_State checkpointR = context;
 
     XCTAssertTrue(checkpointR.applicationIsInForeground, @"");
     XCTAssertNotEqual(context.appLaunchTime, 0);
@@ -168,17 +168,17 @@
 
 - (void)testBGRelaunch
 {
-    BSG_KSCrash_State context = {0};
+    RSC_KSCrash_State context = {0};
     NSString* stateFile = [self.tempPath stringByAppendingPathComponent:@"state.json"];
 
-    bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+    rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                       &context);
-    BSG_KSCrash_State checkpoint0 = context;
+    RSC_KSCrash_State checkpoint0 = context;
     NSParameterAssert(context.applicationIsInForeground);
 
     usleep(1);
-    bsg_kscrashstate_notifyAppInForeground(false);
-    BSG_KSCrash_State checkpoint1 = context;
+    rsc_kscrashstate_notifyAppInForeground(false);
+    RSC_KSCrash_State checkpoint1 = context;
 
     XCTAssertTrue(checkpoint1.applicationIsInForeground !=
                  checkpoint0.applicationIsInForeground, @"");
@@ -195,9 +195,9 @@
 
     usleep(1);
     memset(&context, 0, sizeof(context));
-    bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+    rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                       &context);
-    BSG_KSCrash_State checkpointR = context;
+    RSC_KSCrash_State checkpointR = context;
 
     XCTAssertTrue(checkpointR.applicationIsInForeground, @"");
 
@@ -210,20 +210,20 @@
 
 - (void)testBGTerminate
 {
-    BSG_KSCrash_State context = {0};
+    RSC_KSCrash_State context = {0};
     NSString* stateFile = [self.tempPath stringByAppendingPathComponent:@"state.json"];
 
-    bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+    rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                       &context);
     NSParameterAssert(context.applicationIsInForeground);
     usleep(1);
-    bsg_kscrashstate_notifyAppInForeground(false);
+    rsc_kscrashstate_notifyAppInForeground(false);
     usleep(1);
 
     memset(&context, 0, sizeof(context));
-    bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+    rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                       &context);
-    BSG_KSCrash_State checkpointR = context;
+    RSC_KSCrash_State checkpointR = context;
 
     XCTAssertTrue(checkpointR.applicationIsInForeground, @"");
     XCTAssertNotEqual(context.appLaunchTime, 0);
@@ -237,19 +237,19 @@
 
 - (void)testBGCrash
 {
-    BSG_KSCrash_State context = {0};
+    RSC_KSCrash_State context = {0};
     NSString* stateFile = [self.tempPath stringByAppendingPathComponent:@"state.json"];
 
-    bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+    rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                       &context);
     usleep(1);
     NSParameterAssert(context.applicationIsInForeground);
-    bsg_kscrashstate_notifyAppInForeground(false);
-    BSG_KSCrash_State checkpoint0 = context;
+    rsc_kscrashstate_notifyAppInForeground(false);
+    RSC_KSCrash_State checkpoint0 = context;
 
     usleep(1);
-    bsg_kscrashstate_notifyAppCrash();
-    BSG_KSCrash_State checkpointC = context;
+    rsc_kscrashstate_notifyAppCrash();
+    RSC_KSCrash_State checkpointC = context;
 
     XCTAssertTrue(checkpointC.applicationIsInForeground ==
                  checkpoint0.applicationIsInForeground, @"");
@@ -264,7 +264,7 @@
     XCTAssertFalse(checkpointC.crashedLastLaunch, @"");
 
     memset(&context, 0, sizeof(context));
-    bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+    rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                       &context);
 
     XCTAssertTrue(context.applicationIsInForeground, @"");
@@ -278,19 +278,19 @@
 
 - (void)testBGFGRelaunch
 {
-    BSG_KSCrash_State context = {0};
+    RSC_KSCrash_State context = {0};
     NSString* stateFile = [self.tempPath stringByAppendingPathComponent:@"state.json"];
 
-    bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+    rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                       &context);
     usleep(1);
-    bsg_kscrashstate_notifyAppInForeground(false);
+    rsc_kscrashstate_notifyAppInForeground(false);
     usleep(1);
-    BSG_KSCrash_State checkpoint0 = context;
+    RSC_KSCrash_State checkpoint0 = context;
 
     usleep(1);
-    bsg_kscrashstate_notifyAppInForeground(true);
-    BSG_KSCrash_State checkpoint1 = context;
+    rsc_kscrashstate_notifyAppInForeground(true);
+    RSC_KSCrash_State checkpoint1 = context;
 
     XCTAssertTrue(checkpoint1.applicationIsInForeground !=
                  checkpoint0.applicationIsInForeground, @"");
@@ -307,9 +307,9 @@
 
     usleep(1);
     memset(&context, 0, sizeof(context));
-    bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+    rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                       &context);
-    BSG_KSCrash_State checkpointR = context;
+    RSC_KSCrash_State checkpointR = context;
 
     XCTAssertTrue(checkpointR.applicationIsInForeground, @"");
 
@@ -322,20 +322,20 @@
 
 - (void)testBGFGCrash
 {
-    BSG_KSCrash_State context = {0};
+    RSC_KSCrash_State context = {0};
     NSString* stateFile = [self.tempPath stringByAppendingPathComponent:@"state.json"];
 
-    bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+    rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                       &context);
     usleep(1);
-    bsg_kscrashstate_notifyAppInForeground(false);
+    rsc_kscrashstate_notifyAppInForeground(false);
     usleep(1);
-    bsg_kscrashstate_notifyAppInForeground(true);
-    BSG_KSCrash_State checkpoint0 = context;
+    rsc_kscrashstate_notifyAppInForeground(true);
+    RSC_KSCrash_State checkpoint0 = context;
 
     usleep(1);
-    bsg_kscrashstate_notifyAppCrash();
-    BSG_KSCrash_State checkpointC = context;
+    rsc_kscrashstate_notifyAppCrash();
+    RSC_KSCrash_State checkpointC = context;
 
     XCTAssertTrue(checkpointC.applicationIsInForeground ==
                  checkpoint0.applicationIsInForeground, @"");
@@ -350,7 +350,7 @@
     XCTAssertFalse(checkpointC.crashedLastLaunch, @"");
 
     memset(&context, 0, sizeof(context));
-    bsg_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
+    rsc_kscrashstate_init([stateFile cStringUsingEncoding:NSUTF8StringEncoding],
                       &context);
 
     XCTAssertTrue(context.applicationIsInForeground, @"");
@@ -366,13 +366,13 @@
 {
     NSString *file = [self.tempPath stringByAppendingPathComponent:@"state.json"];
     
-    BSG_KSCrash_State state = {0};
-    bsg_kscrashstate_init([file fileSystemRepresentation], &state);
+    RSC_KSCrash_State state = {0};
+    rsc_kscrashstate_init([file fileSystemRepresentation], &state);
     
     id json = [NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfFile:file] options:0 error:nil];
     XCTAssertEqualObjects([json objectForKey:@"crashedLastLaunch"], @NO);
     
-    bsg_kscrashstate_notifyAppCrash();
+    rsc_kscrashstate_notifyAppCrash();
     
     json = [NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfFile:file] options:0 error:nil];
     XCTAssertEqualObjects([json objectForKey:@"crashedLastLaunch"], @YES);

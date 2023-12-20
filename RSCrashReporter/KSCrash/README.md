@@ -7,7 +7,7 @@ KSCrash
 ### Another crash reporter? Why?
 
 Because while the existing crash reporters do report crashes, there's a heck
-of a lot more that they COULD do. Here are some key features of BSG_KSCrash:
+of a lot more that they COULD do. Here are some key features of RSC_KSCrash:
 
 * On-device symbolication in a way that supports re-symbolication offline
   (necessary for iOS versions where many functions have been redacted).
@@ -33,7 +33,7 @@ of a lot more that they COULD do. Here are some key features of BSG_KSCrash:
 * Supports including extra data that the programmer supplies (before and during
   a crash).
 
-#### BSG_KSCrash handles the following kinds of crashes:
+#### RSC_KSCrash handles the following kinds of crashes:
 
 * Mach kernel exceptions
 * Fatal signals
@@ -42,7 +42,7 @@ of a lot more that they COULD do. Here are some key features of BSG_KSCrash:
 * Main thread deadlock (experimental)
 * Custom crashes (e.g. from scripting languages)
 
-#### BSG_KSCrash can report to the following servers:
+#### RSC_KSCrash can report to the following servers:
 
 * [Hockey](http://hockeyapp.net/)
 * [QuincyKit](https://github.com/TheRealKerni/QuincyKit)
@@ -75,7 +75,7 @@ all you get is this:
 
 No way to track what the exception was or where it was thrown from!
 
-Now with BSG_KSCrash, you get the uncaught exception type, description, and where it was thrown from:
+Now with RSC_KSCrash, you get the uncaught exception type, description, and where it was thrown from:
 
     Application Specific Information:
     *** Terminating app due to uncaught exception 'MyException', reason: 'Something bad happened...'
@@ -100,7 +100,7 @@ Now with BSG_KSCrash, you get the uncaught exception type, description, and wher
 If you turn on trace printing:
 
 ```objective-c
-[BSG_KSCrash sharedInstance].printTraceToStdout = YES;
+[RSC_KSCrash sharedInstance].printTraceToStdout = YES;
 ```
 
 It will print a proper stack trace to stdout whenever your app throws an
@@ -119,7 +119,7 @@ languages):
         terminateProgram:(BOOL) terminateProgram;
 ```
 
-See BSG_KSCrash.h for details.
+See RSC_KSCrash.h for details.
 
 
 ### Unstable Features
@@ -131,18 +131,18 @@ The following features should be considered "unstable" and are disabled by defau
 
 ### Incompatible API Change Notice
 
-As of Jan 29th, 2013, I've modified the BSG_KSCrash main API to use properties
+As of Jan 29th, 2013, I've modified the RSC_KSCrash main API to use properties
 rather than init method parameters for configuration. With all the new options,
 things were starting to get a bit unwieldly. This should mark the last major
 API change.
 
-Note: The preferred method for initializing BSG_KSCrash is now via the installation
-      objects rather than using filters directly. See "How to Use BSG_KSCrash" for
+Note: The preferred method for initializing RSC_KSCrash is now via the installation
+      objects rather than using filters directly. See "How to Use RSC_KSCrash" for
       details.
 
 
 
-How to Build BSG_KSCrash
+How to Build RSC_KSCrash
 --------------------
 
 1. Select the **KSCrash** scheme.
@@ -154,10 +154,10 @@ can use it like you would any other framework.
 
 
 
-How to Use BSG_KSCrash
+How to Use RSC_KSCrash
 ------------------
 
-1. Add the framework to your project (or add the BSG_KSCrash project as a
+1. Add the framework to your project (or add the RSC_KSCrash project as a
    dependency)
    
 2. Add the following system frameworks & libraries to your project:
@@ -173,15 +173,15 @@ How to Use BSG_KSCrash
 
 
 ```objective-c
-#import <BSG_KSCrash/KSCrash.h>
+#import <RSC_KSCrash/KSCrash.h>
 // Include to use the standard reporter.
-#import <BSG_KSCrash/KSCrashInstallationStandard.h>
+#import <RSC_KSCrash/KSCrashInstallationStandard.h>
 // Include to use Quincy or Hockey.
-#import <BSG_KSCrash/KSCrashInstallationQuincyHockey.h>
+#import <RSC_KSCrash/KSCrashInstallationQuincyHockey.h>
 // Include to use the email reporter.
-#import <BSG_KSCrash/KSCrashInstallationEmail.h>
+#import <RSC_KSCrash/KSCrashInstallationEmail.h>
 // Include to use Victory.
-#import <BSG_KSCrash/KSCrashInstallationVictory.h>
+#import <RSC_KSCrash/KSCrashInstallationVictory.h>
 
 - (BOOL)application:(UIApplication*) application didFinishLaunchingWithOptions:(NSDictionary*) launchOptions
 {
@@ -240,12 +240,12 @@ Recommended Reading
 -------------------
 
 If possible, you should read the following header files to fully understand
-what features BSG_KSCrash has, and how to use them:
+what features RSC_KSCrash has, and how to use them:
 
-* BSG_KSCrash.h
-* BSG_KSCrashAdvanced.h
-* BSG_KSCrashInstallation.h
-* BSG_KSCrashInstallation(SPECIFIC TYPE).h
+* RSC_KSCrash.h
+* RSC_KSCrashAdvanced.h
+* RSC_KSCrashInstallation.h
+* RSC_KSCrashInstallation(SPECIFIC TYPE).h
 * Architecture.md
 
 
@@ -268,13 +268,13 @@ reports in the wild. Some involve minor trade-offs, so most of them are
 disabled by default.
 
 
-#### Custom User Data (userInfo in BSG_KSCrash.h)
+#### Custom User Data (userInfo in RSC_KSCrash.h)
 
 You can store custom user data to the next crash report by setting the
-**userInfo** property in BSG_KSCrash.h.
+**userInfo** property in RSC_KSCrash.h.
 
 
-#### Zombie Tracking (zombieCacheSize in BSG_KSCrash.h)
+#### Zombie Tracking (zombieCacheSize in RSC_KSCrash.h)
 
 KSCrash has the ability to detect zombie instances (dangling pointers to
 deallocated objects). It does this by recording the address and class of any
@@ -283,7 +283,7 @@ deallocated object's address. This means that the smaller you set the cache
 size, the greater the chance that a hash collision occurs and you lose
 information about a previously deallocated object.
 
-With zombie tracking enabled, BSG_KSCrash will also detect a lost NSException and
+With zombie tracking enabled, RSC_KSCrash will also detect a lost NSException and
 print its contents. Certain kinds of memory corruption or stack corruption
 crashes can cause the exception to deallocate early, further twarting efforts
 to debug your app, so this feature can be quite handy at times.
@@ -292,7 +292,7 @@ Trade off: Zombie tracking at the cost of adding very slight overhead to object
            deallocation, and having some memory reserved.
 
 
-#### Deadlock Detection (deadlockWatchdogInterval in BSG_KSCrash.h)
+#### Deadlock Detection (deadlockWatchdogInterval in RSC_KSCrash.h)
 
 **WARNING WARNING WARNING WARNING WARNING WARNING WARNING**
 
@@ -317,18 +317,18 @@ Trade off: Deadlock detection, but you must be a lot more careful about what
            runs on the main thread!
 
 
-#### Memory Introspection (introspectMemory in BSG_KSCrash.h)
+#### Memory Introspection (introspectMemory in RSC_KSCrash.h)
 
 When an app crashes, there are usually objects and strings in memory that are
 being referenced by the stack, registers, or even exception messages. When
-enabled, BSG_KSCrash will introspect these memory regions and store their contents
+enabled, RSC_KSCrash will introspect these memory regions and store their contents
 in the crash report.
 
 You can also specify a list of classes that should not be introspected by
-setting the **doNotIntrospectClasses** property in BSG_KSCrash.
+setting the **doNotIntrospectClasses** property in RSC_KSCrash.
 
 
-#### Custom crash handling code (onCrash in BSG_KSCrash.h)
+#### Custom crash handling code (onCrash in RSC_KSCrash.h)
 
 If you want to do some extra processing after a crash occurs (perhaps to add
 more contextual data to the report), you can do so.
@@ -337,17 +337,17 @@ However, you must ensure that you only use async-safe code, and above all else
 never call Objective-C code from that method! There are many cases where you
 can get away with doing so anyway, but there are certain classes of crashes
 where handler code that disregards this warning will cause the crash handler
-to crash! Note that if this happens, BSG_KSCrash will detect it and write a full
+to crash! Note that if this happens, RSC_KSCrash will detect it and write a full
 report anyway, though your custom handler code may not fully run.
 
 Trade off: Custom crash handling code, but you must be careful what you put
            in it!
 
 
-#### BSG_KSCrash log redirection (BSG_KSCrashAdvanced.h)
+#### RSC_KSCrash log redirection (RSC_KSCrashAdvanced.h)
 
-This takes whatever BSG_KSCrash would have printed to the console, and writes it
-to a file instead. I mostly use this for debugging BSG_KSCrash itself, but it could
+This takes whatever RSC_KSCrash would have printed to the console, and writes it
+to a file instead. I mostly use this for debugging RSC_KSCrash itself, but it could
 be useful for other purposes, so I've exposed an API for it.
 
 
@@ -355,7 +355,7 @@ be useful for other purposes, so I've exposed an API for it.
 Examples
 --------
 
-The workspace includes some example apps, which demonstrate common BSG_KSCrash
+The workspace includes some example apps, which demonstrate common RSC_KSCrash
 usage. Please look at the top of AppDelegate.m in each app for a description
 of what it does.
 
