@@ -87,7 +87,6 @@ jobs:
         id: finish-release
         env:
           HUSKY: 0
-          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           npm i -g conventional-changelog-cli@2.2.2
           SUMMARY=$(((npx conventional-changelog -u) 2>&1) | sed "s/*/<br> */g" | sed "s/#/ /g" | tr -d '\n' || true)
@@ -95,16 +94,21 @@ jobs:
           echo "Current version: $CURRENT_VERSION_VALUE"
           echo "New version: $NEW_VERSION_VALUE"
           npx replace $CURRENT_VERSION_VALUE $NEW_VERSION_VALUE sonar-project.properties
-          git add sonar-project.properties
           echo ${{ steps.create-release.outputs.new_version }}
           echo "commit_summary=$SUMMARY" >> $GITHUB_OUTPUT
-          npx standard-version -a --skip.tag
+          npx standard-version --skip.commit --skip.tag
 
-      - name: Push new version in release branch & tag
+      - name: Create verified commit via API
+        uses: ryancyq/github-signed-commit@e9f3b28c80da7be66d24b8f501a5abe82a6b855f # v1.2.0
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
-        run: |
-          git push
+        with:
+          branch-name: ${{ steps.create-release.outputs.branch_name }}
+          commit-message: 'chore(release): v${{ steps.create-release.outputs.new_version }}'
+          files: |
+            CHANGELOG.md
+            package.json
+            sonar-project.properties
 
       - name: Create pull request into master
         uses: repo-sync/pull-request@7e79a9f5dc3ad0ce53138f01df2fad14a04831c5 # v2.12.1
