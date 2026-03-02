@@ -20,9 +20,20 @@
 
 # Crash Reporter
 
-> ⚠️ **Deprecation Notice**
+> # ⚠️ Archived Repository
 >
-> This repository is no longer actively maintained. It will not receive new features, bug fixes, or security updates, and is scheduled to be sunset in the near future.
+> This repository has been archived and is no longer maintained.
+>
+> `crash-reporter-ios` was originally developed as an internal utility and is no longer part of RudderStack's supported SDK offerings.
+>
+> ## Status
+>
+> - No new features
+> - No bug fixes
+> - No security updates
+> - Issues and pull requests are not monitored
+>
+> The code remains available in read-only mode for historical reference.
 
 This SDK is for capturing RudderStack iOS SDK crashes.
 
